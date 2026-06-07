@@ -63,6 +63,8 @@ class Pet(Base):
     added_superfoods = Column(JSON, nullable=True)  # List of superfood ids
     custom_instructions = Column(Text, nullable=True)
     address = Column(Text, nullable=True)
+    customer_id = Column(Integer, nullable=True, index=True)
+    customer_email = Column(String(100), nullable=True, index=True)
 
 class Order(Base):
     __tablename__ = "orders"
@@ -81,6 +83,8 @@ class Order(Base):
     total_price = Column(Integer, nullable=False)
     address = Column(Text, nullable=False)
     paid_status = Column(String(50), default="Verificado")
+    customer_id = Column(Integer, nullable=True, index=True)
+    customer_email = Column(String(100), nullable=True, index=True)
 
 class Testimonial(Base):
     __tablename__ = "testimonials"
@@ -115,3 +119,12 @@ class Admin(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False)
     password_hash = Column(String(255), nullable=False)
+
+class Customer(Base):
+    __tablename__ = "customers"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    email = Column(String(100), unique=True, nullable=False, index=True)
+    password_hash = Column(String(255), nullable=True)
+    name = Column(String(100), nullable=True)
+    provider = Column(String(50), default="email")  # email, google, apple

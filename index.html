@@ -27,13 +27,16 @@
     </div>
     
     <!-- Pestañas de Navegación del Entorno -->
-    <nav class="view-tabs">
+    <nav class="view-tabs" style="display: flex; align-items: center; gap: 1rem;">
       <button class="tab-btn active" onclick="switchView('web')">
         <i class="fa-solid fa-globe"></i> Sitio Web Desktop
       </button>
       <button class="tab-btn" onclick="switchView('mobile')">
         <i class="fa-solid fa-mobile-screen-button"></i> App Móvil (Simulador)
       </button>
+      <div id="customer-header-badge" class="customer-profile-badge" style="display: none; cursor: pointer;" onclick="logoutCustomer()">
+        <i class="fa-solid fa-user-check"></i> <span id="customer-header-name">Cliente</span> (Salir)
+      </div>
     </nav>
   </header>
 
@@ -50,7 +53,7 @@
           <h1><span>Alimentación Natural Premium</span>Nutrición Evolutiva para su Bienestar</h1>
           <p>Ofrecemos dietas BARF crudas y recetas cocinadas al vapor con ingredientes 100% naturales de grado humano. Diseñamos la porción diaria perfecta según las características únicas de tu perro.</p>
           <div class="hero-actions">
-            <button class="btn btn-primary" onclick="switchView('mobile'); changeMobileView('welcome')">
+            <button class="btn btn-primary" onclick="startOrderFlow()">
               <i class="fa-solid fa-dog"></i> Personalizar Comida en la App
             </button>
             <a href="#catalogo-seccion" class="btn btn-secondary">Ver Menú & Snacks</a>
@@ -152,7 +155,7 @@
           <div class="web-calc-text">
             <h2>Calcula la Ración Diaria de tu Mascota</h2>
             <p>Ingresa los datos básicos para conocer los gramos recomendados que necesita al día. Si deseas guardar su perfil, añadir su foto, recibir entregas mensuales automáticas y pagar con tarjeta, utiliza nuestra <strong>App Móvil</strong> interactiva en la pestaña superior.</p>
-            <button class="btn btn-primary" onclick="switchView('mobile'); changeMobileView('welcome')">
+            <button class="btn btn-primary" onclick="startOrderFlow()">
               <i class="fa-solid fa-mobile-screen"></i> Abrir en la App Móvil
             </button>
           </div>
@@ -551,6 +554,63 @@
                 </div>
               </div>
 
+              <!-- 2.4.5 PANTALLA: AUTENTICACIÓN MÓVIL (LOGIN/REGISTRO) -->
+              <div id="mobile-auth" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title" id="mobile-auth-title">Inicia Sesión</h3>
+                  <p class="mobile-subtitle">Identifícate para poder procesar tu pago y sincronizar tus mascotas.</p>
+                  
+                  <!-- Login Social Móvil -->
+                  <div style="margin-bottom: 1.5rem;">
+                    <button class="social-login-btn google-btn" onclick="loginCustomerSocialMobile('google')" style="padding: 0.6rem; font-size: 0.8rem; margin-bottom: 0.5rem; width: 100%;">
+                      <i class="fa-brands fa-google"></i> Continuar con Google
+                    </button>
+                    <button class="social-login-btn apple-btn" onclick="loginCustomerSocialMobile('apple')" style="padding: 0.6rem; font-size: 0.8rem; width: 100%;">
+                      <i class="fa-brands fa-apple"></i> Continuar con Apple
+                    </button>
+                  </div>
+
+                  <div class="auth-divider" style="margin: 1rem 0;">O</div>
+
+                  <!-- Formulario Correo -->
+                  <div id="mobile-login-fields">
+                    <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                      <label for="mb-auth-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
+                      <input type="email" id="mb-auth-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                    </div>
+                    <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                      <label for="mb-auth-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
+                      <input type="password" id="mb-auth-pass" class="mobile-input" placeholder="••••••••">
+                    </div>
+                    <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('login')">Ingresar</button>
+                    <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
+                      ¿No tienes cuenta? <a href="#" onclick="toggleMobileAuthView(true); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Regístrate aquí</a>
+                    </p>
+                  </div>
+
+                  <div id="mobile-register-fields" style="display: none;">
+                    <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                      <label for="mb-auth-reg-name" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Nombre</label>
+                      <input type="text" id="mb-auth-reg-name" class="mobile-input" placeholder="Tu Nombre">
+                    </div>
+                    <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                      <label for="mb-auth-reg-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
+                      <input type="email" id="mb-auth-reg-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                    </div>
+                    <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                      <label for="mb-auth-reg-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
+                      <input type="password" id="mb-auth-reg-pass" class="mobile-input" placeholder="••••••••">
+                    </div>
+                    <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('register')">Registrarse</button>
+                    <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
+                      ¿Ya tienes cuenta? <a href="#" onclick="toggleMobileAuthView(false); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Inicia sesión</a>
+                    </p>
+                  </div>
+                  
+                  <button class="mobile-btn mobile-btn-secondary" style="margin-top: 1rem; width: 100%;" onclick="changeMobileView('snacks')">Atrás</button>
+                </div>
+              </div>
+
               <!-- 2.6 PANTALLA: RECIBO DE CONFIRMACIÓN (MULTI-MASCOTA) -->
               <div id="mobile-receipt" class="mobile-view">
                 <div class="mobile-card" style="margin-top: 1rem;">
@@ -711,7 +771,313 @@
     </div>
   </div>
 
-  </main>
+  
+  <!-- ==========================================
+       MODAL DE ASISTENTE DE COMPRA DESKTOP
+       ========================================== -->
+  <div id="desktop-purchase-modal" class="desktop-wizard-modal">
+    <div class="desktop-wizard-card">
+      <header class="desktop-wizard-header">
+        <h3><i class="fa-solid fa-calculator"></i> <span id="desktop-wizard-title">Configurar Suscripción de Mascota</span></h3>
+        <button class="desktop-wizard-close-btn" onclick="closeDesktopWizard()">&times;</button>
+      </header>
+      
+      <div class="desktop-wizard-progress-bar">
+        <div id="desktop-wizard-progress-fill" class="desktop-wizard-progress-fill"></div>
+      </div>
+      
+      <div class="desktop-wizard-body">
+        
+        <!-- PASO 1: PERFIL DE MASCOTA -->
+        <div id="desktop-step-1" class="desktop-wizard-step active">
+          <h4 style="font-family:var(--font-serif); color:var(--secondary-brown); font-size:1.2rem; margin-top:0;">Paso 1: Perfil de tu Mascota</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:1.5rem;">Cuéntanos sobre tu perro para calcular su plan de alimentación perfecto.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1rem;">
+            <div class="form-group">
+              <label for="dk-pet-name" style="font-weight:700;">Nombre del Perro</label>
+              <input type="text" id="dk-pet-name" class="form-input" placeholder="Ej: Toby" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label for="dk-pet-breed" style="font-weight:700;">Raza</label>
+              <input type="text" id="dk-pet-breed" class="form-input" placeholder="Ej: Border Collie" style="width:100%;">
+            </div>
+          </div>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:1rem; margin-bottom:1.5rem;">
+            <div class="form-group">
+              <label for="dk-pet-weight" style="font-weight:700;">Peso Actual (kg)</label>
+              <input type="number" id="dk-pet-weight" class="form-input" placeholder="Ej: 15" step="0.1" style="width:100%;">
+            </div>
+            <div class="form-group">
+              <label for="dk-pet-age" style="font-weight:700;">Edad / Etapa</label>
+              <select id="dk-pet-age" class="form-input" style="width:100%;">
+                <option value="adult">Adulto (más de 1 año)</option>
+                <option value="puppy">Cachorro (2 - 4 meses)</option>
+                <option value="puppy-mid">Cachorro (4 - 6 meses)</option>
+                <option value="puppy-late">Cachorro (6 - 12 meses)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dk-pet-activity" style="font-weight:700;">Nivel de Actividad</label>
+              <select id="dk-pet-activity" class="form-input" style="width:100%;">
+                <option value="sedentary">Sedentario / Senior</option>
+                <option value="normal" selected>Normal / Paseo diario</option>
+                <option value="active">Activo / Deporte ocasional</option>
+                <option value="working">Muy Activo / Trabajo o agility</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom:1.5rem;">
+            <label for="dk-pet-notes" style="font-weight:700;">Notas Médicas / Alergias (Opcional)</label>
+            <textarea id="dk-pet-notes" class="form-input" placeholder="Indica si tiene alguna condición o ingrediente a evitar..." style="width:100%; height:60px; resize:none;"></textarea>
+          </div>
+          
+          <div class="form-group">
+            <label style="font-weight:700; display:block; margin-bottom:0.5rem;">Foto de tu Mascota (Opcional)</label>
+            <div style="display:flex; align-items:center; gap:1.5rem;">
+              <div id="dk-pet-photo-preview" style="width:90px; height:90px; border-radius:50%; background:rgba(44,26,14,0.04); border:2px dashed rgba(44,26,14,0.15); display:flex; flex-direction:column; justify-content:center; align-items:center; color:var(--text-muted); cursor:pointer; font-size:0.75rem; overflow:hidden;" onclick="document.getElementById('dk-pet-photo-input').click()">
+                <i class="fa-solid fa-camera" style="font-size:1.2rem; margin-bottom:4px;"></i>
+                <span>Subir Foto</span>
+              </div>
+              <input type="file" id="dk-pet-photo-input" accept="image/*" style="display:none;" onchange="handleDesktopPetPhotoSelect(event)">
+              <p style="font-size:0.75rem; color:var(--text-muted); line-height:1.4; margin:0;">
+                Sube una linda foto de tu perro para personalizar sus porciones.<br>Formatos recomendados: JPG o PNG. Máx 2MB.
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        <!-- PASO 2: RECETA Y SELECCIÓN DE PLAN -->
+        <div id="desktop-step-2" class="desktop-wizard-step">
+          <h4 style="font-family:var(--font-serif); color:var(--secondary-brown); font-size:1.2rem; margin-top:0;">Paso 2: Selección de Plan Nutricional</h4>
+          
+          <div id="dk-portion-summary-box" style="background:rgba(85,114,46,0.08); border:1px solid rgba(85,114,46,0.15); padding:1.25rem; border-radius:var(--radius-md); margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h5 style="margin:0; font-size:1rem; color:var(--primary-green); font-weight:700;"><span id="dk-summary-pet-name">Toby</span> necesita:</h5>
+              <p style="margin:4px 0 0 0; font-size:0.85rem; color:var(--text-dark);">
+                Porción diaria estimada: <strong id="dk-summary-daily-grams">375g/día</strong> (aprox. <strong id="dk-summary-monthly-kg">11.2 kg/mes</strong>).
+              </p>
+            </div>
+            <div style="text-align:right;">
+              <span style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px; display:block;">Dieta Sugerida</span>
+              <span id="dk-summary-diet-type" style="font-weight:700; color:var(--secondary-brown); font-size:1.1rem;">BARF Cruda</span>
+            </div>
+          </div>
+
+          <h5 style="color:var(--secondary-brown); font-size:0.95rem; font-weight:700; margin-bottom:1rem;">Elige una Receta Base:</h5>
+          <div class="products-grid" id="dk-recipes-grid" style="grid-template-columns:1fr 1fr 1fr; gap:1.25rem; margin-bottom:2rem;">
+            <!-- Renderizado dinámico -->
+          </div>
+
+          <div style="display:grid; grid-template-columns:1.2fr 1fr; gap:2rem; padding:1.5rem; background:#fff; border:1px solid rgba(44, 26, 14, 0.08); border-radius:var(--radius-md);">
+            <div>
+              <h5 style="color:var(--secondary-brown); font-size:0.9rem; font-weight:700; margin-top:0; margin-bottom:0.75rem;">¿Deseas excluir algún ingrediente?</h5>
+              <div id="dk-exclusions-list" style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.8rem;">
+                <!-- Dinámico -->
+              </div>
+            </div>
+            <div>
+              <h5 style="color:var(--secondary-brown); font-size:0.9rem; font-weight:700; margin-top:0; margin-bottom:0.75rem;">Añadir Superalimentos Opcionales:</h5>
+              <div id="dk-superfoods-list" style="font-size:0.8rem; display:flex; flex-direction:column; gap:0.5rem;">
+                <!-- Dinámico -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 3: SNACKS Y COMPLEMENTOS -->
+        <div id="desktop-step-3" class="desktop-wizard-step">
+          <h4 style="font-family:var(--font-serif); color:var(--secondary-brown); font-size:1.2rem; margin-top:0;">Paso 3: Snacks y Suplementos Naturales</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:2rem;">Acompaña su dieta con snacks deshidratados 100% naturales o caldo de huesos.</p>
+          
+          <div id="dk-snacks-list-container" style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+            <!-- Renderizado dinámico -->
+          </div>
+        </div>
+
+        <!-- PASO 4: CREACIÓN DE CUENTA / LOGIN -->
+        <div id="desktop-step-4" class="desktop-wizard-step">
+          <h4 style="font-family:var(--font-serif); color:var(--secondary-brown); font-size:1.2rem; margin-top:0; text-align:center;">Paso 4: Guarda tu Receta e Inicia Sesión</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:2rem; text-align:center;">Para guardar la suscripción de tu mascota y ver el historial, inicia sesión o crea una cuenta.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1.2fr; gap:3rem; max-width:800px; margin:0 auto;">
+            <!-- Login Social -->
+            <div style="border-right:1px solid rgba(44, 26, 14, 0.08); padding-right:3rem; display:flex; flex-direction:column; justify-content:center;">
+              <h5 style="color:var(--secondary-brown); font-size:0.95rem; font-weight:700; margin-top:0; margin-bottom:1.25rem;">Acceso Rápido</h5>
+              <button class="social-login-btn google-btn" onclick="loginCustomerSocial('google')">
+                <i class="fa-brands fa-google"></i> Continuar con Google
+              </button>
+              <button class="social-login-btn apple-btn" onclick="loginCustomerSocial('apple')">
+                <i class="fa-brands fa-apple"></i> Continuar con Apple
+              </button>
+            </div>
+            
+            <!-- Login/Registro Correo -->
+            <div>
+              <div id="dk-auth-login-box">
+                <h5 style="color:var(--secondary-brown); font-size:0.95rem; font-weight:700; margin-top:0; margin-bottom:1rem;">Iniciar Sesión con Correo</h5>
+                <div class="form-group" style="margin-bottom:0.75rem;">
+                  <label for="dk-auth-email">Correo Electrónico</label>
+                  <input type="email" id="dk-auth-email" class="form-input" style="width:100%;" placeholder="ejemplo@gmail.com">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label for="dk-auth-pass">Contraseña</label>
+                  <input type="password" id="dk-auth-pass" class="form-input" style="width:100%;" placeholder="••••••••">
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-bottom:1rem;" onclick="submitCustomerAuth('login')">Ingresar</button>
+                <p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">
+                  ¿No tienes cuenta? <a href="#" onclick="toggleDesktopAuthView(true); return false;" style="color:var(--primary-green); font-weight:600; text-decoration:none;">Registrate aquí</a>
+                </p>
+              </div>
+
+              <div id="dk-auth-register-box" style="display:none;">
+                <h5 style="color:var(--secondary-brown); font-size:0.95rem; font-weight:700; margin-top:0; margin-bottom:1rem;">Crear Cuenta Nueva</h5>
+                <div class="form-group" style="margin-bottom:0.75rem;">
+                  <label for="dk-auth-reg-name">Nombre Completo</label>
+                  <input type="text" id="dk-auth-reg-name" class="form-input" style="width:100%;" placeholder="Tu Nombre">
+                </div>
+                <div class="form-group" style="margin-bottom:0.75rem;">
+                  <label for="dk-auth-reg-email">Correo Electrónico</label>
+                  <input type="email" id="dk-auth-reg-email" class="form-input" style="width:100%;" placeholder="ejemplo@gmail.com">
+                </div>
+                <div class="form-group" style="margin-bottom:1rem;">
+                  <label for="dk-auth-reg-pass">Contraseña</label>
+                  <input type="password" id="dk-auth-reg-pass" class="form-input" style="width:100%;" placeholder="••••••••">
+                </div>
+                <button class="btn btn-primary" style="width:100%; margin-bottom:1rem;" onclick="submitCustomerAuth('register')">Registrarse</button>
+                <p style="font-size:0.8rem; color:var(--text-muted); text-align:center;">
+                  ¿Ya tienes cuenta? <a href="#" onclick="toggleDesktopAuthView(false); return false;" style="color:var(--primary-green); font-weight:600; text-decoration:none;">Inicia sesión</a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 5: ENVÍO Y PAGO -->
+        <div id="desktop-step-5" class="desktop-wizard-step">
+          <h4 style="font-family:var(--font-serif); color:var(--secondary-brown); font-size:1.2rem; margin-top:0;">Paso 5: Datos de Despacho y Pago Seguro</h4>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:2rem;">Completa tu dirección y datos de facturación para activar tu suscripción.</p>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:3rem;">
+            <!-- Dirección y Resumen -->
+            <div>
+              <h5 style="color:var(--secondary-brown); font-size:0.95rem; font-weight:700; margin-top:0; margin-bottom:1rem;">Dirección de Despacho</h5>
+              <div class="form-group" style="margin-bottom:1.5rem;">
+                <label for="dk-pay-address">Dirección (Calle, Número, Depto/Casa, Comuna)</label>
+                <input type="text" id="dk-pay-address" class="form-input" placeholder="Ej: Av. Vitacura 1234, Vitacura" style="width:100%;" required>
+              </div>
+              
+              <div style="background:#fff; border:1px solid rgba(44, 26, 14, 0.08); padding:1.25rem; border-radius:var(--radius-md);">
+                <h5 style="color:var(--secondary-brown); font-size:0.9rem; font-weight:700; margin-top:0; margin-bottom:0.75rem; border-bottom:1px solid rgba(44, 26, 14, 0.06); padding-bottom:0.5rem;">Resumen del Pedido</h5>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                  <span>Suscripción mensual (<span id="dk-pay-pet-name">Toby</span>)</span>
+                  <span id="dk-pay-recipe-price">$0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.4rem;">
+                  <span>Snacks & Caldos</span>
+                  <span id="dk-pay-snacks-price">$0</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.8rem; color:var(--text-muted);">
+                  <span>Despacho mensual (Fijo)</span>
+                  <span>$3.500</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.05rem; font-weight:700; border-top:1px solid rgba(44, 26, 14, 0.06); padding-top:0.75rem; color:var(--primary-green);">
+                  <span>TOTAL MENSUAL</span>
+                  <span id="dk-pay-total-price">$0</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Tarjeta -->
+            <div>
+              <h5 style="color:var(--secondary-brown); font-size:0.95rem; font-weight:700; margin-top:0; margin-bottom:1rem;">Método de Pago Seguro (Tarjeta de Crédito/Débito)</h5>
+              
+              <!-- Simulación de Tarjeta Visual -->
+              <div id="dk-card-preview-container" class="credit-card-wrapper" style="margin-bottom:1.5rem;">
+                <div class="credit-card-front" style="padding:1.5rem; border-radius:12px; color:#fff; position:relative; box-shadow:0 10px 20px rgba(0,0,0,0.15); display:flex; flex-direction:column; justify-content:space-between; height:150px; background:linear-gradient(135deg, #55722e 0%, #2c1a0e 100%);">
+                  <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <i class="fa-solid fa-microchip" style="font-size:2rem; color:#f1c40f;"></i>
+                    <i class="fa-brands fa-cc-visa" style="font-size:2rem;"></i>
+                  </div>
+                  <div id="dk-card-num-preview" style="font-family:monospace; font-size:1.15rem; letter-spacing:2px; text-align:center;">•••• •••• •••• ••••</div>
+                  <div style="display:flex; justify-content:space-between; font-size:0.75rem; text-transform:uppercase;">
+                    <div>
+                      <span style="opacity:0.6; display:block; font-size:0.6rem;">Titular</span>
+                      <span id="dk-card-name-preview">Nombre Completo</span>
+                    </div>
+                    <div>
+                      <span style="opacity:0.6; display:block; font-size:0.6rem;">Vence</span>
+                      <span id="dk-card-exp-preview">MM/AA</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="form-group" style="margin-bottom:0.75rem;">
+                <label for="dk-pay-cardholder">Nombre del Titular</label>
+                <input type="text" id="dk-pay-cardholder" class="form-input" style="width:100%;" placeholder="Como aparece en la tarjeta" oninput="updateDkCardPreview('name', this.value)">
+              </div>
+              <div class="form-group" style="margin-bottom:0.75rem;">
+                <label for="dk-pay-cardnumber">Número de Tarjeta</label>
+                <input type="text" id="dk-pay-cardnumber" class="form-input" style="width:100%;" placeholder="4000 1234 5678 9010" maxlength="19" oninput="updateDkCardPreview('number', this.value)">
+              </div>
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+                <div class="form-group">
+                  <label for="dk-pay-expiry">Vencimiento</label>
+                  <input type="text" id="dk-pay-expiry" class="form-input" placeholder="MM/AA" maxlength="5" oninput="updateDkCardPreview('expiry', this.value)">
+                </div>
+                <div class="form-group">
+                  <label for="dk-pay-cvv">CVV</label>
+                  <input type="password" id="dk-pay-cvv" class="form-input" placeholder="123" maxlength="4">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PASO 6: CONFIRMACIÓN Y RECIBO -->
+        <div id="desktop-step-6" class="desktop-wizard-step" style="text-align:center; padding:2rem 0;">
+          <div style="width:80px; height:80px; border-radius:50%; background:rgba(85,114,46,0.1); color:var(--primary-green); display:flex; justify-content:center; align-items:center; font-size:3rem; margin:0 auto 1.5rem;">
+            <i class="fa-solid fa-circle-check"></i>
+          </div>
+          <h4 style="font-family:var(--font-serif); color:var(--secondary-brown); font-size:1.5rem; margin:0 0 0.5rem 0;">¡Suscripción Activada con Éxito!</h4>
+          <p style="color:var(--text-muted); font-size:0.9rem; max-width:550px; margin:0 auto 2rem;">
+            Hemos registrado el plan personalizado de <strong id="dk-rec-pet-name">Toby</strong>. Tu orden <strong id="dk-rec-order-id">OC-1234</strong> ha sido verificada y estamos preparando su primer despacho mensual de comida real.
+          </p>
+          
+          <div style="background:#fff; border:1px solid rgba(44, 26, 14, 0.08); padding:1.5rem; border-radius:var(--radius-md); max-width:500px; margin:0 auto 2rem; text-align:left; font-size:0.85rem;">
+            <div style="border-bottom:1px solid rgba(44,26,14,0.06); padding-bottom:0.75rem; margin-bottom:0.75rem; display:flex; justify-content:space-between; font-weight:700;">
+              <span>Recibo de Suscripción</span>
+              <span id="dk-rec-date">07/06/2026</span>
+            </div>
+            <div style="margin-bottom:0.4rem;"><strong>Mascota:</strong> <span id="dk-rec-pet-detail">Toby (15 kg)</span></div>
+            <div style="margin-bottom:0.4rem;"><strong>Dieta:</strong> <span id="dk-rec-recipe-detail">BARF Pollo Premium</span></div>
+            <div style="margin-bottom:0.4rem;"><strong>Adicionales:</strong> <span id="dk-rec-snacks-detail">Caldo de huesos x1</span></div>
+            <div style="margin-bottom:0.75rem;"><strong>Despacho en:</strong> <span id="dk-rec-address-detail">Av. Vitacura 1234</span></div>
+            <div style="border-top:1px dashed rgba(44,26,14,0.15); padding-top:0.75rem; display:flex; justify-content:space-between; font-weight:700; color:var(--primary-green); font-size:1rem;">
+              <span>Total Debitado Mensual:</span>
+              <span id="dk-rec-total-detail">$47.000</span>
+            </div>
+          </div>
+          
+          <button class="btn btn-primary" onclick="closeDesktopWizard()">Ir a la Página Principal</button>
+        </div>
+
+      </div>
+      
+      <footer class="desktop-wizard-footer">
+        <button id="dk-wizard-prev-btn" class="btn btn-secondary" onclick="desktopWizardPrevStep()" style="visibility:hidden;">
+          <i class="fa-solid fa-arrow-left"></i> Anterior
+        </button>
+        <button id="dk-wizard-next-btn" class="btn btn-primary" onclick="desktopWizardNextStep()">
+          Siguiente <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </footer>
+    </div>
+  </div>
+</main>
 
   <!-- Lógica JavaScript Principal -->
   <script src="app.js?v=3.0"></script>

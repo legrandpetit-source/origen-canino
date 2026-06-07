@@ -249,21 +249,38 @@ async function loadInitialDataFromAPI() {
     appState.testimonials = data.testimonials;
     appState.faqs = data.faqs;
     
-    // Cargar las mascotas pertenecientes a este navegador (usando la lista de IDs locales)
-    const myPetIds = safeLoadFromStorage('oc_my_pet_ids', []);
-    let loadedPets = [];
-    for (const petId of myPetIds) {
-      try {
-        const petRes = await fetch(`${API_BASE_URL}/api/pets/${petId}`);
-        if (petRes.ok) {
-          let pet = await petRes.json();
-          loadedPets.push(mapPetFromAPI(pet));
-        }
-      } catch (err) {
-        console.warn(`Error al cargar mascota ${petId}:`, err);
+    // CHECK FOR CUSTOMER TOKEN
+    const token = localStorage.getItem('oc_customer_token');
+    if (token) {
+      appState.customerToken = token;
+      const name = localStorage.getItem('oc_customer_name') || 'Cliente';
+      
+      const badge = document.getElementById('customer-header-badge');
+      const badgeName = document.getElementById('customer-header-name');
+      if (badge && badgeName) {
+        badgeName.textContent = name;
+        badge.style.display = 'flex';
       }
+      
+      // Sync/Fetch customer pets
+      await syncCustomerPets();
+    } else {
+      // Cargar las mascotas pertenecientes a este navegador (usando la lista de IDs locales)
+      const myPetIds = safeLoadFromStorage('oc_my_pet_ids', []);
+      let loadedPets = [];
+      for (const petId of myPetIds) {
+        try {
+          const petRes = await fetch(`${API_BASE_URL}/api/pets/${petId}`);
+          if (petRes.ok) {
+            let pet = await petRes.json();
+            loadedPets.push(mapPetFromAPI(pet));
+          }
+        } catch (err) {
+          console.warn(`Error al cargar mascota ${petId}:`, err);
+        }
+      }
+      appState.pets = loadedPets;
     }
-    appState.pets = loadedPets;
     
     // Renderizado reactivo en la UI
     renderWebProducts();
@@ -342,6 +359,13 @@ window.changeMobileView = function(viewName) {
       setupReceiptUI();
     } else if (viewName === 'pet-dashboard') {
       renderPetDashboard();
+    } else if (viewName === 'auth') {
+      document.getElementById('mb-auth-email').value = '';
+      document.getElementById('mb-auth-pass').value = '';
+      document.getElementById('mb-auth-reg-name').value = '';
+      document.getElementById('mb-auth-reg-email').value = '';
+      document.getElementById('mb-auth-reg-pass').value = '';
+      toggleMobileAuthView(false);
     }
   }
 
@@ -354,7 +378,7 @@ window.changeMobileView = function(viewName) {
     navItems[1].classList.add('active');
   } else if (viewName === 'snacks') {
     navItems[2].classList.add('active');
-  } else if (viewName === 'pet-dashboard' || viewName === 'checkout' || viewName === 'receipt') {
+  } else if (viewName === 'pet-dashboard' || viewName === 'checkout' || viewName === 'receipt' || viewName === 'auth') {
     navItems[3].classList.add('active');
   }
 };
@@ -467,7 +491,7 @@ function renderWebProducts() {
         <p class="product-ingredients">${p.ingredients}</p>
         <div class="product-footer">
           <span class="product-price">${p.priceLabel}</span>
-          <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="switchView('mobile'); changeMobileView('welcome')">
+          <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="startOrderFlow()">
             Comprar en App
           </button>
         </div>
@@ -1070,7 +1094,11 @@ window.proceedToCheckout = function() {
     changeMobileView('welcome');
     return;
   }
-  changeMobileView('checkout');
+  if (!appState.customerToken) {
+    changeMobileView('auth');
+  } else {
+    changeMobileView('checkout');
+  }
 };
 
 // ----------------------------------------------------
@@ -1370,6 +1398,14 @@ window.editCurrentPlanFromDashboard = function() {
 
 window.logoutApp = function() {
   if (confirm('¿Deseas cerrar sesión? Se borrarán las mascotas del dispositivo local.')) {
+    appState.customerToken = null;
+    localStorage.removeItem('oc_customer_token');
+    localStorage.removeItem('oc_customer_name');
+    localStorage.removeItem('oc_customer_email');
+    
+    const badge = document.getElementById('customer-header-badge');
+    if (badge) badge.style.display = 'none';
+    
     appState.pets = [];
     appState.currentPetId = null;
     appState.activePetIdDashboard = null;
@@ -1379,9 +1415,825 @@ window.logoutApp = function() {
   }
 };
 
+// ==========================================================================
+// MODO MULTI-DISPOSITIVO, CUENTAS CLIENTES Y ASISTENTE COMPRA DESKTOP
+// ==========================================================================
+
+let dkWizardCurrentStep = 1;
+let dkPet = {
+  id: '',
+  name: '',
+  breed: '',
+  weight: 0,
+  age: 'adult',
+  activity: 'normal',
+  notes: '',
+  photo: 'assets/logo.jpg',
+  selectedRecipeId: '',
+  excludedIngredients: [],
+  addedSuperfoods: [],
+  customInstructions: '',
+  address: ''
+};
+let dkSnacksCart = {};
+let dkPetPhotoBase64 = null;
+
+// Routing principal de compra
+window.startOrderFlow = function() {
+  if (isMobileDevice()) {
+    switchView('mobile');
+    changeMobileView('welcome');
+  } else {
+    openDesktopWizard();
+  }
+};
+
+// Controladores del Asistente Desktop (Wizard)
+window.openDesktopWizard = function() {
+  dkWizardCurrentStep = 1;
+  dkPet = {
+    id: 'pet_' + Date.now(),
+    name: '',
+    breed: '',
+    weight: 0,
+    age: 'adult',
+    activity: 'normal',
+    notes: '',
+    photo: 'assets/logo.jpg',
+    selectedRecipeId: '',
+    excludedIngredients: [],
+    addedSuperfoods: [],
+    customInstructions: '',
+    address: ''
+  };
+  dkSnacksCart = {};
+  dkPetPhotoBase64 = null;
+  
+  // Limpiar inputs
+  document.getElementById('dk-pet-name').value = '';
+  document.getElementById('dk-pet-breed').value = '';
+  document.getElementById('dk-pet-weight').value = '';
+  document.getElementById('dk-pet-age').value = 'adult';
+  document.getElementById('dk-pet-activity').value = 'normal';
+  document.getElementById('dk-pet-notes').value = '';
+  document.getElementById('dk-pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera" style="font-size:1.2rem; margin-bottom:4px;"></i><span>Subir Foto</span>`;
+  
+  const modal = document.getElementById('desktop-purchase-modal');
+  if (modal) {
+    modal.classList.add('active');
+  }
+  
+  showDkWizardStep(1);
+};
+
+window.closeDesktopWizard = function() {
+  const modal = document.getElementById('desktop-purchase-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+};
+
+function showDkWizardStep(step) {
+  dkWizardCurrentStep = step;
+  
+  for (let i = 1; i <= 6; i++) {
+    const el = document.getElementById(`desktop-step-${i}`);
+    if (el) el.classList.remove('active');
+  }
+  
+  const currentEl = document.getElementById(`desktop-step-${step}`);
+  if (currentEl) currentEl.classList.add('active');
+  
+  const progressFill = document.getElementById('desktop-wizard-progress-fill');
+  if (progressFill) {
+    progressFill.style.width = `${(step / 6) * 100}%`;
+  }
+  
+  const prevBtn = document.getElementById('dk-wizard-prev-btn');
+  const nextBtn = document.getElementById('dk-wizard-next-btn');
+  
+  if (prevBtn) {
+    if (step === 1 || step === 6) {
+      prevBtn.style.visibility = 'hidden';
+    } else {
+      prevBtn.style.visibility = 'visible';
+    }
+  }
+  
+  if (nextBtn) {
+    if (step === 5) {
+      nextBtn.innerHTML = `Pagar Suscripción <i class="fa-solid fa-credit-card"></i>`;
+      nextBtn.style.display = 'block';
+    } else if (step === 6) {
+      nextBtn.style.display = 'none';
+    } else {
+      nextBtn.innerHTML = `Siguiente <i class="fa-solid fa-arrow-right"></i>`;
+      nextBtn.style.display = 'block';
+    }
+  }
+  
+  if (step === 2) {
+    setupDkStep2();
+  } else if (step === 3) {
+    setupDkStep3();
+  } else if (step === 5) {
+    setupDkStep5();
+  }
+}
+
+window.desktopWizardNextStep = async function() {
+  if (dkWizardCurrentStep === 1) {
+    const name = document.getElementById('dk-pet-name').value.trim();
+    const breed = document.getElementById('dk-pet-breed').value.trim();
+    const weight = parseFloat(document.getElementById('dk-pet-weight').value);
+    const age = document.getElementById('dk-pet-age').value;
+    const activity = document.getElementById('dk-pet-activity').value;
+    const notes = document.getElementById('dk-pet-notes').value.trim();
+    
+    if (!name || !breed || isNaN(weight) || weight <= 0) {
+      alert('Por favor, completa Nombre, Raza y Peso de tu mascota.');
+      return;
+    }
+    
+    dkPet.name = name;
+    dkPet.breed = breed;
+    dkPet.weight = weight;
+    dkPet.age = age;
+    dkPet.activity = activity;
+    dkPet.notes = notes;
+    dkPet.photo = dkPetPhotoBase64 || 'assets/logo.jpg';
+    
+    if (!dkPet.selectedRecipeId && appState.recipes.length > 0) {
+      dkPet.selectedRecipeId = appState.recipes[0].id;
+    }
+    
+    showDkWizardStep(2);
+  } else if (dkWizardCurrentStep === 2) {
+    showDkWizardStep(3);
+  } else if (dkWizardCurrentStep === 3) {
+    if (appState.customerToken) {
+      showDkWizardStep(5);
+    } else {
+      showDkWizardStep(4);
+    }
+  } else if (dkWizardCurrentStep === 4) {
+    alert('Por favor, inicia sesión o crea una cuenta para continuar.');
+  } else if (dkWizardCurrentStep === 5) {
+    await processDesktopWizardPayment();
+  }
+};
+
+window.desktopWizardPrevStep = function() {
+  if (dkWizardCurrentStep === 5 && appState.customerToken) {
+    showDkWizardStep(3);
+  } else {
+    showDkWizardStep(dkWizardCurrentStep - 1);
+  }
+};
+
+window.handleDesktopPetPhotoSelect = function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      dkPetPhotoBase64 = e.target.result;
+      document.getElementById('dk-pet-photo-preview').innerHTML = `<img src="${dkPetPhotoBase64}" alt="Foto Mascota" style="width:100%; height:100%; object-fit:cover;">`;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+function setupDkStep2() {
+  const selectedRecipe = appState.recipes.find(r => r.id === dkPet.selectedRecipeId) || appState.recipes[0];
+  const dietType = selectedRecipe.category;
+  const portion = calculatePortion(dkPet.weight, dkPet.age, dkPet.activity, dietType);
+  dkPet.portionResults = portion;
+  
+  document.getElementById('dk-summary-pet-name').textContent = dkPet.name;
+  document.getElementById('dk-summary-daily-grams').textContent = `${portion.dailyGrams}g/día`;
+  document.getElementById('dk-summary-monthly-kg').textContent = `${portion.monthlyKg} kg/mes`;
+  document.getElementById('dk-summary-diet-type').textContent = dietType === 'barf' ? 'BARF Cruda' : 'Cocida al Vapor';
+  
+  const grid = document.getElementById('dk-recipes-grid');
+  if (grid) {
+    grid.innerHTML = '';
+    appState.recipes.forEach(r => {
+      const isSelected = dkPet.selectedRecipeId === r.id;
+      const card = document.createElement('div');
+      card.className = `recipe-select-card ${isSelected ? 'selected' : ''}`;
+      card.style.cursor = 'pointer';
+      card.onclick = () => {
+        dkPet.selectedRecipeId = r.id;
+        dkPet.excludedIngredients = [];
+        setupDkStep2();
+      };
+      card.innerHTML = `
+        <div style="font-size: 1.5rem; margin-bottom: 4px;">${r.icon}</div>
+        <h4 style="margin:4px 0; font-size:0.9rem; font-weight:700;">${r.name}</h4>
+        <span style="font-size:0.8rem; color:var(--text-muted); font-weight:600;">$${r.price.toLocaleString('es-CL')}/kg</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+  
+  const exclusionsContainer = document.getElementById('dk-exclusions-list');
+  if (exclusionsContainer) {
+    exclusionsContainer.innerHTML = '';
+    const ingredients = selectedRecipe.ingredientsArray || selectedRecipe.ingredients.split(', ');
+    ingredients.forEach((ing, i) => {
+      const checkboxId = `dk-ing-${i}`;
+      const isExcluded = dkPet.excludedIngredients.includes(ing);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleDkIngredient('${ing}', this.checked)">
+        <label for="${checkboxId}" class="pill-label base-ing" style="padding:4px 8px; font-size:0.75rem;">
+          <i class="fa-solid fa-check"></i> ${ing}
+        </label>
+      `;
+      exclusionsContainer.appendChild(wrapper.firstElementChild);
+      exclusionsContainer.appendChild(wrapper.lastElementChild);
+    });
+  }
+  
+  const superfoodsContainer = document.getElementById('dk-superfoods-list');
+  if (superfoodsContainer) {
+    superfoodsContainer.innerHTML = '';
+    SUPERALIMENTOS.forEach(sup => {
+      const checkboxId = `dk-sup-${sup.id}`;
+      const isAdded = dkPet.addedSuperfoods.includes(sup.id);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${isAdded ? 'checked' : ''} onchange="toggleDkSuperfood('${sup.id}', this.checked)">
+        <label for="${checkboxId}" class="pill-label super-ing" style="padding:4px 8px; font-size:0.75rem;">
+          <i class="fa-solid fa-plus"></i> ${sup.icon} ${sup.name}
+        </label>
+      `;
+      superfoodsContainer.appendChild(wrapper.firstElementChild);
+      superfoodsContainer.appendChild(wrapper.lastElementChild);
+    });
+  }
+  
+  const basePrice = selectedRecipe.price;
+  const dietSubtotal = Math.round(portion.monthlyKg * basePrice);
+  const superfoodExtra = dkPet.addedSuperfoods.length * 1500;
+  dkPet.totalPrice = dietSubtotal + superfoodExtra;
+}
+
+window.toggleDkIngredient = function(ing, isChecked) {
+  if (!isChecked) {
+    if (!dkPet.excludedIngredients.includes(ing)) {
+      dkPet.excludedIngredients.push(ing);
+    }
+  } else {
+    dkPet.excludedIngredients = dkPet.excludedIngredients.filter(x => x !== ing);
+  }
+};
+
+window.toggleDkSuperfood = function(supId, isChecked) {
+  if (isChecked) {
+    if (!dkPet.addedSuperfoods.includes(supId)) {
+      dkPet.addedSuperfoods.push(supId);
+    }
+  } else {
+    dkPet.addedSuperfoods = dkPet.addedSuperfoods.filter(x => x !== supId);
+  }
+};
+
+function setupDkStep3() {
+  const container = document.getElementById('dk-snacks-list-container');
+  if (container) {
+    container.innerHTML = '';
+    appState.snacks.forEach(s => {
+      const qty = dkSnacksCart[s.id] || 0;
+      const item = document.createElement('div');
+      item.className = 'mobile-snack-item';
+      item.style.background = '#fff';
+      item.style.border = '1px solid rgba(44, 26, 14, 0.08)';
+      item.style.padding = '1rem';
+      item.style.borderRadius = 'var(--radius-md)';
+      item.innerHTML = `
+        <div class="mobile-snack-icon">${s.icon}</div>
+        <div class="mobile-snack-info">
+          <h4 style="margin:0 0 4px 0; font-size:0.95rem; font-weight:700;">${s.name}</h4>
+          <p style="margin:0; font-size:0.75rem; color:var(--text-muted);">${s.ingredients} • <strong>$${s.price.toLocaleString('es-CL')} / ${s.unit}</strong></p>
+        </div>
+        <div class="mobile-snack-qty">
+          <button class="qty-btn" onclick="updateDkSnackQty('${s.id}', -1)">-</button>
+          <span style="font-weight:700; width: 14px; text-align: center;">${qty}</span>
+          <button class="qty-btn" onclick="updateDkSnackQty('${s.id}', 1)">+</button>
+        </div>
+      `;
+      container.appendChild(item);
+    });
+  }
+}
+
+window.updateDkSnackQty = function(snackId, change) {
+  const qty = dkSnacksCart[snackId] || 0;
+  let newQty = qty + change;
+  if (newQty < 0) newQty = 0;
+  if (newQty === 0) {
+    delete dkSnacksCart[snackId];
+  } else {
+    dkSnacksCart[snackId] = newQty;
+  }
+  setupDkStep3();
+};
+
+function setupDkStep5() {
+  let snacksTotal = 0;
+  for (const id in dkSnacksCart) {
+    const s = appState.snacks.find(x => x.id === id);
+    if (s) {
+      snacksTotal += s.price * dkSnacksCart[id];
+    }
+  }
+  
+  document.getElementById('dk-pay-pet-name').textContent = dkPet.name;
+  document.getElementById('dk-pay-recipe-price').textContent = `$${dkPet.totalPrice.toLocaleString('es-CL')}`;
+  document.getElementById('dk-pay-snacks-price').textContent = `$${snacksTotal.toLocaleString('es-CL')}`;
+  document.getElementById('dk-pay-total-price').textContent = `$${(dkPet.totalPrice + snacksTotal + 3500).toLocaleString('es-CL')}`;
+  
+  document.getElementById('dk-pay-cardholder').value = '';
+  document.getElementById('dk-pay-cardnumber').value = '';
+  document.getElementById('dk-pay-expiry').value = '';
+  document.getElementById('dk-pay-cvv').value = '';
+  
+  document.getElementById('dk-card-name-preview').textContent = 'Nombre Completo';
+  document.getElementById('dk-card-num-preview').textContent = '•••• •••• •••• ••••';
+  document.getElementById('dk-card-exp-preview').textContent = 'MM/AA';
+}
+
+window.updateDkCardPreview = function(field, value) {
+  if (field === 'name') {
+    document.getElementById('dk-card-name-preview').textContent = value.trim() || 'Nombre Completo';
+  } else if (field === 'number') {
+    let cleaned = value.replace(/\s+/g, '').replace(/[^0-9]/gi, '');
+    let formatted = [];
+    for (let i = 0; i < cleaned.length; i += 4) {
+      formatted.push(cleaned.substring(i, i + 4));
+    }
+    const finalVal = formatted.join(' ');
+    document.getElementById('dk-pay-cardnumber').value = finalVal;
+    document.getElementById('dk-card-num-preview').textContent = finalVal || '•••• •••• •••• ••••';
+  } else if (field === 'expiry') {
+    let cleaned = value.replace(/\//g, '').replace(/[^0-9]/gi, '');
+    if (cleaned.length >= 2) {
+      cleaned = cleaned.substring(0,2) + '/' + cleaned.substring(2,4);
+    }
+    document.getElementById('dk-pay-expiry').value = cleaned;
+    document.getElementById('dk-card-exp-preview').textContent = cleaned || 'MM/AA';
+  }
+};
+
+async function processDesktopWizardPayment() {
+  const address = document.getElementById('dk-pay-address').value.trim();
+  const holder = document.getElementById('dk-pay-cardholder').value.trim();
+  const num = document.getElementById('dk-pay-cardnumber').value.trim();
+  const expiry = document.getElementById('dk-pay-expiry').value.trim();
+  const cvv = document.getElementById('dk-pay-cvv').value.trim();
+  
+  if (!address || !holder || !num || !expiry || !cvv) {
+    alert('Por favor, completa todos los campos de despacho y pago.');
+    return;
+  }
+  
+  if (num.replace(/\s/g, '').length < 16) {
+    alert('El número de tarjeta de crédito es incorrecto.');
+    return;
+  }
+  
+  const nextBtn = document.getElementById('dk-wizard-next-btn');
+  const prevBtn = document.getElementById('dk-wizard-prev-btn');
+  nextBtn.disabled = true;
+  prevBtn.disabled = true;
+  nextBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando...`;
+  
+  const selectedRecipe = appState.recipes.find(r => r.id === dkPet.selectedRecipeId) || appState.recipes[0];
+  const orderId = `OC-${Math.floor(1000 + Math.random() * 9000)}`;
+  
+  const snacksArr = [];
+  let snacksTotal = 0;
+  for (const id in dkSnacksCart) {
+    const s = appState.snacks.find(x => x.id === id);
+    if (s) {
+      const qty = dkSnacksCart[id];
+      snacksArr.push(`${s.name} (x${qty})`);
+      snacksTotal += s.price * qty;
+    }
+  }
+  const snacksText = snacksArr.join(', ') || 'Ninguno';
+  const totalVal = dkPet.totalPrice + snacksTotal + 3500;
+  
+  const petData = {
+    id: dkPet.id,
+    name: dkPet.name,
+    breed: dkPet.breed,
+    weight: dkPet.weight,
+    age: dkPet.age,
+    activity: dkPet.activity,
+    notes: dkPet.notes,
+    photo: dkPet.photo,
+    subscription_paid: true,
+    selected_recipe_id: dkPet.selectedRecipeId,
+    excluded_ingredients: dkPet.excludedIngredients,
+    added_superfoods: dkPet.addedSuperfoods,
+    custom_instructions: dkPet.customInstructions,
+    address: address
+  };
+  
+  const orderData = {
+    order_id: orderId,
+    date: new Date().toLocaleDateString('es-CL'),
+    pet_name: dkPet.name,
+    pet_breed: `${dkPet.name} (${dkPet.weight}kg, ${dkPet.breed})`,
+    pet_weight: dkPet.weight,
+    pet_photo: dkPet.photo,
+    recipe_name: `${selectedRecipe.name}${dkPet.addedSuperfoods.length ? ' [Suplementos: ' + dkPet.addedSuperfoods.join(', ') + ']' : ''}`,
+    daily_grams: dkPet.portionResults.dailyGrams,
+    monthly_kg: dkPet.portionResults.monthlyKg,
+    snacks: snacksText,
+    total_price: totalVal,
+    address: address,
+    paid_status: 'Verificado'
+  };
+  
+  try {
+    const headers = { "Content-Type": "application/json" };
+    if (appState.customerToken) {
+      headers["Authorization"] = `Bearer ${appState.customerToken}`;
+    }
+    
+    const petUrl = appState.customerToken ? `${API_BASE_URL}/api/customer/pets` : `${API_BASE_URL}/api/pets`;
+    const petRes = await fetch(petUrl, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(petData)
+    });
+    if (!petRes.ok) throw new Error("Error al registrar la mascota en el servidor");
+    const petResponseJson = await petRes.json();
+    const savedPet = mapPetFromAPI(petResponseJson.pet);
+    
+    const orderRes = await fetch(`${API_BASE_URL}/api/orders`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(orderData)
+    });
+    if (!orderRes.ok) throw new Error("Error al registrar la orden en el servidor");
+    
+    const idx = appState.pets.findIndex(p => p.id === savedPet.id);
+    if (idx !== -1) {
+      appState.pets[idx] = savedPet;
+    } else {
+      appState.pets.push(savedPet);
+    }
+    
+    appState.activePetIdDashboard = savedPet.id;
+    saveStateToStorage();
+    
+    document.getElementById('dk-rec-pet-name').textContent = dkPet.name;
+    document.getElementById('dk-rec-order-id').textContent = orderId;
+    document.getElementById('dk-rec-date').textContent = orderData.date;
+    document.getElementById('dk-rec-pet-detail').textContent = `${dkPet.name} (${dkPet.weight} kg, ${dkPet.breed})`;
+    document.getElementById('dk-rec-recipe-detail').textContent = selectedRecipe.name;
+    document.getElementById('dk-rec-snacks-detail').textContent = snacksText;
+    document.getElementById('dk-rec-address-detail').textContent = address;
+    document.getElementById('dk-rec-total-detail').textContent = `$${totalVal.toLocaleString('es-CL')}`;
+    
+    nextBtn.disabled = false;
+    prevBtn.disabled = false;
+    
+    showDkWizardStep(6);
+  } catch (err) {
+    alert("Error al procesar el pago: " + err.message);
+    nextBtn.disabled = false;
+    prevBtn.disabled = false;
+    nextBtn.innerHTML = `Pagar Suscripción <i class="fa-solid fa-credit-card"></i>`;
+  }
+}
+
+// Controladores de Autenticación de Clientes (Desktop y Mobile)
+window.toggleDesktopAuthView = function(isRegister) {
+  const loginBox = document.getElementById('dk-auth-login-box');
+  const registerBox = document.getElementById('dk-auth-register-box');
+  if (isRegister) {
+    loginBox.style.display = 'none';
+    registerBox.style.display = 'block';
+  } else {
+    loginBox.style.display = 'block';
+    registerBox.style.display = 'none';
+  }
+};
+
+window.submitCustomerAuth = async function(type) {
+  let url = '';
+  let payload = {};
+  
+  if (type === 'login') {
+    const email = document.getElementById('dk-auth-email').value.trim();
+    const password = document.getElementById('dk-auth-pass').value;
+    if (!email || !password) {
+      alert('Por favor, ingresa tu correo y contraseña.');
+      return;
+    }
+    url = `${API_BASE_URL}/api/customer/login`;
+    payload = { email, password, provider: 'email' };
+  } else {
+    const name = document.getElementById('dk-auth-reg-name').value.trim();
+    const email = document.getElementById('dk-auth-reg-email').value.trim();
+    const password = document.getElementById('dk-auth-reg-pass').value;
+    if (!name || !email || !password) {
+      alert('Por favor, ingresa tu nombre, correo y contraseña.');
+      return;
+    }
+    url = `${API_BASE_URL}/api/customer/register`;
+    payload = { name, email, password, provider: 'email' };
+  }
+  
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || 'Error en la autenticación');
+    }
+    
+    const data = await res.json();
+    setCustomerSession(data.token, data.name, data.email);
+    
+    await syncCustomerPets();
+    showDkWizardStep(5);
+  } catch (err) {
+    alert("Error de autenticación: " + err.message);
+  }
+};
+
+window.loginCustomerSocial = async function(provider) {
+  const email = provider === 'google' ? 'usuario.google@gmail.com' : 'usuario.apple@icloud.com';
+  const name = provider === 'google' ? 'Google User' : 'Apple User';
+  
+  const url = `${API_BASE_URL}/api/customer/login`;
+  const payload = {
+    email: email,
+    password: '',
+    provider: provider
+  };
+  
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || 'Error en la autenticación social');
+    }
+    
+    const data = await res.json();
+    setCustomerSession(data.token, data.name, data.email);
+    
+    await syncCustomerPets();
+    showDkWizardStep(5);
+  } catch (err) {
+    alert("Error de inicio social: " + err.message);
+  }
+};
+
+window.logoutCustomer = function() {
+  if (confirm('¿Deseas cerrar sesión?')) {
+    appState.customerToken = null;
+    localStorage.removeItem('oc_customer_token');
+    localStorage.removeItem('oc_customer_name');
+    localStorage.removeItem('oc_customer_email');
+    
+    const badge = document.getElementById('customer-header-badge');
+    if (badge) badge.style.display = 'none';
+    
+    appState.pets = [];
+    appState.currentPetId = null;
+    appState.activePetIdDashboard = null;
+    appState.snacksCart = {};
+    saveStateToStorage();
+    
+    loadInitialDataFromAPI();
+  }
+};
+
+function setCustomerSession(token, name, email) {
+  appState.customerToken = token;
+  localStorage.setItem('oc_customer_token', token);
+  localStorage.setItem('oc_customer_name', name);
+  localStorage.setItem('oc_customer_email', email);
+  
+  const badge = document.getElementById('customer-header-badge');
+  const badgeName = document.getElementById('customer-header-name');
+  if (badge && badgeName) {
+    badgeName.textContent = name;
+    badge.style.display = 'flex';
+  }
+}
+
+async function syncCustomerPets() {
+  if (!appState.customerToken) return;
+  
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/customer/pets`, {
+      headers: { "Authorization": `Bearer ${appState.customerToken}` }
+    });
+    
+    if (!res.ok) throw new Error("No se pudieron obtener las mascotas del servidor");
+    const serverPetsJson = await res.json();
+    const serverPets = serverPetsJson.map(mapPetFromAPI);
+    const serverPetsMap = new Map(serverPets.map(p => [p.id, p]));
+    
+    for (const pet of appState.pets) {
+      if (!serverPetsMap.has(pet.id)) {
+        const petData = {
+          id: pet.id,
+          name: pet.name,
+          breed: pet.breed,
+          weight: pet.weight,
+          age: pet.age,
+          activity: pet.activity,
+          notes: pet.notes,
+          photo: pet.photo,
+          subscription_paid: pet.subscriptionPaid,
+          selected_recipe_id: pet.selectedRecipeId,
+          excluded_ingredients: pet.excludedIngredients,
+          added_superfoods: pet.addedSuperfoods,
+          custom_instructions: pet.customInstructions,
+          address: pet.address
+        };
+        
+        try {
+          const postRes = await fetch(`${API_BASE_URL}/api/customer/pets`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${appState.customerToken}`
+            },
+            body: JSON.stringify(petData)
+          });
+          if (postRes.ok) {
+            const data = await postRes.json();
+            const saved = mapPetFromAPI(data.pet);
+            serverPets.push(saved);
+          }
+        } catch (e) {
+          console.warn("Error uploading local pet during sync:", e);
+        }
+      } else {
+        const serverPet = serverPetsMap.get(pet.id);
+        Object.assign(pet, serverPet);
+      }
+    }
+    
+    const localPetIds = new Set(appState.pets.map(p => p.id));
+    serverPets.forEach(p => {
+      if (!localPetIds.has(p.id)) {
+        appState.pets.push(p);
+      }
+    });
+    
+    saveStateToStorage();
+    renderMobileWelcomeScreen();
+  } catch (err) {
+    console.warn("Fallo al sincronizar mascotas:", err);
+  }
+}
+
+// Controladores Mobile Auth
+window.toggleMobileAuthView = function(isRegister) {
+  const loginFields = document.getElementById('mobile-login-fields');
+  const registerFields = document.getElementById('mobile-register-fields');
+  const title = document.getElementById('mobile-auth-title');
+  if (isRegister) {
+    loginFields.style.display = 'none';
+    registerFields.style.display = 'block';
+    if (title) title.textContent = 'Crear Cuenta';
+  } else {
+    loginFields.style.display = 'block';
+    registerFields.style.display = 'none';
+    if (title) title.textContent = 'Inicia Sesión';
+  }
+};
+
+window.submitCustomerAuthMobile = async function(type) {
+  let url = '';
+  let payload = {};
+  
+  if (type === 'login') {
+    const email = document.getElementById('mb-auth-email').value.trim();
+    const password = document.getElementById('mb-auth-pass').value;
+    if (!email || !password) {
+      alert('Por favor, ingresa tu correo y contraseña.');
+      return;
+    }
+    url = `${API_BASE_URL}/api/customer/login`;
+    payload = { email, password, provider: 'email' };
+  } else {
+    const name = document.getElementById('mb-auth-reg-name').value.trim();
+    const email = document.getElementById('mb-auth-reg-email').value.trim();
+    const password = document.getElementById('mb-auth-reg-pass').value;
+    if (!name || !email || !password) {
+      alert('Por favor, ingresa tu nombre, correo y contraseña.');
+      return;
+    }
+    url = `${API_BASE_URL}/api/customer/register`;
+    payload = { name, email, password, provider: 'email' };
+  }
+  
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || 'Error en la autenticación');
+    }
+    
+    const data = await res.json();
+    setCustomerSession(data.token, data.name, data.email);
+    
+    await syncCustomerPets();
+    changeMobileView('checkout');
+  } catch (err) {
+    alert("Error de autenticación: " + err.message);
+  }
+};
+
+window.loginCustomerSocialMobile = async function(provider) {
+  const email = provider === 'google' ? 'usuario.google@gmail.com' : 'usuario.apple@icloud.com';
+  const name = provider === 'google' ? 'Google User' : 'Apple User';
+  
+  const url = `${API_BASE_URL}/api/customer/login`;
+  const payload = {
+    email: email,
+    password: '',
+    provider: provider
+  };
+  
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+    
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || 'Error en la autenticación social');
+    }
+    
+    const data = await res.json();
+    setCustomerSession(data.token, data.name, data.email);
+    
+    await syncCustomerPets();
+    changeMobileView('checkout');
+  } catch (err) {
+    alert("Error de inicio social: " + err.message);
+  }
+};
+
+// Detección de Dispositivo y Responsividad
+window.isMobileDevice = function() {
+  const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const mobileWidth = window.innerWidth <= 768;
+  return mobileUA || mobileWidth;
+};
+
+window.configureDeviceMode = function() {
+  if (isMobileDevice()) {
+    document.body.classList.add('mobile-native-mode');
+    switchView('mobile');
+    changeMobileView('welcome');
+  } else {
+    document.body.classList.remove('mobile-native-mode');
+    if (appState.activeView === 'mobile') {
+      switchView('mobile');
+    } else {
+      switchView('web');
+    }
+  }
+};
+
 // ----------------------------------------------------
 // 11. INICIALIZACIÓN DE LA APLICACIÓN
 // ----------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
   loadInitialDataFromAPI();
+  configureDeviceMode();
+});
+
+window.addEventListener('resize', () => {
+  configureDeviceMode();
 });

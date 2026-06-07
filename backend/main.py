@@ -111,6 +111,17 @@ class LeadCreate(BaseModel):
     phone: str
     message: str
 
+class CustomerRegister(BaseModel):
+    email: str
+    password: Optional[str] = None
+    name: Optional[str] = None
+    provider: Optional[str] = "email"
+
+class CustomerLogin(BaseModel):
+    email: str
+    password: Optional[str] = None
+    provider: Optional[str] = "email"
+
 # ----------------------------------------------------
 # AUTHENTICATION DEPENDENCY
 # ----------------------------------------------------
@@ -135,6 +146,29 @@ def get_current_admin(authorization: Optional[str] = Header(None)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Token inválido o expirado",
+        )
+
+def get_current_customer(authorization: Optional[str] = Header(None)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de cliente faltante o inválido",
+        )
+    token = authorization.split(" ")[1]
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        email: str = payload.get("sub")
+        role: str = payload.get("role")
+        if email is None or role != "customer":
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token no es de cliente",
+            )
+        return email
+    except jwt.PyJWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token de cliente inválido o expirado",
         )
 
 # Ensure at least default parameters and an admin user exist
@@ -226,10 +260,30 @@ def save_or_update_pet(pet_data: PetCreate, db: Session = Depends(get_db)):
         return {"status": "success", "pet": new_pet}
 
 @app.post("/api/orders")
-def create_order(order_data: OrderCreate, db: Session = Depends(get_db)):
+def create_order(order_data: OrderCreate, db: Session = Depends(get_db), authorization: Optional[str] = Header(None)):
     """Saves a checkout order / subscription and updates corresponding pet payment status."""
+    cust_id = None
+    cust_email = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+        try:
+            payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+            email = payload.get("sub")
+            role = payload.get("role")
+            if email and role == "customer":
+                cust = db.query(models.Customer).filter(models.Customer.email == email).first()
+                if cust:
+                    cust_id = cust.id
+                    cust_email = cust.email
+        except jwt.PyJWTError:
+            pass
+
     # Create new order record
-    new_order = models.Order(**order_data.model_dump())
+    order_dict = order_data.model_dump()
+    order_dict["customer_id"] = cust_id
+    order_dict["customer_email"] = cust_email
+    
+    new_order = models.Order(**order_dict)
     db.add(new_order)
 
     # If this is for specific pets, mark those pets as paid in the database
@@ -237,10 +291,14 @@ def create_order(order_data: OrderCreate, db: Session = Depends(get_db)):
     pet_names = [name.strip() for name in order_data.pet_name.split(",")]
     for name in pet_names:
         # We find unpaid pets matching this name and mark them paid
-        pets = db.query(models.Pet).filter(
+        query = db.query(models.Pet).filter(
             models.Pet.name == name, 
             models.Pet.subscription_paid == False
-        ).all()
+        )
+        if cust_email:
+            query = query.filter(models.Pet.customer_email == cust_email)
+        
+        pets = query.all()
         for pet in pets:
             pet.subscription_paid = True
             pet.address = order_data.address
@@ -262,6 +320,108 @@ def save_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
     db.add(new_lead)
     db.commit()
     return {"status": "success"}
+
+# ----------------------------------------------------
+# CUSTOMER AUTHENTICATION & PRIVATE ENDPOINTS
+# ----------------------------------------------------
+
+@app.post("/api/customer/register")
+def register_customer(data: CustomerRegister, db: Session = Depends(get_db)):
+    """Register a new customer account."""
+    existing = db.query(models.Customer).filter(models.Customer.email == data.email).first()
+    if existing:
+        raise HTTPException(status_code=400, detail="El correo electrónico ya está registrado")
+    
+    hashed_pass = None
+    if data.password:
+        hashed_pass = bcrypt.hashpw(data.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        
+    new_cust = models.Customer(
+        email=data.email,
+        password_hash=hashed_pass,
+        name=data.name or data.email.split("@")[0],
+        provider=data.provider or "email"
+    )
+    db.add(new_cust)
+    db.commit()
+    db.refresh(new_cust)
+    
+    token_payload = {
+        "sub": new_cust.email,
+        "role": "customer",
+        "exp": datetime.utcnow().timestamp() + 86400 * 30 # 30 days
+    }
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return {"token": token, "email": new_cust.email, "name": new_cust.name}
+
+@app.post("/api/customer/login")
+def login_customer(data: CustomerLogin, db: Session = Depends(get_db)):
+    """Authenticate customer (standard or social login)."""
+    cust = db.query(models.Customer).filter(models.Customer.email == data.email).first()
+    
+    if data.provider in ["google", "apple"]:
+        if not cust:
+            cust = models.Customer(
+                email=data.email,
+                name=data.email.split("@")[0],
+                provider=data.provider
+            )
+            db.add(cust)
+            db.commit()
+            db.refresh(cust)
+    else:
+        if not cust or not cust.password_hash:
+            raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+        if not bcrypt.checkpw(data.password.encode("utf-8"), cust.password_hash.encode("utf-8")):
+            raise HTTPException(status_code=401, detail="Correo o contraseña incorrectos")
+            
+    token_payload = {
+        "sub": cust.email,
+        "role": "customer",
+        "exp": datetime.utcnow().timestamp() + 86400 * 30 # 30 days
+    }
+    token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
+    return {"token": token, "email": cust.email, "name": cust.name}
+
+@app.get("/api/customer/pets")
+def get_customer_pets(db: Session = Depends(get_db), customer_email: str = Depends(get_current_customer)):
+    """Retrieve all pet profiles owned by the logged-in customer."""
+    pets = db.query(models.Pet).filter(models.Pet.customer_email == customer_email).all()
+    return pets
+
+@app.post("/api/customer/pets")
+def save_customer_pet(pet_data: PetCreate, db: Session = Depends(get_db), customer_email: str = Depends(get_current_customer)):
+    """Create or update a pet profile linked to the logged-in customer."""
+    cust = db.query(models.Customer).filter(models.Customer.email == customer_email).first()
+    if not cust:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+        
+    existing_pet = db.query(models.Pet).filter(models.Pet.id == pet_data.id).first()
+    
+    attrs = pet_data.model_dump()
+    attrs["customer_id"] = cust.id
+    attrs["customer_email"] = cust.email
+    
+    if existing_pet:
+        if existing_pet.customer_email != customer_email and existing_pet.customer_email is not None:
+            raise HTTPException(status_code=403, detail="No tienes permisos para modificar esta mascota")
+        for key, value in attrs.items():
+            setattr(existing_pet, key, value)
+        db.commit()
+        db.refresh(existing_pet)
+        return {"status": "success", "pet": existing_pet}
+    else:
+        new_pet = models.Pet(**attrs)
+        db.add(new_pet)
+        db.commit()
+        db.refresh(new_pet)
+        return {"status": "success", "pet": new_pet}
+
+@app.get("/api/customer/orders")
+def get_customer_orders(db: Session = Depends(get_db), customer_email: str = Depends(get_current_customer)):
+    """Retrieve subscription history for the logged-in customer."""
+    orders = db.query(models.Order).filter(models.Order.customer_email == customer_email).all()
+    return orders
 
 # ----------------------------------------------------
 # ADMIN AUTH & PRIVATE ENDPOINTS

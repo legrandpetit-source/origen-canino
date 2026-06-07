@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Origen Canino - Comida Real, Vida Saludable | Alimentación BARF y Natural Cocinada</title>
+  <meta name="description" content="Alimentación natural personalizada para tu mascota. Calculadora de porciones BARF y cocinada, snacks deshidratados, caldo de hueso y suscripción mensual con entrega segura.">
+  
+  <!-- Estilos CSS y Fuentes -->
+  <link rel="stylesheet" href="style.css">
+  <!-- Iconos de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Encabezado Principal de la Suite -->
+  <header class="app-header">
+    <div class="logo-container">
+      <img src="assets/logo.jpg" alt="Logo Origen Canino" class="logo-img">
+      <div class="logo-text">
+        <div class="logo-brand-wrapper">
+          <span class="logo-brand-origen">Origen</span>
+          <span class="logo-brand-canino"><i class="fa-solid fa-paw logo-paw"></i>CANINO</span>
+        </div>
+        <span class="logo-brand-sub">Comida Real, Vida Saludable</span>
+      </div>
+    </div>
+    
+    <!-- Pestañas de Navegación del Entorno -->
+    <nav class="view-tabs">
+      <button class="tab-btn active" onclick="switchView('web')">
+        <i class="fa-solid fa-globe"></i> Sitio Web Desktop
+      </button>
+      <button class="tab-btn" onclick="switchView('mobile')">
+        <i class="fa-solid fa-mobile-screen-button"></i> App Móvil (Simulador)
+      </button>
+      <button class="tab-btn" onclick="switchView('admin')">
+        <i class="fa-solid fa-sliders"></i> Panel Admin (Mantenedores)
+      </button>
+    </nav>
+  </header>
+
+  <!-- Área de Contenido Principal -->
+  <main class="main-viewport">
+
+    <!-- ==========================================
+         VISTA 1: SITIO WEB DESKTOP
+         ========================================== -->
+    <section id="view-web" class="view-section active">
+      <!-- Hero Section -->
+      <section class="web-hero">
+        <div class="hero-content">
+          <h1><span>Alimentación Natural Premium</span>Nutrición Evolutiva para su Bienestar</h1>
+          <p>Ofrecemos dietas BARF crudas y recetas cocinadas al vapor con ingredientes 100% naturales de grado humano. Diseñamos la porción diaria perfecta según las características únicas de tu perro.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="switchView('mobile'); changeMobileView('welcome')">
+              <i class="fa-solid fa-dog"></i> Personalizar Comida en la App
+            </button>
+            <a href="#catalogo-seccion" class="btn btn-secondary">Ver Menú & Snacks</a>
+          </div>
+        </div>
+        <div class="hero-image-wrapper">
+          <div class="hero-badge badge-1">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <div class="hero-badge-info">
+              <h4>100% Digestible</h4>
+              <p>Adiós a las alergias de piel</p>
+            </div>
+          </div>
+          <div class="hero-badge badge-2">
+            <i class="fa-solid fa-bone"></i>
+            <div class="hero-badge-info">
+              <h4>Dientes Sanos</h4>
+              <p>Adiós al sarro canino</p>
+            </div>
+          </div>
+          <img src="assets/logo.jpg" alt="Mascota Feliz" class="hero-main-img">
+        </div>
+      </section>
+
+      <!-- Tipos de Alimentación -->
+      <section class="web-diets">
+        <div class="section-title">
+          <span>Nuestras Especialidades</span>
+          <h2>Dos Formas de Nutrir con Amor</h2>
+        </div>
+        <div class="diets-grid">
+          <div class="diet-card barf">
+            <span class="diet-icon">🥩</span>
+            <h3>Dieta BARF (Cruda)</h3>
+            <p>Alimentación biológicamente apropiada basada en ingredientes crudos. Respeta el diseño biológico del perro, aportando vitalidad máxima y enzimas digestivas intactas.</p>
+            <ul class="diet-benefits-list">
+              <li><i class="fa-solid fa-circle-check"></i> 60% Huesos carnosos triturados</li>
+              <li><i class="fa-solid fa-circle-check"></i> 30% Carne magra de primera calidad</li>
+              <li><i class="fa-solid fa-circle-check"></i> 10% Vísceras y órganos ricos en hierro</li>
+              <li><i class="fa-solid fa-circle-check"></i> Suplementos verdes y frutas</li>
+            </ul>
+          </div>
+          <div class="diet-card cooked">
+            <span class="diet-icon">🍲</span>
+            <h3>Comida Cocinada al Vapor</h3>
+            <p>Elaborada a baja temperatura para conservar nutrientes. Ideal para perros con digestión sensible, de edad avanzada o cuyos dueños prefieren no ofrecer alimentos crudos.</p>
+            <ul class="diet-benefits-list">
+              <li><i class="fa-solid fa-circle-check"></i> Proteínas cocinadas (Pollo, Vacuno, Cerdo)</li>
+              <li><i class="fa-solid fa-circle-check"></i> Verduras picadas ricas en fibra</li>
+              <li><i class="fa-solid fa-circle-check"></i> Carbohidratos saludables seleccionados</li>
+              <li><i class="fa-solid fa-circle-check"></i> Suplementos de calcio y vitaminas</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Catálogo de Productos -->
+      <section id="catalogo-seccion" class="web-catalog">
+        <div class="section-title">
+          <span>Nuestros Productos</span>
+          <h2>Explora el Menú del Origen</h2>
+        </div>
+        <div class="catalog-filters">
+          <button class="filter-btn active" onclick="filterCatalog('todos', this)">Todos</button>
+          <button class="filter-btn" onclick="filterCatalog('barf', this)">Dieta BARF</button>
+          <button class="filter-btn" onclick="filterCatalog('cooked', this)">Comida Cocinada</button>
+          <button class="filter-btn" onclick="filterCatalog('snack', this)">Snacks & Caldos</button>
+        </div>
+        <div class="products-grid" id="web-products-container">
+          <!-- Carga dinámica mediante JS -->
+        </div>
+      </section>
+
+      <!-- Calculadora Rápida Informativa -->
+      <section class="web-calculator-section">
+        <div class="web-calc-container">
+          <div class="web-calc-text">
+            <h2>Calcula la Ración Diaria de tu Mascota</h2>
+            <p>Ingresa los datos básicos para conocer los gramos recomendados que necesita al día. Si deseas guardar su perfil, añadir su foto, recibir entregas mensuales automáticas y pagar con tarjeta, utiliza nuestra <strong>App Móvil</strong> interactiva en la pestaña superior.</p>
+            <button class="btn btn-primary" onclick="switchView('mobile'); changeMobileView('welcome')">
+              <i class="fa-solid fa-mobile-screen"></i> Abrir en la App Móvil
+            </button>
+          </div>
+          <div class="web-calc-box">
+            <div class="form-group">
+              <label for="web-calc-diet">Tipo de Alimentación</label>
+              <select id="web-calc-diet" class="form-input">
+                <option value="barf">Dieta BARF (Cruda)</option>
+                <option value="cooked">Comida Cocinada al Vapor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="web-calc-weight">Peso de la Mascota (kg)</label>
+              <input type="number" id="web-calc-weight" class="form-input" placeholder="Ej: 15" min="1" step="0.5">
+            </div>
+            <div class="form-group">
+              <label for="web-calc-age">Etapa de Vida</label>
+              <select id="web-calc-age" class="form-input">
+                <option value="adult">Adulto (Más de 12 meses)</option>
+                <option value="puppy">Cachorro (Menos de 12 meses)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="web-calc-activity">Nivel de Actividad / Estado</label>
+              <select id="web-calc-activity" class="form-input">
+                <option value="sedentary">Bajo / Sedentario o Senior</option>
+                <option value="normal" selected>Normal / Paseos diarios</option>
+                <option value="active">Activo / Deporte moderado</option>
+                <option value="working">Muy Activo / Trabajo o Lactancia</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="calculateWebPortion()">
+              <i class="fa-solid fa-calculator"></i> Calcular Ración
+            </button>
+            
+            <div class="calc-result-overlay" id="web-calc-result">
+              <div class="result-grid">
+                <div class="result-item">
+                  <span>Ración Diaria</span>
+                  <strong id="web-res-daily">0 g</strong>
+                </div>
+                <div class="result-item">
+                  <span>Suscripción Mensual</span>
+                  <strong id="web-res-monthly">0 kg</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="web-footer">
+        <div class="web-footer-logo">
+          <img src="assets/logo.jpg" alt="Logo Origen Canino" style="height: 44px; border-radius: 50%;">
+          <div class="logo-text" style="text-align: left;">
+            <div class="logo-brand-wrapper">
+              <span class="logo-brand-origen" style="font-size: 1.6rem; margin-right: 0.15rem;">Origen</span>
+              <span class="logo-brand-canino" style="font-size: 1.25rem;"><i class="fa-solid fa-paw logo-paw" style="font-size:0.8rem;"></i>CANINO</span>
+            </div>
+            <span class="logo-brand-sub" style="font-size: 0.52rem; letter-spacing: 1px;">Comida Real, Vida Saludable</span>
+          </div>
+        </div>
+        <p>Alimentación natural biológicamente apropiada. Hecho con amor en Chile para el bienestar integral de tu fiel compañero.</p>
+        <div class="web-footer-copyright">
+          &copy; 2026 Origen Canino. Comida Real, Vida Saludable. Todos los derechos reservados.
+        </div>
+      </footer>
+    </section>
+
+    <!-- ==========================================
+         VISTA 2: SIMULADOR DE APP MÓVIL
+         ========================================== -->
+    <section id="view-mobile" class="view-section">
+      <div class="mobile-simulator-container">
+        
+        <!-- Carcasa de Teléfono Físico -->
+        <div class="phone-mockup">
+          <div class="phone-notch">
+            <div class="phone-camera"></div>
+            <div class="phone-speaker"></div>
+          </div>
+          
+          <div class="phone-screen">
+            <!-- Barra de estado del móvil -->
+            <div class="phone-status-bar">
+              <div id="simulated-time">10:47</div>
+              <div class="status-icons">
+                <i class="fa-solid fa-signal"></i>
+                <i class="fa-solid fa-wifi"></i>
+                <i class="fa-solid fa-battery-three-quarters"></i>
+              </div>
+            </div>
+            
+            <!-- Contenido de las pantallas de la App -->
+            <div class="phone-content" id="mobile-app-content">
+              
+              <!-- 2.1 PANTALLA: BIENVENIDA / SELECCIÓN DE MASCOTAS -->
+              <div id="mobile-welcome" class="mobile-view active">
+                <div class="mobile-welcome-screen">
+                  <img src="assets/logo.jpg" alt="Origen Canino Logo" class="welcome-logo">
+                  <h2>Origen Canino</h2>
+                  <p>Nutrición natural premium formulada a medida para tus mascotas.</p>
+                  
+                  <!-- Listado de mascotas existentes -->
+                  <div id="welcome-pets-title" style="display:none; width: 100%; text-align: left; font-weight:700; margin-bottom: 0.5rem; font-size:0.85rem; color:var(--secondary-brown);">
+                    Tus Mascotas Registradas:
+                  </div>
+                  <div id="welcome-pets-container" class="welcome-pets-list">
+                    <!-- Se carga dinámicamente -->
+                  </div>
+
+                  <button class="mobile-btn mobile-btn-primary" onclick="initNewPetWizard()">
+                    <i class="fa-solid fa-plus"></i> Agregar Mascota
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2.2 PANTALLA: FORMULARIO PERFIL MASCOTA -->
+              <div id="mobile-profile-setup" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title" id="profile-wizard-title">Perfil de tu Mascota</h3>
+                  <p class="mobile-subtitle">Configura los datos clave para armar la receta ideal.</p>
+                  
+                  <div class="photo-uploader">
+                    <div class="photo-preview-box" onclick="triggerPhotoUpload()" id="pet-photo-preview">
+                      <i class="fa-solid fa-camera"></i>
+                      <span>Subir Foto</span>
+                    </div>
+                    <input type="file" id="pet-photo-input" accept="image/*" onchange="previewPetPhoto(event)">
+                  </div>
+
+                  <div class="mobile-input-group">
+                    <label for="pet-name">Nombre de la Mascota</label>
+                    <input type="text" id="pet-name" class="mobile-input" placeholder="Ej: Toby">
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pet-breed">Raza</label>
+                    <input type="text" id="pet-breed" class="mobile-input" placeholder="Ej: Border Collie">
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pet-weight">Peso Corporal (kg)</label>
+                    <input type="number" id="pet-weight" class="mobile-input" placeholder="Ej: 15" min="0.5" step="0.1">
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pet-age">Etapa de Vida</label>
+                    <select id="pet-age" class="mobile-select">
+                      <option value="adult">Adulto (Mayor a 1 año)</option>
+                      <option value="puppy">Cachorro (2 a 4 meses)</option>
+                      <option value="puppy-mid">Cachorro (4 a 6 meses)</option>
+                      <option value="puppy-late">Cachorro (6 a 12 meses)</option>
+                    </select>
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pet-activity">Nivel de Actividad</label>
+                    <select id="pet-activity" class="mobile-select">
+                      <option value="sedentary">Bajo (Sedentario / Senior)</option>
+                      <option value="normal" selected>Normal (Paseo diario)</option>
+                      <option value="active">Activo (Deporte recreativo)</option>
+                      <option value="working">Muy Activo (Trabajo / Canicross)</option>
+                    </select>
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pet-notes">Observaciones / Alergias</label>
+                    <input type="text" id="pet-notes" class="mobile-input" placeholder="Ej: Alérgico al pollo, piel sensible">
+                  </div>
+                  
+                  <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                    <button class="mobile-btn mobile-btn-secondary" onclick="cancelPetWizard()" style="flex:1;">
+                      Cancelar
+                    </button>
+                    <button class="mobile-btn mobile-btn-primary" onclick="savePetProfileAndGoToCalculator()" style="flex:2;">
+                      Calcular Ración <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.3 PANTALLA: CALCULADORA Y PERSONALIZACIÓN INTERACTIVA DE RECETA -->
+              <div id="mobile-calculator" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+                  <div class="pet-profile-summary">
+                    <img id="calc-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
+                    <div class="pet-meta-text">
+                      <h3 id="calc-pet-name">Toby</h3>
+                      <p id="calc-pet-details">Border Collie • 15 kg</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Desglose de gramos diario -->
+                <div class="portion-breakdown-card">
+                  <div class="portion-header">
+                    <span>Porción Diaria:</span>
+                    <span class="portion-total" id="calc-daily-total">375g</span>
+                  </div>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;" id="calc-explanation">
+                    Calculado al 2.5% del peso corporal para mantenimiento adulto normal.
+                  </p>
+                  
+                  <!-- Desglose de barras -->
+                  <div class="breakdown-bars" id="calc-breakdown-bars">
+                    <div class="bar-part bar-bones" style="width: 50%"></div>
+                    <div class="bar-part bar-meat" style="width: 30%"></div>
+                    <div class="bar-part bar-organs" style="width: 10%"></div>
+                    <div class="bar-part bar-veggies" style="width: 10%"></div>
+                  </div>
+
+                  <!-- Leyenda -->
+                  <div class="breakdown-legend" id="calc-breakdown-legend">
+                    <!-- Dinámico -->
+                  </div>
+                </div>
+
+                <!-- Selección de Receta Base -->
+                <div class="mobile-card">
+                  <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.65rem; color: var(--secondary-brown);">
+                    1. Elige su Receta Base
+                  </h4>
+                  <div class="recipe-selector-grid" id="mobile-recipe-selector">
+                    <!-- Rellenado dinámicamente -->
+                  </div>
+                </div>
+
+                <!-- Formulador Interactivo de Ingredientes -->
+                <div class="mobile-card">
+                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
+                    2. Personaliza la Comida
+                  </h4>
+                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                    Desmarca ingredientes para excluirlos de su porción mensual (se tacharán en la etiqueta).
+                  </p>
+
+                  <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Ingredientes de Receta:</span>
+                  <div class="pills-container" id="calc-ingredients-container" style="margin-bottom: 1rem;">
+                    <!-- Ingredientes de la receta activa -->
+                  </div>
+
+                  <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Superalimentos (+$1.500 c/u al mes):</span>
+                  <div class="pills-container" id="calc-superfoods-container">
+                    <!-- Suplementos opcionales -->
+                  </div>
+                </div>
+
+                <!-- Etiqueta de empaque final -->
+                <div class="mobile-card">
+                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
+                    3. Vista Previa de Etiqueta
+                  </h4>
+                  <div class="package-label-mockup" id="calc-package-label">
+                    <!-- Generado dinámicamente -->
+                  </div>
+                </div>
+
+                <!-- Envío e instrucciones -->
+                <div class="mobile-card">
+                  <div class="mobile-input-group">
+                    <label for="custom-instructions">Instrucciones Especiales de Empaque</label>
+                    <input type="text" id="custom-instructions" class="mobile-input" placeholder="Ej: Congelar en porciones de 150g">
+                  </div>
+                  
+                  <div class="receipt-row" style="margin-bottom: 0.75rem; border-top: 1px solid rgba(44,26,14,0.06); padding-top: 0.75rem;">
+                    <span>Suscripción Mensual (<span id="calc-monthly-weight">11.3</span> kg):</span>
+                    <strong id="calc-diet-price">$45.000</strong>
+                  </div>
+                  
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('welcome')" style="flex: 1;">
+                      Atrás
+                    </button>
+                    <button class="mobile-btn mobile-btn-primary" onclick="proceedToSnacks()" style="flex: 2;">
+                      Confirmar Dieta <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.4 PANTALLA: CATÁLOGO DE SNACKS -->
+              <div id="mobile-snacks" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title">Suplementos & Snacks</h3>
+                  <p class="mobile-subtitle">Acompaña la dieta mensual con deliciosos snacks deshidratados y caldos de colágeno.</p>
+                  
+                  <div class="mobile-snacks-list" id="mobile-snacks-container">
+                    <!-- Cargados dinámicamente -->
+                  </div>
+
+                  <div class="receipt-row" style="margin-top: 1rem; border-top: 1px solid rgba(44, 26, 14, 0.1); padding-top: 0.75rem;">
+                    <span>Dietas de Mascotas:</span>
+                    <span id="snacks-diet-subtotal">$0</span>
+                  </div>
+                  <div class="receipt-row">
+                    <span>Snacks Generales:</span>
+                    <span id="snacks-only-subtotal">$0</span>
+                  </div>
+                  <div class="receipt-row" style="font-weight: 700; color: var(--primary-green);">
+                    <span>Total Mensual Compra:</span>
+                    <span id="snacks-total">$0</span>
+                  </div>
+                  
+                  <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
+                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('calculator')" style="flex: 1;">
+                      Atrás
+                    </button>
+                    <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckout()" style="flex: 2;">
+                      Ir a Pagar <i class="fa-solid fa-credit-card"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.5 PANTALLA: CHECKOUT & PASARELA DE PAGO INTERACTIVA (MULTI-MASCOTA) -->
+              <div id="mobile-checkout" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title">Suscripción Mensual</h3>
+                  <p class="mobile-subtitle">Revisa el detalle de tus mascotas y realiza el pago seguro.</p>
+                  
+                  <!-- Desglose por perro en Checkout -->
+                  <div class="checkout-pets-breakdown" id="checkout-pets-list">
+                    <!-- Llenado dinámico per pet -->
+                  </div>
+
+                  <!-- Tarjeta de Crédito 3D Interactiva -->
+                  <div class="credit-card-wrapper" id="checkout-credit-card">
+                    <div class="credit-card-inner">
+                      <!-- Lado Frontal -->
+                      <div class="credit-card-front">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                          <div class="card-chip"></div>
+                          <i class="fa-brands fa-cc-visa" style="font-size: 1.8rem;"></i>
+                        </div>
+                        <div class="card-number" id="card-num-preview">•••• •••• •••• ••••</div>
+                        <div class="card-holder-group">
+                          <div>
+                            <span>Titular</span>
+                            <div class="card-holder-name" id="card-name-preview">Nombre Completo</div>
+                          </div>
+                          <div>
+                            <span>Expira</span>
+                            <div id="card-exp-preview">MM/AA</div>
+                          </div>
+                        </div>
+                      </div>
+                      <!-- Lado Posterior -->
+                      <div class="credit-card-back">
+                        <div class="card-magnetic-strip"></div>
+                        <div style="margin-top: 1rem;">
+                          <div class="card-signature-strip" id="card-cvv-preview">123</div>
+                          <div style="text-align: right; font-size: 0.6rem; opacity: 0.8; margin-top: 4px;">CVV</div>
+                        </div>
+                        <div style="text-align: left; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">
+                          ORIGEN CANINO
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Campos de Entrada del Pago -->
+                  <div class="mobile-input-group">
+                    <label for="pay-cardholder">Nombre del Titular</label>
+                    <input type="text" id="pay-cardholder" class="mobile-input" placeholder="Ej: Patricio Silva" oninput="updateCardPreview('name', this.value)">
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pay-cardnumber">Número de Tarjeta</label>
+                    <input type="text" id="pay-cardnumber" class="mobile-input" placeholder="4556 1234 5678 9012" maxlength="19" oninput="updateCardPreview('number', this.value)">
+                  </div>
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                    <div class="mobile-input-group">
+                      <label for="pay-expiry">Fecha Vencimiento</label>
+                      <input type="text" id="pay-expiry" class="mobile-input" placeholder="MM/AA" maxlength="5" oninput="updateCardPreview('expiry', this.value)">
+                    </div>
+                    <div class="mobile-input-group">
+                      <label for="pay-cvv">Código CVV</label>
+                      <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
+                    </div>
+                  </div>
+                  <div class="mobile-input-group">
+                    <label for="pay-address">Dirección de Entrega</label>
+                    <input type="text" id="pay-address" class="mobile-input" placeholder="Av. Principal 1234, Santiago">
+                  </div>
+
+                  <div class="receipt-row" style="font-weight: 700; font-size: 1.1rem; color: var(--primary-green); margin: 1rem 0;">
+                    <span>Total a Pagar:</span>
+                    <span id="checkout-total-val">$0</span>
+                  </div>
+
+                  <div style="display: flex; gap: 0.5rem;">
+                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('snacks')" style="flex: 1;">
+                      Atrás
+                    </button>
+                    <button class="mobile-btn mobile-btn-accent" onclick="processSecurePayment()" style="flex: 2;" id="pay-btn">
+                      <i class="fa-solid fa-shield-halved"></i> Pagar Suscripción
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.6 PANTALLA: RECIBO DE CONFIRMACIÓN (MULTI-MASCOTA) -->
+              <div id="mobile-receipt" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <div class="order-success-box">
+                    <div class="success-icon-badge">
+                      <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--secondary-brown);">¡Suscripción Activada!</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                      Hemos procesado tu pago de manera segura. Tu comida ya se está formulando.
+                    </p>
+                    
+                    <div class="order-receipt-ticket" id="receipt-details-container">
+                      <!-- Resumen de recibo dinámico per pet -->
+                    </div>
+
+                    <div class="qr-code-placeholder">
+                      <i class="fa-solid fa-qrcode" style="font-size: 2.2rem; display: block; margin-bottom: 4px; color: var(--secondary-brown);"></i>
+                      <span>Ticket de Suscripción</span>
+                    </div>
+
+                    <button class="mobile-btn mobile-btn-primary" style="margin-top: 1.5rem;" onclick="loadPetDashboardView()">
+                      Ir a Mi Mascota <i class="fa-solid fa-house-user"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.7 PANTALLA: DASHBOARD DE MASCOTAS (CON SLIDER DE SELECCIÓN) -->
+              <div id="mobile-pet-dashboard" class="mobile-view">
+                
+                <!-- Slider Horizontal de Avatares de Perros -->
+                <div class="pet-selector-bar" id="dash-pet-selector">
+                  <!-- Avatares circulares cargados con JS, más botón de agregar -->
+                </div>
+
+                <div class="mobile-card">
+                  <div class="pet-profile-summary">
+                    <img id="dash-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
+                    <div class="pet-meta-text">
+                      <h3 id="dash-pet-name">Toby</h3>
+                      <p id="dash-pet-details">Border Collie • 15 kg</p>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cuenta regresiva de entrega -->
+                <div class="delivery-countdown">
+                  <h4>Siguiente Despacho en</h4>
+                  <div class="days">08 Días</div>
+                  <p style="font-size: 0.7rem; opacity: 0.9;">Entrega estimada: 15 de Junio</p>
+                </div>
+
+                <!-- Info de Plan -->
+                <div class="mobile-card">
+                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.5rem;">
+                    Suscripción Activa Mascota
+                  </h4>
+                  <div class="receipt-row">
+                    <span>Fórmula Base:</span>
+                    <strong id="dash-diet-recipe">BARF Res</strong>
+                  </div>
+                  <div class="receipt-row">
+                    <span>Ración Diaria:</span>
+                    <strong id="dash-daily-portion">375 g / día</strong>
+                  </div>
+                  <div class="receipt-row" style="color: var(--primary-green); font-weight: 700; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 0.5rem; margin-top: 0.5rem;">
+                    <span>Pago Mensual Mascota:</span>
+                    <span id="dash-monthly-cost">$45.000</span>
+                  </div>
+                </div>
+
+                <!-- Guía de alimentación diaria -->
+                <div class="mobile-card">
+                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.75rem;">
+                    Guía de Porción Diaria
+                  </h4>
+                  <div id="dash-feeding-guide">
+                    <!-- Generado dinámicamente -->
+                  </div>
+                </div>
+
+                <button class="mobile-btn mobile-btn-secondary" onclick="editCurrentPlanFromDashboard()">
+                  <i class="fa-solid fa-pen-to-square"></i> Modificar Plan Mascota
+                </button>
+                <button class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2);" onclick="logoutApp()">
+                  <i class="fa-solid fa-power-off"></i> Cerrar Sesión
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Navbar Inferior de la App -->
+            <nav class="phone-navbar" id="mobile-app-nav">
+              <button class="nav-item active" onclick="changeMobileView('welcome')">
+                <i class="fa-solid fa-house"></i>Inicio
+              </button>
+              <button class="nav-item" onclick="navigateMobileNav('profile')">
+                <i class="fa-solid fa-calculator"></i>Porción
+              </button>
+              <button class="nav-item" onclick="navigateMobileNav('snacks')">
+                <i class="fa-solid fa-cookie-bite"></i>Snacks
+              </button>
+              <button class="nav-item" onclick="navigateMobileNav('dashboard')">
+                <i class="fa-solid fa-paw"></i>Mascotas
+              </button>
+            </nav>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==========================================
+         VISTA 3: PANEL ADMIN (MANTENEDORES)
+         ========================================== -->
+    <section id="view-admin" class="view-section">
+      <div class="admin-dashboard-container">
+        
+        <!-- Sidebar del Administrador -->
+        <aside class="admin-sidebar">
+          <button class="admin-menu-btn active" onclick="switchAdminTab('parameters')">
+            <i class="fa-solid fa-sliders"></i> Parámetros de Dietas
+          </button>
+          <button class="admin-menu-btn" onclick="switchAdminTab('recipes')">
+            <i class="fa-solid fa-utensils"></i> Menús & Recetas
+          </button>
+          <button class="admin-menu-btn" onclick="switchAdminTab('orders')">
+            <i class="fa-solid fa-receipt"></i> Suscripciones Activas
+          </button>
+        </aside>
+
+        <!-- Contenido del Panel Admin -->
+        <main class="admin-content-card">
+          
+          <!-- PANEL A: CONFIGURACIÓN DE PARÁMETROS -->
+          <div id="admin-panel-parameters" class="admin-view-panel active">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown); margin-bottom: 0.5rem;">
+              Mantenedor de Parámetros Nutricionales
+            </h2>
+            <p style="color: var(--text-muted); margin-bottom: 2rem;">
+              Configura los multiplicadores de ración para los cálculos automáticos y los precios por kg.
+            </p>
+
+            <div class="inline-form-grid">
+              <div class="form-group">
+                <label for="cfg-barf-price" style="color: var(--text-dark);">Precio por kg Dieta BARF ($)</label>
+                <input type="number" id="cfg-barf-price" class="form-input" value="4000">
+              </div>
+              <div class="form-group">
+                <label for="cfg-cooked-price" style="color: var(--text-dark);">Precio por kg Comida Cocinada ($)</label>
+                <input type="number" id="cfg-cooked-price" class="form-input" value="5000">
+              </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+              Porcentajes para Dieta BARF (Adultos)
+            </h3>
+            <div class="inline-form-grid">
+              <div class="form-group">
+                <label for="cfg-barf-adult-sedentary" style="color: var(--text-dark);">Sedentario / Senior (%)</label>
+                <input type="number" id="cfg-barf-adult-sedentary" class="form-input" value="2.0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="cfg-barf-adult-normal" style="color: var(--text-dark);">Normal (%)</label>
+                <input type="number" id="cfg-barf-adult-normal" class="form-input" value="2.5" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="cfg-barf-adult-active" style="color: var(--text-dark);">Activo (%)</label>
+                <input type="number" id="cfg-barf-adult-active" class="form-input" value="3.0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="cfg-barf-adult-working" style="color: var(--text-dark);">Muy Activo (%)</label>
+                <input type="number" id="cfg-barf-adult-working" class="form-input" value="3.5" step="0.1">
+              </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+              Porcentajes para Comida Cocinada (Adultos)
+            </h3>
+            <div class="inline-form-grid">
+              <div class="form-group">
+                <label for="cfg-cooked-adult-sedentary" style="color: var(--text-dark);">Sedentario / Senior (%)</label>
+                <input type="number" id="cfg-cooked-adult-sedentary" class="form-input" value="3.0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="cfg-cooked-adult-normal" style="color: var(--text-dark);">Normal (%)</label>
+                <input type="number" id="cfg-cooked-adult-normal" class="form-input" value="3.5" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="cfg-cooked-adult-active" style="color: var(--text-dark);">Activo (%)</label>
+                <input type="number" id="cfg-cooked-adult-active" class="form-input" value="4.0" step="0.1">
+              </div>
+              <div class="form-group">
+                <label for="cfg-cooked-adult-working" style="color: var(--text-dark);">Muy Activo (%)</label>
+                <input type="number" id="cfg-cooked-adult-working" class="form-input" value="4.5" step="0.1">
+              </div>
+            </div>
+
+            <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+              Porcentajes para Cachorros (Segun Edad)
+            </h3>
+            <div class="inline-form-grid">
+              <div class="form-group">
+                <label for="cfg-puppy-early" style="color: var(--text-dark);">Cachorros 2-4 meses (%)</label>
+                <input type="number" id="cfg-puppy-early" class="form-input" value="8.0" step="0.5">
+              </div>
+              <div class="form-group">
+                <label for="cfg-puppy-mid" style="color: var(--text-dark);">Cachorros 4-6 meses (%)</label>
+                <input type="number" id="cfg-puppy-mid" class="form-input" value="6.0" step="0.5">
+              </div>
+              <div class="form-group">
+                <label for="cfg-puppy-late" style="color: var(--text-dark);">Cachorros 6-12 meses (%)</label>
+                <input type="number" id="cfg-puppy-late" class="form-input" value="4.0" step="0.5">
+              </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="saveAdminParameters()">
+              <i class="fa-solid fa-floppy-disk"></i> Guardar Parámetros
+            </button>
+          </div>
+
+          <!-- PANEL B: GESTIÓN DE CATÁLOGO / RECETAS -->
+          <div id="admin-panel-recipes" class="admin-view-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+                Catálogo de Productos y Recetas
+              </h2>
+              <button class="btn btn-primary" onclick="showAddProductForm()">
+                <i class="fa-solid fa-plus"></i> Nuevo Producto
+              </button>
+            </div>
+
+            <!-- Formulario de agregar/editar -->
+            <div id="add-product-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+              <h3 id="form-product-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Nuevo Producto</h3>
+              <input type="hidden" id="form-product-id">
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label for="form-product-name" style="color: var(--text-dark);">Nombre del Producto</label>
+                  <input type="text" id="form-product-name" class="form-input" required placeholder="Ej: BARF Salmón Premium">
+                </div>
+                <div class="form-group">
+                  <label for="form-product-category" style="color: var(--text-dark);">Categoría</label>
+                  <select id="form-product-category" class="form-input">
+                    <option value="barf">Dieta BARF</option>
+                    <option value="cooked">Comida Cocinada</option>
+                    <option value="snack">Snack / Suplemento</option>
+                  </select>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label for="form-product-price" style="color: var(--text-dark);">Precio ($)</label>
+                  <input type="number" id="form-product-price" class="form-input" required placeholder="Ej: 4500 (BARF/Cocido es por kg, Snack por unidad)">
+                </div>
+                <div class="form-group">
+                  <label for="form-product-icon" style="color: var(--text-dark);">Emoji / Icono representativo</label>
+                  <input type="text" id="form-product-icon" class="form-input" placeholder="Ej: 🍣 o 🦴">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="form-product-ingredients" style="color: var(--text-dark);">Ingredientes o Descripción Corta</label>
+                <input type="text" id="form-product-ingredients" class="form-input" placeholder="Ej: 60% carne de salmón, 20% huesos triturados, 10% zapallo...">
+              </div>
+
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="submitProductForm()">
+                  Guardar Producto
+                </button>
+                <button class="btn btn-secondary" onclick="hideProductForm()">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+
+            <!-- Tabla de Catálogo -->
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Icono</th>
+                    <th>Nombre</th>
+                    <th>Categoría</th>
+                    <th>Ingredientes / Detalle</th>
+                    <th>Precio</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-products-tbody">
+                  <!-- Carga dinámica -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PANEL C: GESTIÓN DE SUSCRIPCIONES / PEDIDOS -->
+          <div id="admin-panel-orders" class="admin-view-panel">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown); margin-bottom: 0.5rem;">
+              Control de Suscripciones Mensuales
+            </h2>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+              Revisa y gestiona las solicitudes de dietas personalizadas y pedidos ingresados por los clientes en la App.
+            </p>
+
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Foto Mascota</th>
+                    <th>Mascotas & Dueño</th>
+                    <th>Detalles Físicos</th>
+                    <th>Fórmula Solicitada</th>
+                    <th>Porción Diaria</th>
+                    <th>Total Mensual</th>
+                    <th>Estado de Pago</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-orders-tbody">
+                  <!-- Carga dinámica -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+        </main>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lógica JavaScript Principal -->
+  <script src="app.js"></script>
+</body>
+</html>

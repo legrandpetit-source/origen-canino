@@ -1,0 +1,1925 @@
+/* CSS para Origen Canino Web & Mobile Suite */
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Fredoka:wght@400;600;700&family=Outfit:wght@300;400;500;600;700;800&family=Courier+Prime:wght@400;700&display=swap');
+
+:root {
+  /* Paleta de colores basada en el logo oficial */
+  --primary-green: hsl(85, 34%, 28%);     /* #4d6433 - Verde oliva del plato */
+  --primary-green-light: hsl(85, 30%, 45%);
+  --primary-green-dark: hsl(85, 38%, 18%);
+  --secondary-brown: hsl(24, 38%, 13%);    /* #2c1a0e - Marrón de 'CANINO' */
+  --secondary-brown-light: hsl(24, 25%, 30%);
+  --accent-red: hsl(1, 51%, 46%);         /* #b13b39 - Rojo óxido de la carne */
+  --accent-red-light: hsl(1, 55%, 55%);
+  --bg-cream: hsl(40, 24%, 96%);          /* #f6f3ed - Fondo crema suave */
+  --bg-white: #ffffff;
+  --text-dark: hsl(24, 30%, 12%);
+  --text-muted: hsl(24, 12%, 45%);
+  
+  /* Sistema de diseño tipográfico basado en el logotipo oficial */
+  --font-script: 'Pacifico', cursive;      /* Tipografía de 'Origen' */
+  --font-header: 'Fredoka', sans-serif;    /* Tipografía de 'CANINO' (chunky rounded) */
+  --font-sans: 'Outfit', sans-serif;       /* Para cuerpo de texto */
+  --font-mono: 'Courier Prime', monospace;
+  
+  --shadow-sm: 0 4px 12px rgba(44, 26, 14, 0.05);
+  --shadow-md: 0 12px 36px rgba(44, 26, 14, 0.08);
+  --shadow-lg: 0 24px 64px rgba(44, 26, 14, 0.15);
+  
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Reset y Base */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--primary-green-light) transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-cream);
+  color: var(--text-dark);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+
+/* Scrollbar Personalizado */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary-green-light);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-green);
+}
+
+/* Header de la Aplicación General */
+.app-header {
+  background: rgba(246, 243, 237, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(44, 26, 14, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  padding: 0.6rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-img {
+  height: 52px;
+  width: 52px;
+  object-fit: contain;
+  border-radius: 50%;
+  border: 2px solid var(--primary-green);
+  background-color: var(--bg-white);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1;
+}
+
+/* Estructuración Typográfica Réplica del Logo */
+.logo-brand-wrapper {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  margin-bottom: 2px;
+}
+
+.logo-brand-origen {
+  font-family: var(--font-script);
+  font-size: 1.85rem;
+  color: var(--primary-green);
+  transform: rotate(-3deg);
+  line-height: 0.8;
+  padding-bottom: 3px;
+}
+
+.logo-brand-canino {
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 1.45rem;
+  color: var(--secondary-brown);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  letter-spacing: -0.5px;
+  text-transform: uppercase;
+}
+
+.logo-paw {
+  font-size: 0.95rem;
+  color: var(--primary-green-light);
+  transform: rotate(15deg);
+}
+
+.logo-brand-sub {
+  font-family: var(--font-sans);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: var(--primary-green);
+  text-transform: uppercase;
+  border-top: 1px solid rgba(44, 26, 14, 0.12);
+  padding-top: 2px;
+  margin-top: 2px;
+  display: inline-block;
+  line-height: 1.2;
+}
+
+/* Navegación por Pestañas */
+.view-tabs {
+  display: flex;
+  background: rgba(44, 26, 14, 0.05);
+  padding: 0.35rem;
+  border-radius: var(--radius-md);
+  gap: 0.25rem;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-sans);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.2rem;
+  color: var(--text-muted);
+  border-radius: calc(var(--radius-md) - 4px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: var(--transition);
+}
+
+.tab-btn i {
+  font-size: 1.1rem;
+}
+
+.tab-btn:hover {
+  color: var(--secondary-brown);
+}
+
+.tab-btn.active {
+  background: var(--bg-white);
+  color: var(--primary-green);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Área de Contenido Principal */
+.main-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.view-section {
+  display: none;
+  width: 100%;
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.view-section.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ==========================================================================
+   1. ESTILOS DEL SITIO WEB (DESKTOP)
+   ========================================================================== */
+.web-hero {
+  padding: 5rem 2rem;
+  background: radial-gradient(circle at 80% 20%, hsla(85, 34%, 28%, 0.08) 0%, transparent 60%),
+              radial-gradient(circle at 10% 80%, hsla(1, 51%, 46%, 0.05) 0%, transparent 50%);
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  align-items: center;
+  gap: 4rem;
+  max-width: 1300px;
+  margin: 0 auto;
+}
+
+.hero-content h1 {
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 3.2rem;
+  line-height: 1.1;
+  color: var(--secondary-brown);
+  margin-bottom: 1.5rem;
+}
+
+.hero-content h1 span {
+  color: var(--primary-green);
+  display: block;
+  font-family: var(--font-script);
+  font-size: 3rem;
+  font-weight: normal;
+  text-transform: none;
+  letter-spacing: 0px;
+  margin-bottom: 0.5rem;
+}
+
+.hero-content p {
+  font-size: 1.2rem;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  max-width: 550px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.9rem 1.8rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: var(--transition);
+  text-decoration: none;
+  border: none;
+  gap: 0.5rem;
+  font-family: var(--font-sans);
+}
+
+.btn-primary {
+  background: var(--primary-green);
+  color: var(--bg-cream);
+  box-shadow: 0 8px 20px hsla(85, 34%, 28%, 0.25);
+}
+
+.btn-primary:hover {
+  background: var(--primary-green-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 25px hsla(85, 34%, 28%, 0.35);
+}
+
+.btn-secondary {
+  background: var(--bg-white);
+  color: var(--secondary-brown);
+  border: 1px solid rgba(44, 26, 14, 0.15);
+}
+
+.btn-secondary:hover {
+  background: rgba(44, 26, 14, 0.03);
+  transform: translateY(-2px);
+}
+
+.hero-image-wrapper {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.hero-badge {
+  position: absolute;
+  background: var(--bg-white);
+  padding: 1rem 1.5rem;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 10;
+  border: 1px solid rgba(44, 26, 14, 0.05);
+  animation: float 4s ease-in-out infinite;
+}
+
+.hero-badge.badge-1 {
+  top: 10%;
+  left: -5%;
+}
+
+.hero-badge.badge-2 {
+  bottom: 15%;
+  right: -5%;
+  animation-delay: 2s;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.hero-badge i {
+  color: var(--accent-red);
+  font-size: 1.8rem;
+  background: hsla(1, 51%, 46%, 0.1);
+  padding: 0.5rem;
+  border-radius: 50%;
+}
+
+.hero-badge-info h4 {
+  font-family: var(--font-header);
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--secondary-brown);
+}
+
+.hero-badge-info p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.hero-main-img {
+  width: 90%;
+  max-width: 420px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  border: 6px solid var(--bg-white);
+  transform: rotate(2deg);
+}
+
+/* Filosofía y Dietas */
+.web-diets {
+  padding: 6rem 2rem;
+  background: var(--bg-white);
+}
+
+.section-title {
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto 4rem;
+}
+
+.section-title span {
+  color: var(--accent-red);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.section-title h2 {
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 2.6rem;
+  color: var(--secondary-brown);
+}
+
+.diets-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.diet-card {
+  background: var(--bg-cream);
+  border-radius: var(--radius-lg);
+  padding: 3rem;
+  border: 1px solid rgba(44, 26, 14, 0.06);
+  transition: var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+
+.diet-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-green-light);
+}
+
+.diet-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: var(--primary-green);
+}
+
+.diet-card.cooked::before {
+  background: var(--accent-red);
+}
+
+.diet-icon {
+  font-size: 2.5rem;
+  margin-bottom: 1.5rem;
+  display: inline-block;
+}
+
+.diet-card h3 {
+  font-size: 1.8rem;
+  font-family: var(--font-header);
+  color: var(--secondary-brown);
+  margin-bottom: 1rem;
+}
+
+.diet-card p {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+
+.diet-benefits-list {
+  list-style: none;
+  margin-bottom: 2rem;
+}
+
+.diet-benefits-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+  font-weight: 500;
+}
+
+.diet-benefits-list li i {
+  color: var(--primary-green);
+}
+
+.diet-card.cooked .diet-benefits-list li i {
+  color: var(--accent-red);
+}
+
+/* Catálogo Web */
+.web-catalog {
+  padding: 6rem 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.catalog-filters {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 3rem;
+}
+
+.filter-btn {
+  background: var(--bg-white);
+  border: 1px solid rgba(44, 26, 14, 0.1);
+  padding: 0.6rem 1.4rem;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.filter-btn:hover {
+  color: var(--secondary-brown);
+  border-color: var(--secondary-brown);
+}
+
+.filter-btn.active {
+  background: var(--secondary-brown);
+  color: var(--bg-white);
+  border-color: var(--secondary-brown);
+}
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+  gap: 2rem;
+}
+
+.product-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(44, 26, 14, 0.05);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.product-img-wrapper {
+  height: 200px;
+  background: #eae6df;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  font-size: 3.5rem;
+}
+
+.product-tag {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+  background: var(--primary-green);
+  color: var(--bg-white);
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 50px;
+  text-transform: uppercase;
+}
+
+.product-tag.tag-cooked {
+  background: var(--accent-red);
+}
+
+.product-tag.tag-snack {
+  background: var(--secondary-brown);
+}
+
+.product-info {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-info h3 {
+  font-size: 1.25rem;
+  font-family: var(--font-header);
+  font-weight: 600;
+  color: var(--secondary-brown);
+  margin-bottom: 0.5rem;
+}
+
+.product-ingredients {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+  flex: 1;
+}
+
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+}
+
+.product-price {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary-green);
+}
+
+/* Calculadora Rápida Web */
+.web-calculator-section {
+  background: var(--secondary-brown);
+  color: var(--bg-cream);
+  padding: 6rem 2rem;
+}
+
+.web-calc-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.web-calc-text h2 {
+  font-family: var(--font-header);
+  font-size: 2.8rem;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+}
+
+.web-calc-text p {
+  color: hsla(40, 24%, 96%, 0.75);
+  margin-bottom: 2rem;
+}
+
+.web-calc-box {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 3rem;
+  border-radius: var(--radius-lg);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--bg-cream);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.8rem 1.2rem;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(44, 26, 14, 0.1);
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: var(--transition);
+}
+
+.form-input:focus {
+  border-color: var(--primary-green-light);
+  box-shadow: 0 0 0 3px hsla(85, 34%, 28%, 0.25);
+}
+
+.calc-result-overlay {
+  margin-top: 2rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.calc-result-overlay.active {
+  display: block;
+}
+
+.result-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.result-item {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1.2rem;
+  border-radius: var(--radius-md);
+  text-align: center;
+}
+
+.result-item span {
+  display: block;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: hsla(40, 24%, 96%, 0.6);
+  margin-bottom: 0.25rem;
+}
+
+.result-item strong {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--primary-green-light);
+}
+
+/* Footer Web */
+.web-footer {
+  background: var(--bg-white);
+  border-top: 1px solid rgba(44, 26, 14, 0.08);
+  padding: 4rem 2rem;
+  text-align: center;
+}
+
+.web-footer-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.web-footer-logo h3 {
+  font-family: var(--font-header);
+  font-weight: 700;
+  color: var(--secondary-brown);
+}
+
+.web-footer p {
+  color: var(--text-muted);
+  max-width: 500px;
+  margin: 0 auto 2rem;
+}
+
+.web-footer-copyright {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(44, 26, 14, 0.06);
+  padding-top: 2rem;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+/* ==========================================================================
+   2. ESTILOS DEL SIMULADOR DE APP MÓVIL
+   ========================================================================= */
+.mobile-simulator-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4rem 2rem;
+  min-height: calc(100vh - 75px);
+  background: radial-gradient(circle at center, hsla(85, 34%, 28%, 0.05) 0%, transparent 80%);
+}
+
+/* Carcasa del Teléfono (Smartphone Frame) */
+.phone-mockup {
+  width: 385px;
+  height: 810px;
+  background: #111;
+  border-radius: 50px;
+  padding: 14px;
+  box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.5),
+              0px 0px 0px 4px #222,
+              0px 0px 0px 8px #444;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Elementos del Marco */
+.phone-notch {
+  width: 150px;
+  height: 28px;
+  background: #111;
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  z-index: 999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.phone-camera {
+  width: 12px;
+  height: 12px;
+  background: #222;
+  border-radius: 50%;
+  margin-right: 15px;
+  box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.3);
+}
+
+.phone-speaker {
+  width: 45px;
+  height: 4px;
+  background: #333;
+  border-radius: 2px;
+}
+
+/* Contenido Interno de la App Móvil */
+.phone-screen {
+  flex: 1;
+  background: var(--bg-cream);
+  border-radius: 38px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Barra de Estado */
+.phone-status-bar {
+  height: 38px;
+  padding: 12px 24px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-dark);
+  z-index: 99;
+  background: transparent;
+}
+
+.status-icons {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+/* Pantalla/Contenedor de Vistas Móviles */
+.phone-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0 1.15rem 1.15rem;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Ocultar scrollbars dentro del teléfono */
+.phone-content::-webkit-scrollbar {
+  display: none;
+}
+.phone-content {
+  scrollbar-width: none;
+}
+
+/* Navbar Inferior del Móvil */
+.phone-navbar {
+  height: 65px;
+  background: var(--bg-white);
+  border-top: 1px solid rgba(44, 26, 14, 0.08);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding-bottom: 8px;
+  z-index: 99;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  background: none;
+  border: none;
+  flex: 1;
+}
+
+.nav-item i {
+  font-size: 1.25rem;
+  margin-bottom: 0.25rem;
+}
+
+.nav-item.active {
+  color: var(--primary-green);
+}
+
+/* Vistas de la App Móvil */
+.mobile-view {
+  display: none;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  flex: 1;
+  flex-direction: column;
+}
+
+.mobile-view.active {
+  display: flex;
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* Tarjetas y Contenedores Móviles */
+.mobile-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 0.85rem;
+  border: 1px solid rgba(44, 26, 14, 0.04);
+}
+
+.mobile-title {
+  font-size: 1.35rem;
+  font-family: var(--font-header);
+  font-weight: 700;
+  color: var(--secondary-brown);
+  margin-bottom: 0.35rem;
+  line-height: 1.2;
+}
+
+.mobile-subtitle {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+/* Componente de Subida de Imagen (Mascota) */
+.photo-uploader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.photo-preview-box {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  background: hsla(24, 25%, 30%, 0.05);
+  border: 2.5px dashed var(--primary-green-light);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: var(--transition);
+}
+
+.photo-preview-box:hover {
+  background: hsla(85, 34%, 28%, 0.05);
+  border-color: var(--primary-green);
+}
+
+.photo-preview-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photo-preview-box i {
+  font-size: 1.8rem;
+  color: var(--primary-green-light);
+  margin-bottom: 4px;
+}
+
+.photo-preview-box span {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.photo-uploader input[type="file"] {
+  display: none;
+}
+
+/* Inputs Móviles */
+.mobile-input-group {
+  margin-bottom: 0.85rem;
+}
+
+.mobile-input-group label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary-brown-light);
+  margin-bottom: 0.3rem;
+}
+
+.mobile-select,
+.mobile-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  background: var(--bg-cream);
+  border: 1px solid rgba(44, 26, 14, 0.08);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.88rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: var(--transition);
+}
+
+.mobile-select:focus,
+.mobile-input:focus {
+  border-color: var(--primary-green);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 2px hsla(85, 34%, 28%, 0.15);
+}
+
+/* Botones Móviles */
+.mobile-btn {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: var(--transition);
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mobile-btn-primary {
+  background: var(--primary-green);
+  color: var(--bg-white);
+}
+
+.mobile-btn-primary:hover {
+  background: var(--primary-green-dark);
+}
+
+.mobile-btn-accent {
+  background: var(--accent-red);
+  color: var(--bg-white);
+}
+
+.mobile-btn-accent:hover {
+  background: var(--accent-red-light);
+}
+
+.mobile-btn-secondary {
+  background: var(--bg-white);
+  border: 1px solid rgba(44, 26, 14, 0.12);
+  color: var(--secondary-brown);
+}
+
+.mobile-btn-secondary:hover {
+  background: rgba(44, 26, 14, 0.02);
+}
+
+/* Pantalla de Inicio / Onboarding */
+.mobile-welcome-screen {
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.welcome-logo {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid var(--primary-green);
+  margin-bottom: 1.25rem;
+  background-color: var(--bg-white);
+}
+
+.mobile-welcome-screen h2 {
+  font-family: var(--font-header);
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--secondary-brown);
+  margin-bottom: 0.5rem;
+  line-height: 1.1;
+}
+
+.mobile-welcome-screen p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Lista de Mascotas en Bienvenida */
+.welcome-pets-list {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.welcome-pet-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-white);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(44, 26, 14, 0.06);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.welcome-pet-item:hover {
+  border-color: var(--primary-green-light);
+  transform: translateY(-2px);
+}
+
+.welcome-pet-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--primary-green);
+}
+
+.welcome-pet-info {
+  flex: 1;
+}
+
+.welcome-pet-info h4 {
+  font-family: var(--font-header);
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--secondary-brown);
+}
+
+.welcome-pet-info p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Indicador de Desglose de Porción */
+.portion-breakdown-card {
+  background: hsla(85, 34%, 28%, 0.06);
+  border: 1px solid rgba(85, 100, 51, 0.12);
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  margin-bottom: 0.85rem;
+}
+
+.portion-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.portion-total {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--primary-green);
+}
+
+.breakdown-bars {
+  display: flex;
+  height: 10px;
+  border-radius: 50px;
+  overflow: hidden;
+  margin-bottom: 0.85rem;
+  background: rgba(44, 26, 14, 0.05);
+}
+
+.bar-part {
+  height: 100%;
+}
+
+.bar-bones { background: #dfdcd3; } /* Hueso */
+.bar-meat { background: var(--accent-red); } /* Carne */
+.bar-organs { background: var(--secondary-brown); } /* Víscera */
+.bar-veggies { background: var(--primary-green-light); } /* Verduras */
+.bar-carbs { background: #e09f3e; } /* Carbohidratos */
+
+.breakdown-legend {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.4rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 600;
+  gap: 0.3;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+/* Personalización de Receta */
+.recipe-selector-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.recipe-select-card {
+  border: 2px solid rgba(44, 26, 14, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  text-align: center;
+  cursor: pointer;
+  transition: var(--transition);
+  background: var(--bg-white);
+}
+
+.recipe-select-card:hover {
+  border-color: var(--primary-green-light);
+}
+
+.recipe-select-card.selected {
+  border-color: var(--primary-green);
+  background: hsla(85, 34%, 28%, 0.04);
+}
+
+.recipe-select-card h4 {
+  font-family: var(--font-header);
+  font-weight: 600;
+  font-size: 0.82rem;
+  margin-bottom: 0.25rem;
+  color: var(--secondary-brown);
+}
+
+.recipe-select-card span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+/* Ingredientes Personalizables e Interactivos */
+.pills-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.5rem;
+}
+
+.pill-checkbox {
+  display: none;
+}
+
+.pill-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-cream);
+  border: 1px solid rgba(44, 26, 14, 0.1);
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  user-select: none;
+}
+
+.pill-label i {
+  font-size: 0.7rem;
+}
+
+/* Estilo para quitar ingrediente base (se tacha) */
+.pill-checkbox:not(:checked) + .pill-label.base-ing {
+  text-decoration: line-through;
+  opacity: 0.5;
+  background: #f0ede5;
+  border-color: transparent;
+  color: var(--text-muted);
+}
+
+.pill-checkbox:not(:checked) + .pill-label.base-ing i {
+  visibility: hidden;
+}
+
+/* Estilo para superalimento agregado (activo) */
+.pill-checkbox:checked + .pill-label.super-ing {
+  background: var(--primary-green);
+  color: var(--bg-white);
+  border-color: var(--primary-green);
+}
+
+.pill-checkbox:checked + .pill-label.super-ing i {
+  color: var(--bg-white);
+}
+
+/* Etiqueta del Paquete Custom */
+.package-label-mockup {
+  background: #fbf9f4;
+  border: 2px dashed rgba(44, 26, 14, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 1.25rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  position: relative;
+  overflow: hidden;
+  color: #3d2b1f;
+  margin-top: 1rem;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.02);
+}
+
+.package-label-mockup::before {
+  content: "ORIGEN CANINO - SELLO CALIDAD";
+  position: absolute;
+  top: 15px;
+  right: -35px;
+  transform: rotate(45deg);
+  background: var(--accent-red);
+  color: white;
+  font-size: 0.45rem;
+  padding: 2px 25px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  font-family: var(--font-sans);
+}
+
+.label-title {
+  text-align: center;
+  font-weight: 700;
+  font-size: 0.95rem;
+  border-bottom: 1px double rgba(44, 26, 14, 0.2);
+  padding-bottom: 0.35rem;
+  margin-bottom: 0.75rem;
+  letter-spacing: 0.5px;
+}
+
+.label-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+}
+
+/* Catálogo de Snacks en Móvil */
+.mobile-snacks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.mobile-snack-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--bg-white);
+  border-radius: var(--radius-md);
+  padding: 0.65rem;
+  border: 1px solid rgba(44, 26, 14, 0.05);
+  box-shadow: var(--shadow-sm);
+}
+
+.mobile-snack-icon {
+  font-size: 1.6rem;
+  width: 40px;
+  height: 40px;
+  background: var(--bg-cream);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-snack-info {
+  flex: 1;
+}
+
+.mobile-snack-info h4 {
+  font-family: var(--font-header);
+  font-weight: 600;
+  font-size: 0.82rem;
+  color: var(--secondary-brown);
+}
+
+.mobile-snack-info p {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.mobile-snack-qty {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.qty-btn {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1px solid rgba(44, 26, 14, 0.2);
+  background: var(--bg-white);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
+.qty-btn:hover {
+  background: var(--secondary-brown);
+  color: var(--bg-white);
+  border-color: var(--secondary-brown);
+}
+
+/* Desglose Checkout por Mascota */
+.checkout-pets-breakdown {
+  border-bottom: 1px dashed rgba(44, 26, 14, 0.15);
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.checkout-pet-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+}
+
+.checkout-pet-row .pet-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.checkout-pet-row .pet-title img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--primary-green);
+}
+
+/* Simulación de Tarjeta de Crédito 3D */
+.credit-card-wrapper {
+  perspective: 1000px;
+  margin: 0.5rem auto 1.25rem;
+  width: 100%;
+  max-width: 280px;
+  height: 165px;
+}
+
+.credit-card-inner {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.credit-card-wrapper.flipped .credit-card-inner {
+  transform: rotateY(180deg);
+}
+
+.credit-card-front,
+.credit-card-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  border-radius: var(--radius-md);
+  padding: 1.15rem;
+  color: var(--bg-white);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+}
+
+.credit-card-front {
+  background: linear-gradient(135deg, var(--secondary-brown) 0%, var(--primary-green) 100%);
+}
+
+.credit-card-back {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-brown) 100%);
+  transform: rotateY(180deg);
+}
+
+.card-chip {
+  width: 36px;
+  height: 26px;
+  background: linear-gradient(135deg, #ffd700 0%, #e5c158 100%);
+  border-radius: 4px;
+}
+
+.card-number {
+  font-size: 1.05rem;
+  letter-spacing: 2px;
+  font-family: monospace;
+  margin-top: 0.75rem;
+}
+
+.card-holder-group {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+
+.card-holder-group span {
+  opacity: 0.7;
+}
+
+.card-holder-name {
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+/* Dorso de la tarjeta */
+.card-magnetic-strip {
+  height: 32px;
+  background: #111;
+  margin: 0 -1.15rem 0.5rem;
+}
+
+.card-signature-strip {
+  height: 28px;
+  background: #fff;
+  color: #111;
+  text-align: right;
+  padding-right: 10px;
+  font-family: monospace;
+  line-height: 28px;
+  font-style: italic;
+  font-size: 0.85rem;
+  border-radius: 4px;
+}
+
+/* Pantalla de Confirmación de Compra */
+.order-success-box {
+  text-align: center;
+  padding: 1.25rem 0.25rem;
+}
+
+.success-icon-badge {
+  width: 60px;
+  height: 60px;
+  background: hsla(85, 34%, 28%, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1rem;
+  color: var(--primary-green);
+  font-size: 2rem;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(77, 100, 51, 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(77, 100, 51, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(77, 100, 51, 0); }
+}
+
+.order-receipt-ticket {
+  background: var(--bg-cream);
+  border: 1px dashed rgba(44, 26, 14, 0.15);
+  border-radius: var(--radius-sm);
+  padding: 1.15rem;
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.receipt-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  margin-bottom: 0.4rem;
+}
+
+.receipt-row.total-row {
+  border-top: 1px solid rgba(44, 26, 14, 0.1);
+  padding-top: 0.5rem;
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--primary-green);
+}
+
+.qr-code-placeholder {
+  width: 90px;
+  height: 90px;
+  background: #fff;
+  border: 1px solid rgba(44, 26, 14, 0.1);
+  margin: 1rem auto 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem;
+  color: var(--text-muted);
+}
+
+/* Barra de Selección de Mascota en el Dashboard */
+.pet-selector-bar {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.25rem 0.15rem 0.75rem;
+  margin-bottom: 1rem;
+  align-items: center;
+  scrollbar-width: none;
+}
+
+.pet-selector-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.pet-selector-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(44, 26, 14, 0.15);
+  cursor: pointer;
+  transition: var(--transition);
+  opacity: 0.6;
+  flex-shrink: 0;
+}
+
+.pet-selector-avatar:hover {
+  opacity: 0.9;
+}
+
+.pet-selector-avatar.active {
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 2.5px var(--primary-green-light);
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+.pet-selector-add {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px dashed rgba(44, 26, 14, 0.3);
+  background: var(--bg-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: var(--text-muted);
+  flex-shrink: 0;
+  transition: var(--transition);
+}
+
+.pet-selector-add:hover {
+  border-color: var(--primary-green);
+  color: var(--primary-green);
+}
+
+.pet-profile-summary {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.pet-avatar-big {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--primary-green);
+  object-fit: cover;
+}
+
+.pet-meta-text h3 {
+  font-family: var(--font-header);
+  font-weight: 600;
+  font-size: 1.12rem;
+  color: var(--secondary-brown);
+}
+
+.pet-meta-text p {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.delivery-countdown {
+  background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+  color: #fff;
+  padding: 1.15rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 0.85rem;
+  text-align: center;
+}
+
+.delivery-countdown h4 {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.85;
+}
+
+.delivery-countdown .days {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0.2rem 0;
+}
+
+/* ==========================================================================
+   3. ESTILOS DEL PANEL DE MANTENEDORES (ADMIN)
+   ========================================================================== */
+.admin-dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 2rem;
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 2.5rem;
+}
+
+.admin-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.admin-menu-btn {
+  background: var(--bg-white);
+  border: 1px solid rgba(44, 26, 14, 0.08);
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.admin-menu-btn:hover {
+  background: rgba(44, 26, 14, 0.02);
+  color: var(--secondary-brown);
+}
+
+.admin-menu-btn.active {
+  background: var(--primary-green);
+  color: var(--bg-white);
+  border-color: var(--primary-green);
+  box-shadow: var(--shadow-sm);
+}
+
+.admin-content-card {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  padding: 2.5rem;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(44, 26, 14, 0.06);
+}
+
+.admin-view-panel {
+  display: none;
+  animation: fadeIn 0.3s ease-out;
+}
+
+.admin-view-panel.active {
+  display: block;
+}
+
+/* Tablas Administrativas */
+.admin-table-wrapper {
+  overflow-x: auto;
+  margin-top: 1.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(44, 26, 14, 0.08);
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.9rem;
+}
+
+.admin-table th {
+  background: var(--bg-cream);
+  padding: 1rem;
+  font-weight: 700;
+  color: var(--secondary-brown);
+  border-bottom: 1px solid rgba(44, 26, 14, 0.08);
+}
+
+.admin-table td {
+  padding: 1rem;
+  border-bottom: 1px solid rgba(44, 26, 14, 0.05);
+  vertical-align: middle;
+}
+
+.admin-table tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  padding: 0.25rem 0.6rem;
+  border-radius: 50px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.badge-success {
+  background: hsla(85, 34%, 28%, 0.1);
+  color: var(--primary-green);
+}
+
+.badge-info {
+  background: hsla(24, 38%, 13%, 0.1);
+  color: var(--secondary-brown);
+}
+
+.badge-danger {
+  background: hsla(1, 51%, 46%, 0.1);
+  color: var(--accent-red);
+}
+
+/* Modales e Interfaces de Edición Admin */
+.admin-actions-cell {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  font-size: 1.1rem;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.btn-edit {
+  color: var(--primary-green);
+}
+.btn-edit:hover {
+  background: hsla(85, 34%, 28%, 0.08);
+}
+
+.btn-delete {
+  color: var(--accent-red);
+}
+.btn-delete:hover {
+  background: hsla(1, 51%, 46%, 0.08);
+}
+
+/* Formulario inline para parámetros */
+.inline-form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+/* ==========================================================================
+   4. DISEÑO RESPONSIVO (PORTAL WEB)
+   ========================================================================= */
+@media (max-width: 1024px) {
+  .web-hero {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 3rem 1.5rem;
+    text-align: center;
+  }
+  .hero-content p {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  .hero-actions {
+    justify-content: center;
+  }
+  .diets-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .web-calc-container {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .admin-dashboard-container {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+  }
+  .view-tabs {
+    width: 100%;
+    justify-content: center;
+  }
+  .tab-btn {
+    padding: 0.5rem 0.8rem;
+    font-size: 0.8rem;
+  }
+  .hero-content h1 {
+    font-size: 2.8rem;
+  }
+}

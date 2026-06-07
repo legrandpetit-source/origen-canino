@@ -2124,12 +2124,17 @@ body {
   font-size: 32px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   z-index: 9999;
-  display: flex;
+  display: none; /* Oculto por defecto para no interferir en simulador móvil o admin */
   align-items: center;
   justify-content: center;
   text-decoration: none;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Mostrar únicamente cuando la vista del Sitio Web Desktop está activa */
+#view-web.active ~ .whatsapp-float-btn {
+  display: flex;
 }
 
 .whatsapp-float-btn:hover {

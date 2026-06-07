@@ -960,7 +960,8 @@ body {
 /* Carcasa del Teléfono (Smartphone Frame) - Adaptado a contenedor limpio en PC */
 .phone-mockup {
   width: 500px;
-  height: 780px;
+  height: 850px;
+  max-height: 90vh;
   background: transparent;
   border-radius: 0;
   padding: 0;

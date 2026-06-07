@@ -158,14 +158,17 @@ const DEFAULT_FAQS = [
 ];
 
 // Cargar estado inicial
+const savedTestimonials = JSON.parse(localStorage.getItem('oc_testimonials'));
+const savedFaqs = JSON.parse(localStorage.getItem('oc_faqs'));
+
 let appState = {
   recipes: JSON.parse(localStorage.getItem('oc_recipes')) || DEFAULT_RECIPES,
   snacks: JSON.parse(localStorage.getItem('oc_snacks')) || DEFAULT_SNACKS,
   params: JSON.parse(localStorage.getItem('oc_params')) || DEFAULT_PARAMS,
   orders: JSON.parse(localStorage.getItem('oc_orders')) || [],
   pets: JSON.parse(localStorage.getItem('oc_pets')) || [],
-  testimonials: JSON.parse(localStorage.getItem('oc_testimonials')) || DEFAULT_TESTIMONIALS,
-  faqs: JSON.parse(localStorage.getItem('oc_faqs')) || DEFAULT_FAQS,
+  testimonials: (savedTestimonials && savedTestimonials.length > 0) ? savedTestimonials : DEFAULT_TESTIMONIALS,
+  faqs: (savedFaqs && savedFaqs.length > 0) ? savedFaqs : DEFAULT_FAQS,
   
   currentPetId: null,
   activePetIdDashboard: null,
@@ -1723,4 +1726,9 @@ document.addEventListener('DOMContentLoaded', () => {
   renderWebTestimonials();
   renderWebFaqs();
   renderMobileWelcomeScreen();
+  
+  // Sincronizar de vuelta a localStorage si se aplicaron los valores por defecto (healing)
+  if (!savedTestimonials || savedTestimonials.length === 0 || !savedFaqs || savedFaqs.length === 0) {
+    saveStateToStorage();
+  }
 });

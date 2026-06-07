@@ -598,7 +598,191 @@ body {
   color: var(--primary-green);
 }
 
-/* Calculadora Rápida Web */
+/* ==========================================
+   ESTILOS DE TESTIMONIOS (INSPIRADO EN LEGRAND PETIT)
+   ========================================== */
+.web-testimonials {
+  padding: 6rem 2rem;
+  background: var(--bg-white);
+  border-bottom: 1px solid rgba(44, 26, 14, 0.08);
+}
+
+.testimonials-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.testimonial-card {
+  background: var(--bg-cream);
+  border: 1px solid rgba(44, 26, 14, 0.06);
+  padding: 2.5rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+  position: relative;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary-green-light);
+}
+
+.stars-rating {
+  color: #f39c12; /* Color dorado */
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+}
+
+.testimonial-quote {
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  font-style: italic;
+  margin-bottom: 2rem;
+}
+
+.testimonial-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(44, 26, 14, 0.08);
+}
+
+.testimonial-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1.5px solid var(--primary-green);
+  flex-shrink: 0;
+}
+
+.testimonial-author-name {
+  font-family: var(--font-header);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--secondary-brown);
+}
+
+.testimonial-location {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.testimonial-dog-tag {
+  font-size: 0.7rem;
+  color: var(--primary-green);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 2px;
+}
+
+.testimonial-dog-tag span {
+  font-style: italic;
+  text-transform: none;
+  font-weight: normal;
+}
+
+/* Botón flotante para crear testimonio */
+.add-testimonial-cta {
+  text-align: center;
+  margin-top: 3.5rem;
+}
+
+/* ==========================================
+   ESTILOS DE PREGUNTAS FRECUENTES (FAQS)
+   ========================================== */
+.web-faqs {
+  padding: 6rem 2rem;
+  background: var(--bg-cream);
+  border-bottom: 1px solid rgba(44, 26, 14, 0.08);
+}
+
+.faq-accordion {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item {
+  background: var(--bg-white);
+  border: 1px solid rgba(44, 26, 14, 0.06);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+.faq-item:hover {
+  border-color: var(--primary-green-light);
+  box-shadow: var(--shadow-sm);
+}
+
+.faq-question {
+  width: 100%;
+  background: none;
+  border: none;
+  font-family: var(--font-header);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--secondary-brown);
+  padding: 1.25rem 1.75rem;
+  text-align: left;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  outline: none;
+}
+
+.faq-chevron {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: var(--primary-green);
+  font-size: 1rem;
+}
+
+.faq-item.active {
+  border-color: var(--primary-green);
+}
+
+.faq-item.active .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  background: hsla(40, 24%, 96%, 0.3);
+}
+
+.faq-answer-content {
+  padding: 0 1.75rem 1.25rem;
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  border-top: 1px solid rgba(44, 26, 14, 0.04);
+  line-height: 1.6;
+}
+
+.faq-item.active .faq-answer {
+  max-height: 300px;
+}
+
+/* ==========================================
+   Calculadora Rápida Web
+   ========================================== */
 .web-calculator-section {
   background: var(--secondary-brown);
   color: var(--bg-cream);

@@ -127,6 +127,28 @@
         </div>
       </section>
 
+      <!-- Testimonios de Familias (Estilo Legrand Petit) -->
+      <section class="web-testimonials">
+        <div class="section-title">
+          <span>Testimonios</span>
+          <h2>Familias Origen Canino</h2>
+        </div>
+        <div class="testimonials-grid" id="web-testimonials-container">
+          <!-- Carga dinámica mediante JS -->
+        </div>
+      </section>
+
+      <!-- Preguntas Frecuentes (FAQs) -->
+      <section class="web-faqs">
+        <div class="section-title">
+          <span>Preguntas Frecuentes</span>
+          <h2>Dudas sobre Alimentación Natural</h2>
+        </div>
+        <div class="faq-accordion" id="web-faqs-container">
+          <!-- Carga dinámica mediante JS -->
+        </div>
+      </section>
+
       <!-- Calculadora Rápida Informativa -->
       <section class="web-calculator-section">
         <div class="web-calc-container">
@@ -661,6 +683,12 @@
           <button class="admin-menu-btn" onclick="switchAdminTab('orders')">
             <i class="fa-solid fa-receipt"></i> Suscripciones Activas
           </button>
+          <button class="admin-menu-btn" onclick="switchAdminTab('testimonials')">
+            <i class="fa-solid fa-comments"></i> Testimonios Familias
+          </button>
+          <button class="admin-menu-btn" onclick="switchAdminTab('faqs')">
+            <i class="fa-solid fa-circle-question"></i> Preguntas Frecuentes (FAQs)
+          </button>
         </aside>
 
         <!-- Contenido del Panel Admin -->
@@ -853,6 +881,132 @@
                   </tr>
                 </thead>
                 <tbody id="admin-orders-tbody">
+                  <!-- Carga dinámica -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PANEL D: GESTIÓN DE TESTIMONIOS -->
+          <div id="admin-panel-testimonials" class="admin-view-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+                Testimonios de Familias
+              </h2>
+              <button class="btn btn-primary" onclick="showAddTestimonialForm()">
+                <i class="fa-solid fa-plus"></i> Nuevo Testimonio
+              </button>
+            </div>
+
+            <!-- Formulario de agregar/editar testimonio -->
+            <div id="add-testimonial-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+              <h3 id="form-testimonial-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Testimonio</h3>
+              <input type="hidden" id="form-testimonial-id">
+              
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label for="form-testimonial-author" style="color: var(--text-dark);">Nombre del Autor</label>
+                  <input type="text" id="form-testimonial-author" class="form-input" required placeholder="Ej: Camila Rojas">
+                </div>
+                <div class="form-group">
+                  <label for="form-testimonial-location" style="color: var(--text-dark);">Ubicación</label>
+                  <input type="text" id="form-testimonial-location" class="form-input" required placeholder="Ej: Providencia">
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+                <div class="form-group">
+                  <label for="form-testimonial-dog" style="color: var(--text-dark);">Nombre de la Mascota</label>
+                  <input type="text" id="form-testimonial-dog" class="form-input" placeholder="Ej: Mateo">
+                </div>
+                <div class="form-group">
+                  <label for="form-testimonial-photo" style="color: var(--text-dark);">Avatar (URL de foto o Base64)</label>
+                  <input type="text" id="form-testimonial-photo" class="form-input" placeholder="Opcional. Por defecto usa logo.">
+                </div>
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="form-testimonial-quote" style="color: var(--text-dark);">Testimonio / Opinión</label>
+                <textarea id="form-testimonial-quote" class="form-input" style="height: 80px; resize: none;" required placeholder="Escribe aquí el testimonio de la familia..."></textarea>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="submitTestimonialForm()">
+                  Guardar Testimonio
+                </button>
+                <button class="btn btn-secondary" onclick="hideTestimonialForm()">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+
+            <!-- Tabla de Testimonios -->
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th>Autor</th>
+                    <th>Ubicación</th>
+                    <th>Mascota</th>
+                    <th>Opinión</th>
+                    <th>Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-testimonials-tbody">
+                  <!-- Carga dinámica -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- PANEL E: GESTIÓN DE FAQS -->
+          <div id="admin-panel-faqs" class="admin-view-panel">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+              <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+                Preguntas Frecuentes (FAQs)
+              </h2>
+              <button class="btn btn-primary" onclick="showAddFaqForm()">
+                <i class="fa-solid fa-plus"></i> Nueva FAQ
+              </button>
+            </div>
+
+            <!-- Formulario de agregar/editar FAQ -->
+            <div id="add-faq-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+              <h3 id="form-faq-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar FAQ</h3>
+              <input type="hidden" id="form-faq-id">
+              
+              <div class="form-group" style="margin-bottom: 1rem;">
+                <label for="form-faq-question" style="color: var(--text-dark);">Pregunta</label>
+                <input type="text" id="form-faq-question" class="form-input" required placeholder="Ej: ¿Es seguro dar huesos a mi perro?">
+              </div>
+
+              <div class="form-group" style="margin-bottom: 1.25rem;">
+                <label for="form-faq-answer" style="color: var(--text-dark);">Respuesta</label>
+                <textarea id="form-faq-answer" class="form-input" style="height: 100px; resize: none;" required placeholder="Escribe aquí la respuesta oficial..."></textarea>
+              </div>
+
+              <div style="display: flex; gap: 0.5rem;">
+                <button class="btn btn-primary" onclick="submitFaqForm()">
+                  Guardar FAQ
+                </button>
+                <button class="btn btn-secondary" onclick="hideFaqForm()">
+                  Cancelar
+                </button>
+              </div>
+            </div>
+
+            <!-- Tabla de FAQs -->
+            <div class="admin-table-wrapper">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th style="width: 250px;">Pregunta</th>
+                    <th>Respuesta Oficial</th>
+                    <th style="width: 100px;">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-faqs-tbody">
                   <!-- Carga dinámica -->
                 </tbody>
               </table>

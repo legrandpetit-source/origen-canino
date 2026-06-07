@@ -1,4 +1,4 @@
-// Lógica de Origen Canino Web & Mobile Suite (Actualizada con Soporte Multi-Mascota e Ingredientes Interactivos)
+// Lógica de Origen Canino Web & Mobile Suite (Actualizada con Soporte Multi-Mascota, Ingredientes Interactivos, Testimonios y FAQs)
 
 // ----------------------------------------------------
 // 1. BASE DE DATOS Y CONFIGURACIÓN INICIAL (LOCALSTORAGE)
@@ -90,34 +90,90 @@ const SUPERALIMENTOS = [
   { id: 'sup-curcuma', name: 'Cúrcuma & Pimienta', icon: '🟡', price: 1500 }
 ];
 
+// Testimonios Iniciales (Estilo Legrand Petit)
+const DEFAULT_TESTIMONIALS = [
+  { 
+    id: 't-1', 
+    author: 'Camila Rojas', 
+    location: 'Providencia', 
+    dog_name: 'Mateo', 
+    photo_url: 'assets/logo.jpg', 
+    quote: 'El cambio en Mateo fue increíble. Tenía alergias terribles en la piel y se rascaba todo el día. Desde el primer mes con BARF de Origen Canino, su piel está sana, el pelo brilla y sus digestiones son perfectas. ¡Una maravilla!' 
+  },
+  { 
+    id: 't-2', 
+    author: 'Andrés Valenzuela', 
+    location: 'Las Condes', 
+    dog_name: 'Rocky', 
+    photo_url: 'assets/logo.jpg', 
+    quote: 'Estaba escéptico sobre la comida cruda, pero ver a Rocky comer con tanta felicidad me convenció. La porción viene exacta en bolsas al vacío, lo que facilita todo. Sus dientes están impecables y tiene una energía increíble.' 
+  },
+  { 
+    id: 't-3', 
+    author: 'María José Castro', 
+    location: 'Viña del Mar', 
+    dog_name: 'Luna', 
+    photo_url: 'assets/logo.jpg', 
+    quote: 'Luna sufría de problemas estomacales constantes con el alimento seco. Cambiamos a las recetas cocinadas de Origen Canino y el cambio fue instantáneo. La comida huele delicioso y le encanta. El servicio de entrega mensual es puntual.' 
+  }
+];
+
+// 7 Preguntas Frecuentes Iniciales
+const DEFAULT_FAQS = [
+  { 
+    id: 'f-1', 
+    question: '¿Qué es la dieta BARF y cuáles son sus beneficios?', 
+    answer: 'La dieta BARF (Alimento Crudo Biológicamente Apropiado) consiste en alimentar a los perros con carne magra, huesos carnosos triturados, vísceras y vegetales crudos. Sus beneficios incluyen dientes limpios sin sarro, mejor aliento, digestiones más compactas y menos olorosas, pelaje brillante, mayor vitalidad y reducción drástica de alergias cutáneas.' 
+  },
+  { 
+    id: 'f-2', 
+    question: '¿Es seguro dar huesos a mi perro?', 
+    answer: 'Sí, siempre y cuando sean huesos carnosos crudos triturados o enteros (nunca cocidos, ya que la cocción los deshidrata y hace que se astillen). En Origen Canino trituramos finamente todos los huesos en nuestras fórmulas BARF para garantizar una seguridad del 100%, eliminando cualquier riesgo de atragantamiento o perforación.' 
+  },
+  { 
+    id: 'f-3', 
+    question: '¿Cuál es la diferencia entre la dieta BARF y la comida cocinada al vapor?', 
+    answer: 'La dieta BARF utiliza ingredientes 100% crudos para preservar todas las enzimas y bacterias benéficas intactas. La comida cocinada al vapor se cocina a baja temperatura para eliminar patógenos y facilitar la digestión, siendo ideal para perros senior, con estómagos sensibles o cuando los tutores prefieren no manipular carne cruda.' 
+  },
+  { 
+    id: 'f-4', 
+    question: '¿Cómo se realiza la transición de alimento seco (croquetas) a alimento natural?', 
+    answer: 'Recomendamos una transición gradual de 7 días. Los días 1 y 2, ofrece 75% de su alimento anterior y 25% del nuevo alimento natural (en platos separados, nunca mezclados en la misma porción). Los días 3 y 4, ofrece 50% y 50%. Los días 5 y 6, ofrece 75% de alimento natural y 25% anterior. El día 7, ya estará comiendo 100% Origen Canino.' 
+  },
+  { 
+    id: 'f-5', 
+    question: '¿Cómo se entregan y conservan las porciones mensuales?', 
+    answer: 'Entregamos el alimento en porciones diarias exactas envasadas al vacío y congeladas. Debes guardarlas en el congelador. Cada noche, saca la porción del día siguiente y déjala descongelar en el refrigerador. Al momento de servir, puedes entibiarla un poco (nunca usar microondas para la dieta BARF para no cocer los huesos triturados).' 
+  },
+  { 
+    id: 'f-6', 
+    question: '¿Puedo personalizar la comida si mi mascota tiene alergias o condiciones médicas?', 
+    answer: '¡Absolutamente! Utilizando nuestra App Móvil puedes crear el perfil de tu mascota e indicar qué ingredientes base deseas excluir (se tacharán de su receta) y qué superalimentos opcionales agregar (como chía o aceite de coco). Si tiene alguna condición médica compleja, puedes indicarlo en las observaciones y nuestro equipo formulará bajo supervisión veterinaria.' 
+  },
+  { 
+    id: 'f-7', 
+    question: '¿Cómo funciona la suscripción mensual y la forma de entrega?', 
+    answer: 'Al activar tu suscripción en la App Móvil con pago seguro, nuestro sistema programa la producción personalizada de tu mascota. Despachamos tus 30 porciones mensuales congeladas directamente a tu domicilio cada 30 días, asegurando que nunca te quedes sin comida. Puedes modificar, pausar o cancelar tu suscripción en cualquier momento.' 
+  }
+];
+
 // Cargar estado inicial
 let appState = {
   recipes: JSON.parse(localStorage.getItem('oc_recipes')) || DEFAULT_RECIPES,
   snacks: JSON.parse(localStorage.getItem('oc_snacks')) || DEFAULT_SNACKS,
   params: JSON.parse(localStorage.getItem('oc_params')) || DEFAULT_PARAMS,
   orders: JSON.parse(localStorage.getItem('oc_orders')) || [],
-  
-  // Soporte Multi-Mascota
   pets: JSON.parse(localStorage.getItem('oc_pets')) || [],
+  testimonials: JSON.parse(localStorage.getItem('oc_testimonials')) || DEFAULT_TESTIMONIALS,
+  faqs: JSON.parse(localStorage.getItem('oc_faqs')) || DEFAULT_FAQS,
+  
   currentPetId: null,
   activePetIdDashboard: null,
-  
   snacksCart: JSON.parse(localStorage.getItem('oc_snacks_cart')) || {},
   activeView: 'web',
   mobileView: 'welcome',
   adminTab: 'parameters'
 };
-
-// Migración de perfil antiguo si existe
-const oldProfile = JSON.parse(localStorage.getItem('oc_pet_profile'));
-if (oldProfile) {
-  oldProfile.id = 'pet_' + Date.now();
-  oldProfile.excludedIngredients = oldProfile.excludedIngredients || [];
-  oldProfile.addedSuperfoods = oldProfile.addedSuperfoods || [];
-  appState.pets.push(oldProfile);
-  localStorage.removeItem('oc_pet_profile');
-  saveStateToStorage();
-}
 
 // Guardar bases en localStorage
 function saveStateToStorage() {
@@ -127,13 +183,14 @@ function saveStateToStorage() {
   localStorage.setItem('oc_orders', JSON.stringify(appState.orders));
   localStorage.setItem('oc_pets', JSON.stringify(appState.pets));
   localStorage.setItem('oc_snacks_cart', JSON.stringify(appState.snacksCart));
+  localStorage.setItem('oc_testimonials', JSON.stringify(appState.testimonials));
+  localStorage.setItem('oc_faqs', JSON.stringify(appState.faqs));
 }
 
 // ----------------------------------------------------
 // 2. CONFIGURACIÓN DEL SISTEMA HORARIO Y NAVEGACIÓN
 // ----------------------------------------------------
 
-// Actualizar hora en el simulador móvil
 function updateSimulatedTime() {
   const timeEl = document.getElementById('simulated-time');
   if (timeEl) {
@@ -146,7 +203,6 @@ function updateSimulatedTime() {
 setInterval(updateSimulatedTime, 1000);
 updateSimulatedTime();
 
-// Cambio de vista general (Web, Mobile, Admin)
 window.switchView = function(viewName) {
   appState.activeView = viewName;
   
@@ -157,6 +213,8 @@ window.switchView = function(viewName) {
     document.querySelector('.tab-btn[onclick="switchView(\'web\')"]').classList.add('active');
     document.getElementById('view-web').classList.add('active');
     renderWebProducts();
+    renderWebTestimonials();
+    renderWebFaqs();
   } else if (viewName === 'mobile') {
     document.querySelector('.tab-btn[onclick="switchView(\'mobile\')"]').classList.add('active');
     document.getElementById('view-mobile').classList.add('active');
@@ -168,7 +226,6 @@ window.switchView = function(viewName) {
   }
 };
 
-// Cambio de pantalla dentro del simulador móvil
 window.changeMobileView = function(viewName) {
   appState.mobileView = viewName;
   
@@ -178,7 +235,6 @@ window.changeMobileView = function(viewName) {
   if (targetView) {
     targetView.classList.add('active');
     
-    // Ejecutar lógica especial según la pantalla que carga
     if (viewName === 'welcome') {
       renderMobileWelcomeScreen();
     } else if (viewName === 'calculator') {
@@ -195,7 +251,6 @@ window.changeMobileView = function(viewName) {
     }
   }
 
-  // Sincronizar barra de navegación móvil activa
   const navItems = document.querySelectorAll('#mobile-app-nav .nav-item');
   navItems.forEach(item => item.classList.remove('active'));
 
@@ -210,13 +265,11 @@ window.changeMobileView = function(viewName) {
   }
 };
 
-// Navegación por la barra inferior de la App móvil (con validaciones multi-mascota)
 window.navigateMobileNav = function(destination) {
   if (destination === 'profile') {
     if (appState.pets.length === 0) {
       initNewPetWizard();
     } else {
-      // Editar el último perro activo
       appState.currentPetId = appState.pets[appState.pets.length - 1].id;
       changeMobileView('calculator');
     }
@@ -228,7 +281,6 @@ window.navigateMobileNav = function(destination) {
       changeMobileView('snacks');
     }
   } else if (destination === 'dashboard') {
-    // Si hay mascotas pagadas, ir a dashboard. Si no, ir a checkout.
     const paidPets = appState.pets.filter(p => p.subscriptionPaid);
     if (paidPets.length > 0) {
       if (!appState.activePetIdDashboard) {
@@ -357,6 +409,82 @@ window.calculateWebPortion = function() {
   document.getElementById('web-calc-result').classList.add('active');
 };
 
+// Renderizar testimonios en el Sitio Web (Estilo Legrand Petit)
+function renderWebTestimonials() {
+  const container = document.getElementById('web-testimonials-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  appState.testimonials.forEach(t => {
+    const card = document.createElement('div');
+    card.className = 'testimonial-card';
+    
+    // Generar 5 estrellas
+    let starsHtml = '';
+    for(let i=0; i<5; i++) {
+      starsHtml += `<i class="fa-solid fa-star"></i>`;
+    }
+
+    card.innerHTML = `
+      <div>
+        <div class="stars-rating">${starsHtml}</div>
+        <p class="testimonial-quote">&ldquo;${t.quote}&rdquo;</p>
+      </div>
+      <div class="testimonial-user-info">
+        <img src="${t.photo_url || 'assets/logo.jpg'}" alt="${t.author}" class="testimonial-avatar">
+        <div>
+          <h4 class="testimonial-author-name">${t.author}</h4>
+          <span class="testimonial-location">${t.location}</span>
+          <div class="testimonial-dog-tag">Familia de <span>${t.dog_name}</span></div>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+// Renderizar FAQs (Acordeón Interactivo) en el Sitio Web
+function renderWebFaqs() {
+  const container = document.getElementById('web-faqs-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  appState.faqs.forEach(f => {
+    const item = document.createElement('div');
+    item.className = 'faq-item';
+    
+    item.innerHTML = `
+      <button class="faq-question" onclick="toggleFaqAccordion(this)">
+        ${f.question}
+        <i class="fa-solid fa-chevron-down faq-chevron"></i>
+      </button>
+      <div class="faq-answer">
+        <div class="faq-answer-content">
+          ${f.answer}
+        </div>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+
+// Toggle para expandir/colapsar acordeón FAQ
+window.toggleFaqAccordion = function(button) {
+  const item = button.parentElement;
+  const isActive = item.classList.contains('active');
+  
+  // Cerrar todos los demás items (comportamiento profesional)
+  document.querySelectorAll('.faq-item').forEach(i => {
+    i.classList.remove('active');
+  });
+
+  if (!isActive) {
+    item.classList.add('active');
+  }
+};
+
 // ----------------------------------------------------
 // 5. APP MÓVIL: FLUJO MULTI-MASCOTA (BIENVENIDA Y EDICIÓN)
 // ----------------------------------------------------
@@ -407,11 +535,9 @@ function renderMobileWelcomeScreen() {
   }
 }
 
-// Iniciar asistente para nueva mascota
 window.initNewPetWizard = function() {
   appState.currentPetId = 'pet_' + Date.now();
   
-  // Limpiar campos del wizard
   document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
   document.getElementById('pet-name').value = '';
   document.getElementById('pet-breed').value = '';
@@ -429,7 +555,6 @@ window.cancelPetWizard = function() {
   changeMobileView('welcome');
 };
 
-// Guardar Perfil y avanzar
 window.savePetProfileAndGoToCalculator = function() {
   const name = document.getElementById('pet-name').value.trim();
   const breed = document.getElementById('pet-breed').value.trim();
@@ -443,7 +568,6 @@ window.savePetProfileAndGoToCalculator = function() {
     return;
   }
 
-  // Buscar si ya existe la mascota para editarla, o añadirla
   let petIndex = appState.pets.findIndex(p => p.id === appState.currentPetId);
   const photo = petPhotoBase64 || (petIndex !== -1 ? appState.pets[petIndex].photo : 'assets/logo.jpg');
   
@@ -473,7 +597,6 @@ window.savePetProfileAndGoToCalculator = function() {
   changeMobileView('calculator');
 };
 
-// Simulación de Click en Input File
 window.triggerPhotoUpload = function() {
   document.getElementById('pet-photo-input').click();
 };
@@ -492,7 +615,7 @@ window.previewPetPhoto = function(event) {
 };
 
 // ----------------------------------------------------
-// 6. APP MÓVIL: CALCULADORA NUTRIONAL E INGREDIENTES INTERACTIVOS
+// 6. APP MÓVIL: CALCULADORA NUTRICIONAL E INGREDIENTES INTERACTIVOS
 // ----------------------------------------------------
 
 function renderMobileRecipeSelector() {
@@ -522,45 +645,39 @@ function selectRecipeMobile(recipeId) {
   if (!pet) return;
 
   pet.selectedRecipeId = recipeId;
-  pet.excludedIngredients = []; // Resetear exclusiones al cambiar receta
+  pet.excludedIngredients = [];
   
   saveStateToStorage();
   renderMobileRecipeSelector();
   updatePortionCalculatorUI();
 }
 
-// Actualizar los datos calculados en pantalla móvil
 function updatePortionCalculatorUI() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
 
-  // Autoseleccionar primera receta si no hay seleccionada
   if (!pet.selectedRecipeId && appState.recipes.length > 0) {
     pet.selectedRecipeId = appState.recipes[0].id;
   }
 
   const selectedRecipe = appState.recipes.find(r => r.id === pet.selectedRecipeId) || appState.recipes[0];
-  const dietType = selectedRecipe.category; // 'barf' o 'cooked'
+  const dietType = selectedRecipe.category;
 
-  // Asignar avatar e info
   document.getElementById('calc-pet-avatar').src = pet.photo;
   document.getElementById('calc-pet-name').textContent = pet.name;
   document.getElementById('calc-pet-details').textContent = `${pet.breed} • ${pet.weight} kg`;
   document.getElementById('custom-instructions').value = pet.customInstructions || '';
 
-  // Calcular porción
   const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType);
-  pet.portionResults = results; // Guardar resultados en objeto de mascota
+  pet.portionResults = results;
 
   document.getElementById('calc-daily-total').textContent = `${results.dailyGrams}g`;
   document.getElementById('calc-monthly-weight').textContent = results.monthlyKg;
   
-  // Explicación
   const descActivity = { sedentary: 'sedentario/senior', normal: 'actividad normal', active: 'activo', working: 'muy activo' };
   const descStage = { adult: 'mantenimiento adulto', puppy: 'crecimiento cachorro 2-4 meses', 'puppy-mid': 'crecimiento cachorro 4-6 meses', 'puppy-late': 'crecimiento cachorro 6-12 meses' };
   document.getElementById('calc-explanation').textContent = `Calculado al ${results.percentageUsed}% del peso corporal para ${descStage[pet.age]} con ${descActivity[pet.activity]}.`;
 
-  // Renderizar barras y leyenda
   const barWrapper = document.getElementById('calc-breakdown-bars');
   const legendWrapper = document.getElementById('calc-breakdown-legend');
   
@@ -602,11 +719,9 @@ function updatePortionCalculatorUI() {
     `;
   }
 
-  // Renderizar ingredientes base e interactivos
   renderInteractiveIngredients(pet, selectedRecipe);
 }
 
-// Cargar ingredientes de forma interactiva (Pills con checkboxes)
 function renderInteractiveIngredients(pet, recipe) {
   const ingContainer = document.getElementById('calc-ingredients-container');
   const supContainer = document.getElementById('calc-superfoods-container');
@@ -617,7 +732,6 @@ function renderInteractiveIngredients(pet, recipe) {
 
   const ingredients = recipe.ingredientsArray || recipe.ingredients.split(', ');
 
-  // Ingredientes base de la receta
   ingredients.forEach((ing, i) => {
     const isExcluded = pet.excludedIngredients.includes(ing);
     const checkboxId = `ing-${i}`;
@@ -633,7 +747,6 @@ function renderInteractiveIngredients(pet, recipe) {
     ingContainer.appendChild(wrapper.lastElementChild);
   });
 
-  // Superalimentos (opcionales)
   SUPERALIMENTOS.forEach((sup) => {
     const isAdded = pet.addedSuperfoods.includes(sup.id);
     const checkboxId = `sup-${sup.id}`;
@@ -649,14 +762,10 @@ function renderInteractiveIngredients(pet, recipe) {
     supContainer.appendChild(wrapper.lastElementChild);
   });
 
-  // Calcular precio final de la dieta de la mascota
   calculateSingleDietPrice(pet, recipe);
-  
-  // Renderizar etiqueta de empaque
   renderPackageLabelPreview(pet, recipe);
 }
 
-// Toggle de exclusión de ingredientes
 window.toggleIngredient = function(ingredientName, isChecked) {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
@@ -664,12 +773,10 @@ window.toggleIngredient = function(ingredientName, isChecked) {
   pet.excludedIngredients = pet.excludedIngredients || [];
 
   if (!isChecked) {
-    // Excluir ingrediente
     if (!pet.excludedIngredients.includes(ingredientName)) {
       pet.excludedIngredients.push(ingredientName);
     }
   } else {
-    // Volver a incluir
     pet.excludedIngredients = pet.excludedIngredients.filter(ing => ing !== ingredientName);
   }
 
@@ -677,7 +784,6 @@ window.toggleIngredient = function(ingredientName, isChecked) {
   updatePortionCalculatorUI();
 };
 
-// Toggle de superalimentos adicionales
 window.toggleSuperfood = function(superfoodId, isChecked) {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
@@ -696,25 +802,20 @@ window.toggleSuperfood = function(superfoodId, isChecked) {
   updatePortionCalculatorUI();
 };
 
-// Calcular costo mensual de la dieta de la mascota
 function calculateSingleDietPrice(pet, recipe) {
   const basePrice = recipe.price;
   const dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
-  
-  // Agregar costo extra de superalimentos
   const superfoodExtra = (pet.addedSuperfoods || []).length * 1500;
   pet.totalPrice = dietSubtotal + superfoodExtra;
 
   document.getElementById('calc-diet-price').textContent = `$${pet.totalPrice.toLocaleString('es-CL')}`;
 }
 
-// Renderizado de Etiqueta de Empaque
 function renderPackageLabelPreview(pet, recipe) {
   const container = document.getElementById('calc-package-label');
   if (!container) return;
 
   const exList = (pet.excludedIngredients || []).map(i => `<span style="text-decoration:line-through; opacity:0.6;">- ${i}</span>`).join('<br>');
-  
   const superList = (pet.addedSuperfoods || []).map(id => {
     const s = SUPERALIMENTOS.find(item => item.id === id);
     return s ? `+ ${s.icon} ${s.name}` : '';
@@ -741,7 +842,6 @@ function renderPackageLabelPreview(pet, recipe) {
   `;
 }
 
-// Confirmar dieta y avanzar
 window.proceedToSnacks = function() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (pet) {
@@ -805,7 +905,6 @@ let globalDietSubtotal = 0;
 let globalSnacksSubtotal = 0;
 
 function calculateSubscriptionTotals() {
-  // Sumar subtotal de todas las dietas de perros no pagados
   globalDietSubtotal = 0;
   const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
   
@@ -813,7 +912,6 @@ function calculateSubscriptionTotals() {
     globalDietSubtotal += p.totalPrice || 0;
   });
 
-  // Sumar snacks
   globalSnacksSubtotal = 0;
   for (const snackId in appState.snacksCart) {
     const snack = appState.snacks.find(s => s.id === snackId);
@@ -846,7 +944,6 @@ window.proceedToCheckout = function() {
 function setupCheckoutUI() {
   document.getElementById('checkout-total-val').textContent = `$${globalCartTotal.toLocaleString('es-CL')}`;
   
-  // Renderizar desglose de perros en Checkout
   const listContainer = document.getElementById('checkout-pets-list');
   if (listContainer) {
     listContainer.innerHTML = '';
@@ -867,7 +964,6 @@ function setupCheckoutUI() {
       listContainer.appendChild(row);
     });
 
-    // Agregar snacks al desglose
     for (const snackId in appState.snacksCart) {
       const snack = appState.snacks.find(s => s.id === snackId);
       const qty = appState.snacksCart[snackId];
@@ -883,7 +979,6 @@ function setupCheckoutUI() {
     }
   }
 
-  // Limpiar campos de tarjeta
   document.getElementById('pay-cardholder').value = '';
   document.getElementById('pay-cardnumber').value = '';
   document.getElementById('pay-expiry').value = '';
@@ -931,7 +1026,6 @@ window.updateCardPreview = function(field, value) {
   }
 };
 
-// Procesar el pago y activar las suscripciones de los perros
 window.processSecurePayment = function() {
   const holder = document.getElementById('pay-cardholder').value.trim();
   const num = document.getElementById('pay-cardnumber').value.trim();
@@ -956,18 +1050,15 @@ window.processSecurePayment = function() {
   setTimeout(() => {
     const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
     
-    // Marcar perros como pagados
     unpaidPets.forEach(p => {
       p.subscriptionPaid = true;
       p.address = address;
     });
 
-    // Guardar orden global
     const orderId = `OC-${Math.floor(1000 + Math.random() * 9000)}`;
     const petNames = unpaidPets.map(p => p.name).join(', ');
     const petDetails = unpaidPets.map(p => `${p.name} (${p.weight}kg, ${p.breed})`).join(' | ');
 
-    // Detalle de recetas
     const recipeSummary = unpaidPets.map(p => {
       const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
       const superLabels = (p.addedSuperfoods || []).map(id => SUPERALIMENTOS.find(s => s.id === id)?.name || id).join(', ');
@@ -975,7 +1066,6 @@ window.processSecurePayment = function() {
       return `${p.name}: ${rec?.name || 'Receta'}${supText}`;
     }).join('; ');
 
-    // Detalle de snacks
     const snacksArr = [];
     for (const snackId in appState.snacksCart) {
       const snack = appState.snacks.find(s => s.id === snackId);
@@ -993,7 +1083,7 @@ window.processSecurePayment = function() {
       petName: petNames,
       petBreed: petDetails,
       petWeight: unpaidPets.reduce((acc, p) => acc + p.weight, 0),
-      petPhoto: unpaidPets[0]?.photo || 'assets/logo.jpg', // Foto de la primera mascota en la orden
+      petPhoto: unpaidPets[0]?.photo || 'assets/logo.jpg',
       recipeName: recipeSummary,
       dailyGrams: dailyGramsTotal,
       monthlyKg: monthlyKgTotal,
@@ -1005,12 +1095,10 @@ window.processSecurePayment = function() {
 
     appState.orders.push(newOrder);
     
-    // Guardar la primera mascota pagada como activa en el dashboard por defecto
     if (unpaidPets.length > 0) {
       appState.activePetIdDashboard = unpaidPets[0].id;
     }
 
-    // Vaciar carrito de snacks
     appState.snacksCart = {};
 
     saveStateToStorage();
@@ -1030,7 +1118,6 @@ function setupReceiptUI() {
   const container = document.getElementById('receipt-details-container');
   if (!container) return;
 
-  // Cargar los últimos perros pagados
   const paidPets = appState.pets.filter(p => p.subscriptionPaid);
   
   let petRows = paidPets.map(p => {
@@ -1064,12 +1151,10 @@ function renderPetDashboard() {
     return;
   }
 
-  // Renderizar la barra selectora horizontal de avatares de perros
   const selector = document.getElementById('dash-pet-selector');
   if (selector) {
     selector.innerHTML = '';
     
-    // Añadir avatares
     paidPets.forEach(p => {
       const img = document.createElement('img');
       img.src = p.photo;
@@ -1082,7 +1167,6 @@ function renderPetDashboard() {
       selector.appendChild(img);
     });
 
-    // Botón de agregar mascota directa en el slider
     const addBtn = document.createElement('button');
     addBtn.className = 'pet-selector-add';
     addBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
@@ -1090,11 +1174,9 @@ function renderPetDashboard() {
     selector.appendChild(addBtn);
   }
 
-  // Obtener la mascota activa en pantalla
   const activePet = paidPets.find(p => p.id === appState.activePetIdDashboard) || paidPets[0];
   appState.activePetIdDashboard = activePet.id;
 
-  // Llenar datos de la mascota activa
   document.getElementById('dash-pet-avatar').src = activePet.photo;
   document.getElementById('dash-pet-name').textContent = activePet.name;
   document.getElementById('dash-pet-details').textContent = `${activePet.breed} • ${activePet.weight} kg`;
@@ -1104,7 +1186,6 @@ function renderPetDashboard() {
   document.getElementById('dash-daily-portion').textContent = `${activePet.portionResults.dailyGrams} g / día`;
   document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')}`;
 
-  // Guía de porciones de la mascota activa
   const guideWrapper = document.getElementById('dash-feeding-guide');
   const results = activePet.portionResults;
   
@@ -1139,7 +1220,6 @@ function renderPetDashboard() {
   }
 }
 
-// Modificar plan de mascota activa
 window.editCurrentPlanFromDashboard = function() {
   appState.currentPetId = appState.activePetIdDashboard;
   changeMobileView('calculator');
@@ -1180,6 +1260,8 @@ function initAdminPanel() {
 
   renderAdminProductsTable();
   renderAdminOrdersTable();
+  renderAdminTestimonialsTable();
+  renderAdminFaqsTable();
 }
 
 window.switchAdminTab = function(tabName) {
@@ -1188,17 +1270,20 @@ window.switchAdminTab = function(tabName) {
   document.querySelectorAll('.admin-menu-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.admin-view-panel').forEach(panel => panel.classList.remove('active'));
   
-  if (tabName === 'parameters') {
-    document.querySelector('.admin-menu-btn[onclick="switchAdminTab(\'parameters\')"]').classList.add('active');
-    document.getElementById('admin-panel-parameters').classList.add('active');
-  } else if (tabName === 'recipes') {
-    document.querySelector('.admin-menu-btn[onclick="switchAdminTab(\'recipes\')"]').classList.add('active');
-    document.getElementById('admin-panel-recipes').classList.add('active');
+  const activeBtn = document.querySelector(`.admin-menu-btn[onclick="switchAdminTab('${tabName}')"]`);
+  if (activeBtn) activeBtn.classList.add('active');
+
+  const activePanel = document.getElementById(`admin-panel-${tabName}`);
+  if (activePanel) activePanel.classList.add('active');
+
+  if (tabName === 'recipes') {
     renderAdminProductsTable();
   } else if (tabName === 'orders') {
-    document.querySelector('.admin-menu-btn[onclick="switchAdminTab(\'orders\')"]').classList.add('active');
-    document.getElementById('admin-panel-orders').classList.add('active');
     renderAdminOrdersTable();
+  } else if (tabName === 'testimonials') {
+    renderAdminTestimonialsTable();
+  } else if (tabName === 'faqs') {
+    renderAdminFaqsTable();
   }
 };
 
@@ -1398,9 +1483,195 @@ function renderAdminOrdersTable() {
 }
 
 // ----------------------------------------------------
+// 10.1 MANTENEDOR DE TESTIMONIOS (CRUD)
+// ----------------------------------------------------
+
+function renderAdminTestimonialsTable() {
+  const tbody = document.getElementById('admin-testimonials-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  appState.testimonials.forEach(t => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="text-align: center;">
+        <img src="${t.photo_url || 'assets/logo.jpg'}" alt="${t.author}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--primary-green);">
+      </td>
+      <td style="font-weight: 600; color: var(--secondary-brown);">${t.author}</td>
+      <td>${t.location}</td>
+      <td style="font-weight: 500;">${t.dog_name}</td>
+      <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        ${t.quote}
+      </td>
+      <td class="admin-actions-cell">
+        <button class="btn-icon btn-edit" onclick="editTestimonialInAdmin('${t.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-icon btn-delete" onclick="deleteTestimonialInAdmin('${t.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.showAddTestimonialForm = function() {
+  document.getElementById('add-testimonial-form-container').style.display = 'block';
+  document.getElementById('form-testimonial-title').textContent = 'Agregar Testimonio';
+  document.getElementById('form-testimonial-id').value = '';
+  document.getElementById('form-testimonial-author').value = '';
+  document.getElementById('form-testimonial-location').value = '';
+  document.getElementById('form-testimonial-dog').value = '';
+  document.getElementById('form-testimonial-photo').value = '';
+  document.getElementById('form-testimonial-quote').value = '';
+};
+
+window.hideTestimonialForm = function() {
+  document.getElementById('add-testimonial-form-container').style.display = 'none';
+};
+
+window.editTestimonialInAdmin = function(id) {
+  const t = appState.testimonials.find(item => item.id === id);
+  if (!t) return;
+
+  document.getElementById('add-testimonial-form-container').style.display = 'block';
+  document.getElementById('form-testimonial-title').textContent = `Editar Testimonio de ${t.author}`;
+  document.getElementById('form-testimonial-id').value = t.id;
+  document.getElementById('form-testimonial-author').value = t.author;
+  document.getElementById('form-testimonial-location').value = t.location;
+  document.getElementById('form-testimonial-dog').value = t.dog_name;
+  document.getElementById('form-testimonial-photo').value = t.photo_url || '';
+  document.getElementById('form-testimonial-quote').value = t.quote;
+};
+
+window.submitTestimonialForm = function() {
+  const id = document.getElementById('form-testimonial-id').value;
+  const author = document.getElementById('form-testimonial-author').value.trim();
+  const location = document.getElementById('form-testimonial-location').value.trim();
+  const dog_name = document.getElementById('form-testimonial-dog').value.trim() || 'Mascota';
+  const photo_url = document.getElementById('form-testimonial-photo').value.trim() || 'assets/logo.jpg';
+  const quote = document.getElementById('form-testimonial-quote').value.trim();
+
+  if (!author || !location || !quote) {
+    alert('Ingresa el Nombre del Autor, la Ubicación y la Opinión.');
+    return;
+  }
+
+  if (id) {
+    const idx = appState.testimonials.findIndex(item => item.id === id);
+    if (idx !== -1) {
+      appState.testimonials[idx] = { id, author, location, dog_name, photo_url, quote };
+    }
+  } else {
+    const newId = 't-' + Math.floor(1000 + Math.random() * 9000);
+    appState.testimonials.push({ id: newId, author, location, dog_name, photo_url, quote });
+  }
+
+  saveStateToStorage();
+  hideTestimonialForm();
+  renderAdminTestimonialsTable();
+  renderWebTestimonials();
+  alert('¡Testimonio guardado exitosamente!');
+};
+
+window.deleteTestimonialInAdmin = function(id) {
+  if (confirm('¿Seguro que deseas eliminar este testimonio de la web?')) {
+    appState.testimonials = appState.testimonials.filter(item => item.id !== id);
+    saveStateToStorage();
+    renderAdminTestimonialsTable();
+    renderWebTestimonials();
+  }
+};
+
+// ----------------------------------------------------
+// 10.2 MANTENEDOR DE FAQS (CRUD)
+// ----------------------------------------------------
+
+function renderAdminFaqsTable() {
+  const tbody = document.getElementById('admin-faqs-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  appState.faqs.forEach(f => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight: 700; color: var(--secondary-brown); font-size: 0.88rem;">${f.question}</td>
+      <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 450px; overflow: hidden; text-overflow: ellipsis;">
+        ${f.answer}
+      </td>
+      <td class="admin-actions-cell">
+        <button class="btn-icon btn-edit" onclick="editFaqInAdmin('${f.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-icon btn-delete" onclick="deleteFaqInAdmin('${f.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.showAddFaqForm = function() {
+  document.getElementById('add-faq-form-container').style.display = 'block';
+  document.getElementById('form-faq-title').textContent = 'Agregar FAQ';
+  document.getElementById('form-faq-id').value = '';
+  document.getElementById('form-faq-question').value = '';
+  document.getElementById('form-faq-answer').value = '';
+};
+
+window.hideFaqForm = function() {
+  document.getElementById('add-faq-form-container').style.display = 'none';
+};
+
+window.editFaqInAdmin = function(id) {
+  const f = appState.faqs.find(item => item.id === id);
+  if (!f) return;
+
+  document.getElementById('add-faq-form-container').style.display = 'block';
+  document.getElementById('form-faq-title').textContent = `Editar FAQ`;
+  document.getElementById('form-faq-id').value = f.id;
+  document.getElementById('form-faq-question').value = f.question;
+  document.getElementById('form-faq-answer').value = f.answer;
+};
+
+window.submitFaqForm = function() {
+  const id = document.getElementById('form-faq-id').value;
+  const question = document.getElementById('form-faq-question').value.trim();
+  const answer = document.getElementById('form-faq-answer').value.trim();
+
+  if (!question || !answer) {
+    alert('Ingresa tanto la pregunta como su respuesta.');
+    return;
+  }
+
+  if (id) {
+    const idx = appState.faqs.findIndex(item => item.id === id);
+    if (idx !== -1) {
+      appState.faqs[idx] = { id, question, answer };
+    }
+  } else {
+    const newId = 'f-' + Math.floor(1000 + Math.random() * 9000);
+    appState.faqs.push({ id: newId, question, answer });
+  }
+
+  saveStateToStorage();
+  hideFaqForm();
+  renderAdminFaqsTable();
+  renderWebFaqs();
+  alert('¡FAQ guardada exitosamente!');
+};
+
+window.deleteFaqInAdmin = function(id) {
+  if (confirm('¿Seguro que deseas eliminar esta FAQ del sitio?')) {
+    appState.faqs = appState.faqs.filter(item => item.id !== id);
+    saveStateToStorage();
+    renderAdminFaqsTable();
+    renderWebFaqs();
+  }
+};
+
+// ----------------------------------------------------
 // 11. INICIALIZACIÓN DE LA APLICACIÓN
 // ----------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
   renderWebProducts();
+  renderWebTestimonials();
+  renderWebFaqs();
   renderMobileWelcomeScreen();
 });

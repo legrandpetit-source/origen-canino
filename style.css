@@ -2719,6 +2719,10 @@ body:not(.mobile-native-mode) .pc-columns-wrapper {
   width: 100%;
 }
 
+body:not(.mobile-native-mode) #mobile-profile-setup .pc-columns-wrapper {
+  align-items: stretch !important;
+}
+
 body:not(.mobile-native-mode) .pc-column {
   display: flex !important;
   flex-direction: column !important;
@@ -2733,13 +2737,7 @@ body:not(.mobile-native-mode) .mobile-snacks-list {
   gap: 0.75rem;
 }
 
-/* Form layout side-by-side within card */
-body:not(.mobile-native-mode) #mobile-profile-setup .mobile-card {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  align-items: start;
-}
+
 
 /* Welcome and success receipt centered constraints */
 body:not(.mobile-native-mode) .mobile-welcome-screen,

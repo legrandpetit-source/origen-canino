@@ -1448,9 +1448,40 @@ window.startOrderFlow = function() {
   }
 };
 
-// Controladores del Asistente Desktop (Wizard)
-window.openDesktopWizard = function() {
-  dkWizardCurrentStep = 1;
+window.selectExistingDkPet = function(p) {
+  dkPet = {
+    ...p
+  };
+  
+  document.getElementById('dk-pet-name').value = p.name || '';
+  document.getElementById('dk-pet-breed').value = p.breed || '';
+  document.getElementById('dk-pet-weight').value = p.weight || '';
+  document.getElementById('dk-pet-age').value = p.age || 'adult';
+  document.getElementById('dk-pet-activity').value = p.activity || 'normal';
+  document.getElementById('dk-pet-notes').value = p.notes || '';
+  
+  if (p.photo && p.photo !== 'assets/logo.jpg') {
+    document.getElementById('dk-pet-photo-preview').innerHTML = `<img src="${p.photo}" alt="Foto Mascota" style="width:100%; height:100%; object-fit:cover;">`;
+    dkPetPhotoBase64 = p.photo;
+  } else {
+    document.getElementById('dk-pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera" style="font-size:1.2rem; margin-bottom:4px;"></i><span>Subir Foto</span>`;
+    dkPetPhotoBase64 = null;
+  }
+
+  document.querySelectorAll('.dk-pet-badge-btn').forEach(btn => {
+    btn.classList.remove('active-badge');
+    btn.style.borderColor = 'rgba(44,26,14,0.15)';
+    btn.style.background = '#fff';
+  });
+  const activeBtn = document.getElementById(`dk-pet-badge-${p.id}`);
+  if (activeBtn) {
+    activeBtn.classList.add('active-badge');
+    activeBtn.style.borderColor = 'var(--primary-green)';
+    activeBtn.style.background = 'rgba(85,114,46,0.08)';
+  }
+};
+
+window.resetDkPetForm = function() {
   dkPet = {
     id: 'pet_' + Date.now(),
     name: '',
@@ -1466,10 +1497,8 @@ window.openDesktopWizard = function() {
     customInstructions: '',
     address: ''
   };
-  dkSnacksCart = {};
   dkPetPhotoBase64 = null;
   
-  // Limpiar inputs
   document.getElementById('dk-pet-name').value = '';
   document.getElementById('dk-pet-breed').value = '';
   document.getElementById('dk-pet-weight').value = '';
@@ -1477,6 +1506,96 @@ window.openDesktopWizard = function() {
   document.getElementById('dk-pet-activity').value = 'normal';
   document.getElementById('dk-pet-notes').value = '';
   document.getElementById('dk-pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera" style="font-size:1.2rem; margin-bottom:4px;"></i><span>Subir Foto</span>`;
+
+  document.querySelectorAll('.dk-pet-badge-btn').forEach(btn => {
+    btn.classList.remove('active-badge');
+    btn.style.borderColor = 'rgba(44,26,14,0.15)';
+    btn.style.background = '#fff';
+  });
+  const newBtn = document.getElementById('dk-pet-badge-new');
+  if (newBtn) {
+    newBtn.classList.add('active-badge');
+    newBtn.style.borderColor = 'var(--primary-green)';
+    newBtn.style.background = 'rgba(85,114,46,0.08)';
+  }
+};
+
+// Controladores del Asistente Desktop (Wizard)
+window.openDesktopWizard = function() {
+  dkWizardCurrentStep = 1;
+  dkSnacksCart = {};
+  dkPetPhotoBase64 = null;
+  
+  // Render selector if we have pets
+  const selectorSec = document.getElementById('dk-pet-selector-section');
+  const list = document.getElementById('dk-existing-pets-list');
+  
+  if (selectorSec && list) {
+    if (appState.pets.length > 0) {
+      selectorSec.style.display = 'block';
+      list.innerHTML = '';
+      
+      appState.pets.forEach(p => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.id = `dk-pet-badge-${p.id}`;
+        btn.className = 'btn btn-secondary dk-pet-badge-btn';
+        btn.style.display = 'flex';
+        btn.style.alignItems = 'center';
+        btn.style.gap = '0.5rem';
+        btn.style.padding = '0.5rem 1rem';
+        btn.style.fontSize = '0.8rem';
+        btn.style.background = '#fff';
+        btn.style.border = '2px solid rgba(44,26,14,0.15)';
+        btn.style.borderRadius = 'var(--radius-md)';
+        btn.style.cursor = 'pointer';
+        btn.style.transition = 'all 0.2s';
+        btn.onclick = () => selectExistingDkPet(p);
+        
+        const statusText = p.subscriptionPaid 
+          ? `<span class="badge badge-success" style="font-size:0.6rem; padding: 2px 4px;"><i class="fa-solid fa-circle-check"></i> Activo</span>`
+          : `<span class="badge badge-danger" style="font-size:0.6rem; padding: 2px 4px;">Pendiente</span>`;
+        
+        btn.innerHTML = `
+          <img src="${p.photo || 'assets/logo.jpg'}" style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+          <span style="font-weight:700;">${p.name}</span>
+          ${statusText}
+        `;
+        list.appendChild(btn);
+      });
+      
+      const newBtn = document.createElement('button');
+      newBtn.type = 'button';
+      newBtn.id = 'dk-pet-badge-new';
+      newBtn.className = 'btn btn-secondary dk-pet-badge-btn';
+      newBtn.style.display = 'flex';
+      newBtn.style.alignItems = 'center';
+      newBtn.style.gap = '0.5rem';
+      newBtn.style.padding = '0.5rem 1rem';
+      newBtn.style.fontSize = '0.8rem';
+      newBtn.style.background = '#fff';
+      newBtn.style.border = '2px solid rgba(44,26,14,0.15)';
+      newBtn.style.borderRadius = 'var(--radius-md)';
+      newBtn.style.cursor = 'pointer';
+      newBtn.style.transition = 'all 0.2s';
+      newBtn.onclick = () => resetDkPetForm();
+      newBtn.innerHTML = `<i class="fa-solid fa-plus"></i> Nueva Mascota`;
+      list.appendChild(newBtn);
+      
+      // Auto select first pending or first pet
+      const unpaid = appState.pets.find(p => !p.subscriptionPaid);
+      if (unpaid) {
+        selectExistingDkPet(unpaid);
+      } else {
+        selectExistingDkPet(appState.pets[0]);
+      }
+    } else {
+      selectorSec.style.display = 'none';
+      resetDkPetForm();
+    }
+  } else {
+    resetDkPetForm();
+  }
   
   const modal = document.getElementById('desktop-purchase-modal');
   if (modal) {

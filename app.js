@@ -434,7 +434,7 @@ function calculatePortion(weight, stage, activity, dietType) {
   }
 
   const dailyGrams = Math.round(weight * (percentage / 100) * 1000);
-  const monthlyKg = parseFloat(((dailyGrams * 30) / 1000).toFixed(1));
+  const monthlyKg = Math.ceil((dailyGrams * 30) / 1000);
   
   return {
     dailyGrams,
@@ -988,6 +988,7 @@ function renderPackageLabelPreview(pet, recipe) {
     <div class="label-row"><span>PESO:</span><span>${pet.weight} KG</span></div>
     <div class="label-row"><span>TIPO DE DIETA:</span><span>${recipe.name.toUpperCase()}</span></div>
     <div class="label-row"><span>DOSIS DIARIA:</span><strong>${pet.portionResults.dailyGrams} G</strong></div>
+    <div class="label-row"><span>FORMATO ENVÍO:</span><strong>PORCIONES DE 1 KG</strong></div>
     <div style="border-top:1px dashed rgba(44,26,14,0.15); margin: 0.5rem 0; padding-top: 0.5rem;">
       <strong>EXCLUSIONES DE ALERGIAS:</strong><br>
       ${exList || '<span style="opacity:0.6;">NINGUNA</span>'}

@@ -1224,12 +1224,18 @@ window.processSecurePayment = async function() {
   const num = document.getElementById('pay-cardnumber').value.trim();
   const expiry = document.getElementById('pay-expiry').value.trim();
   const cvv = document.getElementById('pay-cvv').value.trim();
-  const address = document.getElementById('pay-address').value.trim();
+  
+  const recipient = document.getElementById('pay-recipient-name').value.trim();
+  const phone = document.getElementById('pay-phone').value.trim();
+  const addressVal = document.getElementById('pay-address').value.trim();
+  const deliveryBlock = document.getElementById('pay-delivery-block').value;
 
-  if (!holder || !num || !expiry || !cvv || !address) {
-    alert('Ingresa todos los campos requeridos para el pago seguro.');
+  if (!holder || !num || !expiry || !cvv || !recipient || !phone || !addressVal) {
+    alert('Ingresa todos los campos requeridos para el pago seguro y el despacho.');
     return;
   }
+
+  const address = `${recipient} | Tel: ${phone} | Dir: ${addressVal} | Horario: ${deliveryBlock}`;
 
   if (num.replace(/\s/g, '').length < 16) {
     alert('El número de tarjeta de crédito es incorrecto.');
@@ -1324,12 +1330,44 @@ function setupReceiptUI() {
     return `<div class="receipt-row"><span>${p.name}:</span><strong>${rec.name} (${p.portionResults?.monthlyKg} kg)</strong></div>`;
   }).join('');
 
+  const firstPet = paidPets[0];
+  let shippingHtml = '';
+  if (firstPet && firstPet.address) {
+    const parts = firstPet.address.split(' | ');
+    if (parts.length === 4) {
+      const recipient = parts[0];
+      const phone = parts[1].replace('Tel: ', '');
+      const addressVal = parts[2].replace('Dir: ', '');
+      const blockVal = parts[3].replace('Horario: ', '');
+      
+      const blockTranslation = { morning: 'Mañana (09:00 - 13:00)', midday: 'Medio día (13:00 - 17:00)', afternoon: 'Tarde (17:00 - 21:00)' };
+      const blockText = blockTranslation[blockVal] || blockVal;
+
+      shippingHtml = `
+        <div style="border-top: 1px dashed rgba(44,26,14,0.15); margin: 0.75rem 0; padding-top: 0.75rem; font-size: 0.75rem; color: var(--secondary-brown);">
+          <strong style="display:block; margin-bottom: 0.25rem;">Datos de Despacho:</strong>
+          <div><strong>Destinatario:</strong> ${recipient}</div>
+          <div><strong>Teléfono:</strong> ${phone}</div>
+          <div><strong>Dirección:</strong> ${addressVal}</div>
+          <div><strong>Horario de Entrega:</strong> ${blockText}</div>
+        </div>
+      `;
+    } else {
+      shippingHtml = `
+        <div style="border-top: 1px dashed rgba(44,26,14,0.15); margin: 0.75rem 0; padding-top: 0.75rem; font-size: 0.75rem; color: var(--secondary-brown);">
+          <strong>Despacho:</strong> ${firstPet.address}
+        </div>
+      `;
+    }
+  }
+
   container.innerHTML = `
     ${petRows}
     <div class="receipt-row">
       <span>Frecuencia de Despacho:</span>
       <span>Mensual (Cada 30 días)</span>
     </div>
+    ${shippingHtml}
     <div class="receipt-row total-row">
       <span>Monto Total Cobrado:</span>
       <span style="font-size:1.15rem;">$${globalCartTotal.toLocaleString('es-CL')}</span>

@@ -548,9 +548,30 @@
                           <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
                         </div>
                       </div>
+                      <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--secondary-brown); margin: 1rem 0 0.5rem 0; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 1rem;">
+                        Información de Despacho
+                      </h4>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div class="mobile-input-group">
+                          <label for="pay-recipient-name">Nombre de quien recibe</label>
+                          <input type="text" id="pay-recipient-name" class="mobile-input" placeholder="Ej: Patricio Silva">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-phone">Teléfono de Contacto</label>
+                          <input type="tel" id="pay-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
+                        </div>
+                      </div>
                       <div class="mobile-input-group">
                         <label for="pay-address">Dirección de Entrega</label>
                         <input type="text" id="pay-address" class="mobile-input" placeholder="Av. Principal 1234, Santiago">
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pay-delivery-block">Horario de Entrega Preferido</label>
+                        <select id="pay-delivery-block" class="mobile-select">
+                          <option value="morning">Mañana (09:00 - 13:00)</option>
+                          <option value="midday" selected>Medio día (13:00 - 17:00)</option>
+                          <option value="afternoon">Tarde (17:00 - 21:00)</option>
+                        </select>
                       </div>
 
                       <div class="receipt-row" style="font-weight: 700; font-size: 1.1rem; color: var(--primary-green); margin: 0.5rem 0 1rem 0;">

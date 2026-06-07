@@ -1379,8 +1379,9 @@ function renderPetDashboard() {
 
 window.editCurrentPlanFromDashboard = function() {
   appState.currentPetId = appState.activePetIdDashboard;
-  changeMobileView('calculator');
 };
+
+window.logoutApp = function() {
   if (confirm('¿Deseas cerrar sesión? Se borrarán las mascotas del dispositivo local.')) {
     appState.pets = [];
     appState.currentPetId = null;

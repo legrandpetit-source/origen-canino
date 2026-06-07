@@ -331,6 +331,7 @@ window.switchView = function(viewName) {
       document.getElementById('admin-login-box').style.display = 'flex';
       document.getElementById('admin-dashboard-wrapper').style.display = 'none';
     }
+  }
 };
 
 window.changeMobileView = function(viewName) {

@@ -322,14 +322,34 @@ body {
 }
 
 .hero-badge.badge-1 {
-  top: 10%;
-  left: -5%;
+  top: 2%;
+  left: -20%;
 }
 
 .hero-badge.badge-2 {
-  bottom: 15%;
-  right: -5%;
+  bottom: 6%;
+  right: -20%;
   animation-delay: 2s;
+}
+
+@media (max-width: 1200px) {
+  .hero-badge.badge-1 {
+    left: -12%;
+  }
+  .hero-badge.badge-2 {
+    right: -12%;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-badge.badge-1 {
+    top: -8%;
+    left: 2%;
+  }
+  .hero-badge.badge-2 {
+    bottom: -8%;
+    right: 2%;
+  }
 }
 
 @keyframes float {

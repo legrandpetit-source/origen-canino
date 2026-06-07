@@ -1681,6 +1681,7 @@ window.deleteFaqInAdmin = function(id) {
     renderAdminFaqsTable();
     renderWebFaqs();
   }
+};
 // ----------------------------------------------------
 // 10.3 PORTAL PPV SOLUCIONES INFORMÁTICAS (MODAL)
 // ----------------------------------------------------

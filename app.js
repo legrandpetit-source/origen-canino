@@ -1664,6 +1664,55 @@ window.deleteFaqInAdmin = function(id) {
     renderAdminFaqsTable();
     renderWebFaqs();
   }
+// ----------------------------------------------------
+// 10.3 PORTAL PPV SOLUCIONES INFORMÁTICAS (MODAL)
+// ----------------------------------------------------
+window.openPpvModal = function(event) {
+  if (event) event.preventDefault();
+  const modal = document.getElementById('ppv-contact-modal');
+  if (modal) {
+    modal.classList.add('active');
+    document.getElementById('ppv-contact-form').style.display = 'block';
+    document.getElementById('ppv-form-success').style.display = 'none';
+    document.getElementById('ppv-contact-form').reset();
+  }
+};
+
+window.closePpvModal = function() {
+  const modal = document.getElementById('ppv-contact-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+};
+
+window.submitPpvForm = function(event) {
+  if (event) event.preventDefault();
+  
+  const name = document.getElementById('ppv-name').value.trim();
+  const email = document.getElementById('ppv-email').value.trim();
+  const phone = document.getElementById('ppv-phone').value.trim();
+  const message = document.getElementById('ppv-message').value.trim();
+
+  if (!name || !email || !phone || !message) {
+    alert('Por favor, completa todos los campos del formulario.');
+    return;
+  }
+
+  // Guardar lead en localStorage para posterior contacto
+  const leads = JSON.parse(localStorage.getItem('ppv_contact_leads')) || [];
+  leads.push({
+    id: 'lead-' + Date.now(),
+    name,
+    email,
+    phone,
+    message,
+    date: new Date().toISOString()
+  });
+  localStorage.setItem('ppv_contact_leads', JSON.stringify(leads));
+
+  // Ocultar formulario y mostrar éxito
+  document.getElementById('ppv-contact-form').style.display = 'none';
+  document.getElementById('ppv-form-success').style.display = 'block';
 };
 
 // ----------------------------------------------------

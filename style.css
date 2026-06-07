@@ -2219,3 +2219,214 @@ body {
   }
 }
 
+/* ==========================================================================
+   6. CRÉDITOS Y MODAL DE CONTACTO PPV SOLUCIONES INFORMÁTICAS
+   ========================================================================= */
+.ppv-credit {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+}
+
+.ppv-link {
+  color: var(--primary-green) !important;
+  font-weight: 700;
+  text-decoration: none;
+  background: linear-gradient(120deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.ppv-link::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  transform: scaleX(0);
+  height: 1.5px;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(120deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  transform-origin: bottom right;
+  transition: transform 0.25s ease-out;
+}
+
+.ppv-link:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+/* Modal PPV */
+.ppv-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(26, 15, 8, 0.6); /* Backdrop oscuro cálido */
+  backdrop-filter: blur(5px);
+  z-index: 11000; /* Por encima de WhatsApp */
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+}
+
+.ppv-modal.active {
+  display: flex;
+  animation: ppvFadeIn 0.3s ease-out;
+}
+
+.ppv-modal-content {
+  background: var(--bg-white);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 480px;
+  position: relative;
+  border: 1px solid rgba(44, 26, 14, 0.08);
+}
+
+.ppv-modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1.25rem;
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  line-height: 1;
+  transition: var(--transition);
+}
+
+.ppv-modal-close:hover {
+  color: var(--accent-red);
+}
+
+.ppv-modal-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.ppv-modal-icon {
+  font-size: 2.5rem;
+  color: var(--primary-green);
+  margin-bottom: 0.75rem;
+}
+
+.ppv-modal-header h3 {
+  font-family: var(--font-header);
+  font-size: 1.4rem;
+  color: var(--secondary-brown);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.ppv-modal-header p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.ppv-form-group {
+  margin-bottom: 1.15rem;
+  text-align: left;
+}
+
+.ppv-form-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--secondary-brown-light);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ppv-form-group input,
+.ppv-form-group textarea {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-cream);
+  border: 1px solid rgba(44, 26, 14, 0.1);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-sans);
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  outline: none;
+  transition: var(--transition);
+}
+
+.ppv-form-group textarea {
+  height: 90px;
+  resize: none;
+}
+
+.ppv-form-group input:focus,
+.ppv-form-group textarea:focus {
+  border-color: var(--primary-green);
+  background: var(--bg-white);
+  box-shadow: 0 0 0 2px hsla(85, 34%, 28%, 0.15);
+}
+
+.ppv-btn-submit {
+  width: 100%;
+  padding: 0.9rem;
+  background: linear-gradient(120deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition);
+}
+
+.ppv-btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+/* Mensaje de Éxito */
+.ppv-success-msg {
+  text-align: center;
+  padding: 1rem 0;
+  animation: ppvScaleIn 0.3s ease-out;
+}
+
+.ppv-success-icon {
+  font-size: 3.5rem;
+  color: var(--primary-green);
+  margin-bottom: 1rem;
+}
+
+.ppv-success-msg h4 {
+  font-family: var(--font-header);
+  font-size: 1.25rem;
+  color: var(--secondary-brown);
+  margin-bottom: 0.5rem;
+  font-weight: 700;
+}
+
+.ppv-success-msg p {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+@keyframes ppvFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ppvScaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+

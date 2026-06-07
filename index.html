@@ -220,9 +220,11 @@
           </div>
         </div>
         <p>Alimentación natural biológicamente apropiada. Hecho con amor en Chile para el bienestar integral de tu fiel compañero.</p>
-        <div class="web-footer-copyright">
-          &copy; 2026 Origen Canino. Comida Real, Vida Saludable. Todos los derechos reservados.
+        <div class="web-footer-copyright" style="display: flex; flex-direction: column; gap: 0.4rem; align-items: center;">
+          <span>&copy; 2026 Origen Canino. Comida Real, Vida Saludable. Todos los derechos reservados.</span>
+          <span class="ppv-credit">Desarrollado por <a href="#" onclick="openPpvModal(event)" class="ppv-link">PPV Soluciones Informáticas</a></span>
         </div>
+      </footer>
     </section>
 
     <!-- ==========================================
@@ -1025,6 +1027,43 @@
         <i class="fa-brands fa-whatsapp"></i>
         <span class="whatsapp-float-tooltip">¿Dudas? Escríbenos a WhatsApp</span>
       </a>
+  <!-- Modal de Contacto PPV Soluciones Informáticas -->
+  <div id="ppv-contact-modal" class="ppv-modal">
+    <div class="ppv-modal-content">
+      <button class="ppv-modal-close" onclick="closePpvModal()">&times;</button>
+      <div class="ppv-modal-header">
+        <i class="fa-solid fa-laptop-code ppv-modal-icon"></i>
+        <h3>PPV Soluciones Informáticas</h3>
+        <p>¿Te gusta esta web? Cuéntanos sobre tu proyecto y te contactaremos para hacerlo realidad.</p>
+      </div>
+      <form id="ppv-contact-form" onsubmit="submitPpvForm(event)">
+        <div class="ppv-form-group">
+          <label for="ppv-name">Nombre Completo</label>
+          <input type="text" id="ppv-name" required placeholder="Ej: Juan Pérez">
+        </div>
+        <div class="ppv-form-group">
+          <label for="ppv-email">Correo Electrónico</label>
+          <input type="email" id="ppv-email" required placeholder="Ej: juan@empresa.cl">
+        </div>
+        <div class="ppv-form-group">
+          <label for="ppv-phone">Teléfono de Contacto</label>
+          <input type="tel" id="ppv-phone" required placeholder="Ej: +56 9 1234 5678">
+        </div>
+        <div class="ppv-form-group">
+          <label for="ppv-message">Cuéntanos sobre tu idea o proyecto</label>
+          <textarea id="ppv-message" required placeholder="Describe brevemente qué tipo de sitio web, aplicación o sistema necesitas..."></textarea>
+        </div>
+        <button type="submit" class="ppv-btn-submit">Enviar Solicitud</button>
+      </form>
+      <div id="ppv-form-success" class="ppv-success-msg" style="display: none;">
+        <i class="fa-solid fa-circle-check ppv-success-icon"></i>
+        <h4>¡Solicitud Recibida!</h4>
+        <p>Tu información ha sido registrada con éxito. Nos pondremos en contacto contigo a la brevedad para asesorarte.</p>
+        <button class="btn btn-primary" onclick="closePpvModal()" style="margin-top: 1rem; width: 100%;">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
   </main>
 
   <!-- Lógica JavaScript Principal -->

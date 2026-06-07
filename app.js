@@ -157,22 +157,36 @@ const DEFAULT_FAQS = [
   }
 ];
 
-// Cargar estado inicial
-const savedTestimonials = JSON.parse(localStorage.getItem('oc_testimonials'));
-const savedFaqs = JSON.parse(localStorage.getItem('oc_faqs'));
+// Función para cargar de forma segura desde localStorage previniendo excepciones
+function safeLoadFromStorage(key, defaultValue) {
+  try {
+    const val = localStorage.getItem(key);
+    if (!val) return defaultValue;
+    const parsed = JSON.parse(val);
+    // Si es un arreglo y está vacío, forzar recarga de valores por defecto
+    if (parsed && Array.isArray(parsed) && parsed.length === 0 && defaultValue !== parsed) {
+      return defaultValue;
+    }
+    return parsed || defaultValue;
+  } catch (e) {
+    console.error(`Error de parseo en la clave "${key}", reestableciendo valores por defecto:`, e);
+    return defaultValue;
+  }
+}
 
+// Cargar estado inicial
 let appState = {
-  recipes: JSON.parse(localStorage.getItem('oc_recipes')) || DEFAULT_RECIPES,
-  snacks: JSON.parse(localStorage.getItem('oc_snacks')) || DEFAULT_SNACKS,
-  params: JSON.parse(localStorage.getItem('oc_params')) || DEFAULT_PARAMS,
-  orders: JSON.parse(localStorage.getItem('oc_orders')) || [],
-  pets: JSON.parse(localStorage.getItem('oc_pets')) || [],
-  testimonials: (savedTestimonials && savedTestimonials.length > 0) ? savedTestimonials : DEFAULT_TESTIMONIALS,
-  faqs: (savedFaqs && savedFaqs.length > 0) ? savedFaqs : DEFAULT_FAQS,
+  recipes: safeLoadFromStorage('oc_recipes', DEFAULT_RECIPES),
+  snacks: safeLoadFromStorage('oc_snacks', DEFAULT_SNACKS),
+  params: safeLoadFromStorage('oc_params', DEFAULT_PARAMS),
+  orders: safeLoadFromStorage('oc_orders', []),
+  pets: safeLoadFromStorage('oc_pets', []),
+  testimonials: safeLoadFromStorage('oc_testimonials', DEFAULT_TESTIMONIALS),
+  faqs: safeLoadFromStorage('oc_faqs', DEFAULT_FAQS),
   
   currentPetId: null,
   activePetIdDashboard: null,
-  snacksCart: JSON.parse(localStorage.getItem('oc_snacks_cart')) || {},
+  snacksCart: safeLoadFromStorage('oc_snacks_cart', {}),
   activeView: 'web',
   mobileView: 'welcome',
   adminTab: 'parameters'
@@ -1727,8 +1741,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderWebFaqs();
   renderMobileWelcomeScreen();
   
-  // Sincronizar de vuelta a localStorage si se aplicaron los valores por defecto (healing)
-  if (!savedTestimonials || savedTestimonials.length === 0 || !savedFaqs || savedFaqs.length === 0) {
-    saveStateToStorage();
-  }
+  // Guardar estado inicial para asegurar persistencia de valores en localStorage
+  saveStateToStorage();
 });

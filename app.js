@@ -1,15 +1,55 @@
-// Lógica de Origen Canino Web & Mobile Suite (Actualizada con Soporte Multi-Mascota, Ingredientes Interactivos, Testimonios y FAQs)
-
 // ----------------------------------------------------
-// 1. BASE DE DATOS Y CONFIGURACIÓN INICIAL (LOCALSTORAGE)
+// 1. CONFIGURACIÓN DEL BACKEND, BASE DE DATOS Y ESTADO
 // ----------------------------------------------------
 
+const API_BASE_URL = (window.location.protocol === "file:" || window.location.port) 
+  ? "http://localhost:8000" 
+  : "";
+
+// Helper mapping functions to adapt SQL model names (snake_case) to Frontend names (camelCase)
+function mapPetFromAPI(p) {
+  if (!p) return null;
+  return {
+    ...p,
+    subscriptionPaid: p.subscription_paid,
+    selectedRecipeId: p.selected_recipe_id,
+    excludedIngredients: p.excluded_ingredients || [],
+    addedSuperfoods: p.added_superfoods || [],
+    customInstructions: p.custom_instructions || ""
+  };
+}
+
+function mapOrderFromAPI(o) {
+  if (!o) return null;
+  return {
+    ...o,
+    orderId: o.order_id,
+    petName: o.pet_name,
+    petBreed: o.pet_breed,
+    petPhoto: o.pet_photo,
+    recipeName: o.recipe_name,
+    dailyGrams: o.daily_grams,
+    monthlyKg: o.monthly_kg,
+    totalPrice: o.total_price,
+    paidStatus: o.paid_status
+  };
+}
+
+function mapRecipeFromAPI(r) {
+  if (!r) return null;
+  return {
+    ...r,
+    ingredientsArray: r.ingredients_array || []
+  };
+}
+
+// Fallback values for development if API is offline
 const DEFAULT_RECIPES = [
   { 
     id: 'b-pollo', 
     name: 'BARF Pollo Premium', 
     category: 'barf', 
-    price: 4000, 
+    price: 4200, 
     icon: '🍗', 
     ingredients: 'Hueso de pollo triturado, carne magra de pollo, hígado de pollo, vísceras trituradas, espinaca fresca, zanahoria picada.',
     ingredientsArray: ['Hueso de pollo triturado', 'Carne magra de pollo', 'Hígado de pollo', 'Vísceras trituradas', 'Espinaca fresca', 'Zanahoria picada']
@@ -21,13 +61,13 @@ const DEFAULT_RECIPES = [
     price: 4200, 
     icon: '🥩', 
     ingredients: 'Carne magra de res, hueso blando de vacuno molido, hígado de res, bofe, riñón de res, manzana verde, zanahoria.',
-    ingredientsArray: ['Carne magra de res', 'Hueso de vacuno molido', 'Hígado de res', 'Vísceras (bofe/riñón)', 'Manzana verde', 'Zanahoria']
+    ingredientsArray: ['Carne magra de res', 'Hueso de vacuno molido', 'Hígado de res', 'Vísceras (bofe/riñón)', 'Manzana verde', 'Zanimoria']
   },
   { 
     id: 'b-salmon', 
     name: 'BARF Pavo & Salmón', 
     category: 'barf', 
-    price: 4600, 
+    price: 4200, 
     icon: '🐟', 
     ingredients: 'Carne magra de pavo, filete de salmón, hueso de pavo triturado, hígado de pavo, acelga fresca, arándanos silvestres.',
     ingredientsArray: ['Carne magra de pavo', 'Filete de salmón', 'Hueso de pavo triturado', 'Hígado de pavo', 'Acelga fresca', 'Arándanos silvestres']
@@ -36,7 +76,7 @@ const DEFAULT_RECIPES = [
     id: 'c-pollo', 
     name: 'Pollo Cocido al Vapor', 
     category: 'cooked', 
-    price: 5000, 
+    price: 5200, 
     icon: '🍲', 
     ingredients: 'Pechuga de pollo cocida, trutro deshuesado, zapallo camote, zanahoria cocida, arroz integral cocido, aceite de oliva.',
     ingredientsArray: ['Pechuga de pollo cocida', 'Trutro de pollo cocido', 'Zapallo camote al vapor', 'Zanahoria cocida', 'Arroz integral cocido', 'Aceite de oliva']
@@ -45,7 +85,7 @@ const DEFAULT_RECIPES = [
     id: 'c-vacuno', 
     name: 'Vacuno & Camote Cocido', 
     category: 'cooked', 
-    price: 5400, 
+    price: 5200, 
     icon: '🥘', 
     ingredients: 'Posta de vacuno picada, camote cocido al vapor, espinaca al vapor, arvejas tiernas, hígado de res cocido.',
     ingredientsArray: ['Posta de vacuno picada', 'Camote al vapor', 'Espinaca al vapor', 'Arvejas tiernas', 'Hígado de res cocido']
@@ -90,7 +130,7 @@ const SUPERALIMENTOS = [
   { id: 'sup-curcuma', name: 'Cúrcuma & Pimienta', icon: '🟡', price: 1500 }
 ];
 
-// Testimonios Iniciales (Estilo Legrand Petit)
+// Testimonios Iniciales
 const DEFAULT_TESTIMONIALS = [
   { 
     id: 't-1', 
@@ -157,13 +197,11 @@ const DEFAULT_FAQS = [
   }
 ];
 
-// Función para cargar de forma segura desde localStorage previniendo excepciones
 function safeLoadFromStorage(key, defaultValue) {
   try {
     const val = localStorage.getItem(key);
     if (!val) return defaultValue;
     const parsed = JSON.parse(val);
-    // Si es un arreglo y está vacío, forzar recarga de valores por defecto
     if (parsed && Array.isArray(parsed) && parsed.length === 0 && defaultValue !== parsed) {
       return defaultValue;
     }
@@ -176,32 +214,77 @@ function safeLoadFromStorage(key, defaultValue) {
 
 // Cargar estado inicial
 let appState = {
-  recipes: safeLoadFromStorage('oc_recipes', DEFAULT_RECIPES),
-  snacks: safeLoadFromStorage('oc_snacks', DEFAULT_SNACKS),
-  params: safeLoadFromStorage('oc_params', DEFAULT_PARAMS),
-  orders: safeLoadFromStorage('oc_orders', []),
-  pets: safeLoadFromStorage('oc_pets', []),
-  testimonials: safeLoadFromStorage('oc_testimonials', DEFAULT_TESTIMONIALS),
-  faqs: safeLoadFromStorage('oc_faqs', DEFAULT_FAQS),
+  recipes: [],
+  snacks: [],
+  params: DEFAULT_PARAMS,
+  orders: [],
+  pets: [],
+  testimonials: [],
+  faqs: [],
   
   currentPetId: null,
   activePetIdDashboard: null,
   snacksCart: safeLoadFromStorage('oc_snacks_cart', {}),
   activeView: 'web',
   mobileView: 'welcome',
-  adminTab: 'parameters'
+  adminTab: 'parameters',
+  adminToken: localStorage.getItem('oc_admin_token') || null
 };
 
-// Guardar bases en localStorage
+// Guardar bases en localStorage (Solo datos locales de sesión del cliente)
 function saveStateToStorage() {
-  localStorage.setItem('oc_recipes', JSON.stringify(appState.recipes));
-  localStorage.setItem('oc_snacks', JSON.stringify(appState.snacks));
-  localStorage.setItem('oc_params', JSON.stringify(appState.params));
-  localStorage.setItem('oc_orders', JSON.stringify(appState.orders));
-  localStorage.setItem('oc_pets', JSON.stringify(appState.pets));
+  const petIds = appState.pets.map(p => p.id);
+  localStorage.setItem('oc_my_pet_ids', JSON.stringify(petIds));
   localStorage.setItem('oc_snacks_cart', JSON.stringify(appState.snacksCart));
-  localStorage.setItem('oc_testimonials', JSON.stringify(appState.testimonials));
-  localStorage.setItem('oc_faqs', JSON.stringify(appState.faqs));
+}
+
+// Carga asíncrona de datos desde la API central
+async function loadInitialDataFromAPI() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/config`);
+    if (!res.ok) throw new Error("No se pudo cargar la configuración del servidor");
+    const data = await res.json();
+    
+    appState.recipes = data.recipes.map(mapRecipeFromAPI);
+    appState.snacks = data.snacks;
+    appState.params = data.params;
+    appState.testimonials = data.testimonials;
+    appState.faqs = data.faqs;
+    
+    // Cargar las mascotas pertenecientes a este navegador (usando la lista de IDs locales)
+    const myPetIds = safeLoadFromStorage('oc_my_pet_ids', []);
+    let loadedPets = [];
+    for (const petId of myPetIds) {
+      try {
+        const petRes = await fetch(`${API_BASE_URL}/api/pets/${petId}`);
+        if (petRes.ok) {
+          let pet = await petRes.json();
+          loadedPets.push(mapPetFromAPI(pet));
+        }
+      } catch (err) {
+        console.warn(`Error al cargar mascota ${petId}:`, err);
+      }
+    }
+    appState.pets = loadedPets;
+    
+    // Renderizado reactivo en la UI
+    renderWebProducts();
+    renderWebTestimonials();
+    renderWebFaqs();
+    renderMobileWelcomeScreen();
+  } catch (err) {
+    console.warn("Fallo en la llamada API (servidor desconectado), cargando datos locales/fallback:", err);
+    appState.recipes = DEFAULT_RECIPES;
+    appState.snacks = DEFAULT_SNACKS;
+    appState.params = DEFAULT_PARAMS;
+    appState.testimonials = DEFAULT_TESTIMONIALS;
+    appState.faqs = DEFAULT_FAQS;
+    
+    renderWebProducts();
+    renderWebTestimonials();
+    renderWebFaqs();
+    renderMobileWelcomeScreen();
+  }
 }
 
 // ----------------------------------------------------
@@ -239,8 +322,15 @@ window.switchView = function(viewName) {
   } else if (viewName === 'admin') {
     document.querySelector('.tab-btn[onclick="switchView(\'admin\')"]').classList.add('active');
     document.getElementById('view-admin').classList.add('active');
-    initAdminPanel();
-  }
+    
+    if (appState.adminToken) {
+      document.getElementById('admin-login-box').style.display = 'none';
+      document.getElementById('admin-dashboard-wrapper').style.display = 'flex';
+      initAdminPanel();
+    } else {
+      document.getElementById('admin-login-box').style.display = 'flex';
+      document.getElementById('admin-dashboard-wrapper').style.display = 'none';
+    }
 };
 
 window.changeMobileView = function(viewName) {
@@ -572,7 +662,7 @@ window.cancelPetWizard = function() {
   changeMobileView('welcome');
 };
 
-window.savePetProfileAndGoToCalculator = function() {
+window.savePetProfileAndGoToCalculator = async function() {
   const name = document.getElementById('pet-name').value.trim();
   const breed = document.getElementById('pet-breed').value.trim();
   const weight = parseFloat(document.getElementById('pet-weight').value);
@@ -597,21 +687,35 @@ window.savePetProfileAndGoToCalculator = function() {
     activity,
     notes,
     photo,
-    subscriptionPaid: petIndex !== -1 ? appState.pets[petIndex].subscriptionPaid : false,
-    selectedRecipeId: petIndex !== -1 ? appState.pets[petIndex].selectedRecipeId : null,
-    excludedIngredients: petIndex !== -1 ? appState.pets[petIndex].excludedIngredients || [] : [],
-    addedSuperfoods: petIndex !== -1 ? appState.pets[petIndex].addedSuperfoods || [] : [],
-    customInstructions: petIndex !== -1 ? appState.pets[petIndex].customInstructions || '' : ''
+    subscription_paid: petIndex !== -1 ? (appState.pets[petIndex].subscriptionPaid || false) : false,
+    selected_recipe_id: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipeId || null) : null,
+    excluded_ingredients: petIndex !== -1 ? (appState.pets[petIndex].excludedIngredients || []) : [],
+    added_superfoods: petIndex !== -1 ? (appState.pets[petIndex].addedSuperfoods || []) : [],
+    custom_instructions: petIndex !== -1 ? (appState.pets[petIndex].customInstructions || '') : ''
   };
 
-  if (petIndex !== -1) {
-    appState.pets[petIndex] = petData;
-  } else {
-    appState.pets.push(petData);
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/pets`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(petData)
+    });
+    if (!response.ok) throw new Error("Error al guardar mascota en el servidor");
+    
+    const data = await response.json();
+    const savedPet = mapPetFromAPI(data.pet);
+    
+    if (petIndex !== -1) {
+      appState.pets[petIndex] = savedPet;
+    } else {
+      appState.pets.push(savedPet);
+    }
+    
+    saveStateToStorage();
+    changeMobileView('calculator');
+  } catch (err) {
+    alert("Error al guardar en la base de datos: " + err.message);
   }
-  
-  saveStateToStorage();
-  changeMobileView('calculator');
 };
 
 window.triggerPhotoUpload = function() {
@@ -859,10 +963,38 @@ function renderPackageLabelPreview(pet, recipe) {
   `;
 }
 
-window.proceedToSnacks = function() {
+window.proceedToSnacks = async function() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (pet) {
     pet.customInstructions = document.getElementById('custom-instructions').value.trim();
+    
+    const petData = {
+      id: pet.id,
+      name: pet.name,
+      breed: pet.breed,
+      weight: pet.weight,
+      age: pet.age,
+      activity: pet.activity,
+      notes: pet.notes,
+      photo: pet.photo,
+      subscription_paid: pet.subscriptionPaid,
+      selected_recipe_id: pet.selectedRecipeId,
+      excluded_ingredients: pet.excludedIngredients,
+      added_superfoods: pet.addedSuperfoods,
+      custom_instructions: pet.customInstructions,
+      address: pet.address
+    };
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/pets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(petData)
+      });
+      if (!res.ok) throw new Error("Error al sincronizar mascota en el servidor");
+    } catch (err) {
+      console.warn("Error al guardar cambios de receta en el servidor:", err);
+    }
     saveStateToStorage();
   }
   changeMobileView('snacks');
@@ -1043,7 +1175,7 @@ window.updateCardPreview = function(field, value) {
   }
 };
 
-window.processSecurePayment = function() {
+window.processSecurePayment = async function() {
   const holder = document.getElementById('pay-cardholder').value.trim();
   const num = document.getElementById('pay-cardnumber').value.trim();
   const expiry = document.getElementById('pay-expiry').value.trim();
@@ -1055,7 +1187,7 @@ window.processSecurePayment = function() {
     return;
   }
 
-  if (num.length < 16) {
+  if (num.replace(/\s/g, '').length < 16) {
     alert('El número de tarjeta de crédito es incorrecto.');
     return;
   }
@@ -1064,67 +1196,75 @@ window.processSecurePayment = function() {
   payBtn.disabled = true;
   payBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando Transacción...`;
 
-  setTimeout(() => {
-    const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
+  const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
+  const orderId = `OC-${Math.floor(1000 + Math.random() * 9000)}`;
+  const petNames = unpaidPets.map(p => p.name).join(', ');
+  const petDetails = unpaidPets.map(p => `${p.name} (${p.weight}kg, ${p.breed})`).join(' | ');
+
+  const recipeSummary = unpaidPets.map(p => {
+    const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
+    const superLabels = (p.addedSuperfoods || []).map(id => SUPERALIMENTOS.find(s => s.id === id)?.name || id).join(', ');
+    const supText = superLabels ? ` [Suplementos: ${superLabels}]` : '';
+    return `${p.name}: ${rec?.name || 'Receta'}${supText}`;
+  }).join('; ');
+
+  const snacksArr = [];
+  for (const snackId in appState.snacksCart) {
+    const snack = appState.snacks.find(s => s.id === snackId);
+    if (snack) {
+      snacksArr.push(`${snack.name} (x${appState.snacksCart[snackId]})`);
+    }
+  }
+
+  const dailyGramsTotal = unpaidPets.reduce((acc, p) => acc + (p.portionResults?.dailyGrams || 0), 0);
+  const monthlyKgTotal = unpaidPets.reduce((acc, p) => acc + (p.portionResults?.monthlyKg || 0), 0);
+
+  const orderData = {
+    order_id: orderId,
+    date: new Date().toLocaleDateString('es-CL'),
+    pet_name: petNames,
+    pet_breed: petDetails,
+    pet_weight: unpaidPets.reduce((acc, p) => acc + p.weight, 0),
+    pet_photo: unpaidPets[0]?.photo || 'assets/logo.jpg',
+    recipe_name: recipeSummary,
+    daily_grams: dailyGramsTotal,
+    monthly_kg: monthlyKgTotal,
+    snacks: snacksArr.join(', ') || 'Ninguno',
+    total_price: globalCartTotal,
+    address: address,
+    paid_status: 'Verificado'
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/orders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(orderData)
+    });
+
+    if (!res.ok) throw new Error("Error al procesar la orden en el servidor");
     
     unpaidPets.forEach(p => {
       p.subscriptionPaid = true;
       p.address = address;
     });
 
-    const orderId = `OC-${Math.floor(1000 + Math.random() * 9000)}`;
-    const petNames = unpaidPets.map(p => p.name).join(', ');
-    const petDetails = unpaidPets.map(p => `${p.name} (${p.weight}kg, ${p.breed})`).join(' | ');
-
-    const recipeSummary = unpaidPets.map(p => {
-      const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
-      const superLabels = (p.addedSuperfoods || []).map(id => SUPERALIMENTOS.find(s => s.id === id)?.name || id).join(', ');
-      const supText = superLabels ? ` [Suplementos: ${superLabels}]` : '';
-      return `${p.name}: ${rec?.name || 'Receta'}${supText}`;
-    }).join('; ');
-
-    const snacksArr = [];
-    for (const snackId in appState.snacksCart) {
-      const snack = appState.snacks.find(s => s.id === snackId);
-      if (snack) {
-        snacksArr.push(`${snack.name} (x${appState.snacksCart[snackId]})`);
-      }
-    }
-
-    const dailyGramsTotal = unpaidPets.reduce((acc, p) => acc + (p.portionResults?.dailyGrams || 0), 0);
-    const monthlyKgTotal = unpaidPets.reduce((acc, p) => acc + (p.portionResults?.monthlyKg || 0), 0);
-
-    const newOrder = {
-      orderId: orderId,
-      date: new Date().toLocaleDateString('es-CL'),
-      petName: petNames,
-      petBreed: petDetails,
-      petWeight: unpaidPets.reduce((acc, p) => acc + p.weight, 0),
-      petPhoto: unpaidPets[0]?.photo || 'assets/logo.jpg',
-      recipeName: recipeSummary,
-      dailyGrams: dailyGramsTotal,
-      monthlyKg: monthlyKgTotal,
-      snacks: snacksArr.join(', ') || 'Ninguno',
-      totalPrice: globalCartTotal,
-      address: address,
-      paidStatus: 'Verificado'
-    };
-
-    appState.orders.push(newOrder);
-    
     if (unpaidPets.length > 0) {
       appState.activePetIdDashboard = unpaidPets[0].id;
     }
 
     appState.snacksCart = {};
-
     saveStateToStorage();
-    
+
     payBtn.disabled = false;
     payBtn.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Pagar Suscripción`;
     
     changeMobileView('receipt');
-  }, 1500);
+  } catch (err) {
+    alert("Error al procesar pago: " + err.message);
+    payBtn.disabled = false;
+    payBtn.innerHTML = `<i class="fa-solid fa-shield-halved"></i> Pagar Suscripción`;
+  }
 };
 
 // ----------------------------------------------------
@@ -1241,8 +1381,6 @@ window.editCurrentPlanFromDashboard = function() {
   appState.currentPetId = appState.activePetIdDashboard;
   changeMobileView('calculator');
 };
-
-window.logoutApp = function() {
   if (confirm('¿Deseas cerrar sesión? Se borrarán las mascotas del dispositivo local.')) {
     appState.pets = [];
     appState.currentPetId = null;
@@ -1253,11 +1391,32 @@ window.logoutApp = function() {
   }
 };
 
+async function fetchAdminOrders() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/orders`, {
+      headers: {
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+    if (!res.ok) {
+      if (res.status === 401) {
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudieron cargar las órdenes");
+    }
+    const rawOrders = await res.json();
+    appState.orders = rawOrders.map(mapOrderFromAPI);
+  } catch (err) {
+    console.error("Error al cargar órdenes del backend:", err);
+  }
+}
+
 // ----------------------------------------------------
 // 10. PANEL DE ADMINISTRACIÓN (MANTENEDORES)
 // ----------------------------------------------------
 
-function initAdminPanel() {
+async function initAdminPanel() {
   document.getElementById('cfg-barf-price').value = appState.params.barf_price_per_kg;
   document.getElementById('cfg-cooked-price').value = appState.params.cooked_price_per_kg;
   
@@ -1276,12 +1435,13 @@ function initAdminPanel() {
   document.getElementById('cfg-puppy-late').value = appState.params.puppy_late;
 
   renderAdminProductsTable();
+  await fetchAdminOrders();
   renderAdminOrdersTable();
   renderAdminTestimonialsTable();
   renderAdminFaqsTable();
 }
 
-window.switchAdminTab = function(tabName) {
+window.switchAdminTab = async function(tabName) {
   appState.adminTab = tabName;
   
   document.querySelectorAll('.admin-menu-btn').forEach(btn => btn.classList.remove('active'));
@@ -1296,6 +1456,7 @@ window.switchAdminTab = function(tabName) {
   if (tabName === 'recipes') {
     renderAdminProductsTable();
   } else if (tabName === 'orders') {
+    await fetchAdminOrders();
     renderAdminOrdersTable();
   } else if (tabName === 'testimonials') {
     renderAdminTestimonialsTable();
@@ -1304,33 +1465,53 @@ window.switchAdminTab = function(tabName) {
   }
 };
 
-window.saveAdminParameters = function() {
-  appState.params.barf_price_per_kg = parseFloat(document.getElementById('cfg-barf-price').value);
-  appState.params.cooked_price_per_kg = parseFloat(document.getElementById('cfg-cooked-price').value);
-  
-  appState.params.barf_adult_sedentary = parseFloat(document.getElementById('cfg-barf-adult-sedentary').value);
-  appState.params.barf_adult_normal = parseFloat(document.getElementById('cfg-barf-adult-normal').value);
-  appState.params.barf_adult_active = parseFloat(document.getElementById('cfg-barf-adult-active').value);
-  appState.params.barf_adult_working = parseFloat(document.getElementById('cfg-barf-adult-working').value);
+window.saveAdminParameters = async function() {
+  const updatedParams = {
+    barf_price_per_kg: parseInt(document.getElementById('cfg-barf-price').value),
+    cooked_price_per_kg: parseInt(document.getElementById('cfg-cooked-price').value),
+    barf_adult_sedentary: parseFloat(document.getElementById('cfg-barf-adult-sedentary').value),
+    barf_adult_normal: parseFloat(document.getElementById('cfg-barf-adult-normal').value),
+    barf_adult_active: parseFloat(document.getElementById('cfg-barf-adult-active').value),
+    barf_adult_working: parseFloat(document.getElementById('cfg-barf-adult-working').value),
+    cooked_adult_sedentary: parseFloat(document.getElementById('cfg-cooked-adult-sedentary').value),
+    cooked_adult_normal: parseFloat(document.getElementById('cfg-cooked-adult-normal').value),
+    cooked_adult_active: parseFloat(document.getElementById('cfg-cooked-adult-active').value),
+    cooked_adult_working: parseFloat(document.getElementById('cfg-cooked-adult-working').value),
+    puppy_early: parseFloat(document.getElementById('cfg-puppy-early').value),
+    puppy_mid: parseFloat(document.getElementById('cfg-puppy-mid').value),
+    puppy_late: parseFloat(document.getElementById('cfg-puppy-late').value)
+  };
 
-  appState.params.cooked_adult_sedentary = parseFloat(document.getElementById('cfg-cooked-adult-sedentary').value);
-  appState.params.cooked_adult_normal = parseFloat(document.getElementById('cfg-cooked-adult-normal').value);
-  appState.params.cooked_adult_active = parseFloat(document.getElementById('cfg-cooked-adult-active').value);
-  appState.params.cooked_adult_working = parseFloat(document.getElementById('cfg-cooked-adult-working').value);
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/config/parameters`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify(updatedParams)
+    });
 
-  appState.params.puppy_early = parseFloat(document.getElementById('cfg-puppy-early').value);
-  appState.params.puppy_mid = parseFloat(document.getElementById('cfg-puppy-mid').value);
-  appState.params.puppy_late = parseFloat(document.getElementById('cfg-puppy-late').value);
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada o no autorizada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudieron guardar los parámetros");
+    }
 
-  saveStateToStorage();
-  
-  appState.recipes.forEach(r => {
-    if (r.category === 'barf') r.price = appState.params.barf_price_per_kg;
-    if (r.category === 'cooked') r.price = appState.params.cooked_price_per_kg;
-  });
-  saveStateToStorage();
-  
-  alert('¡Parámetros de cálculo y precios actualizados con éxito!');
+    appState.params = { ...appState.params, ...updatedParams };
+    
+    appState.recipes.forEach(r => {
+      if (r.category === 'barf') r.price = appState.params.barf_price_per_kg;
+      if (r.category === 'cooked') r.price = appState.params.cooked_price_per_kg;
+    });
+
+    alert('¡Parámetros de cálculo y precios actualizados con éxito!');
+  } catch (err) {
+    alert("Error al guardar: " + err.message);
+  }
 };
 
 function renderAdminProductsTable() {
@@ -1395,7 +1576,7 @@ window.editProductInAdmin = function(prodId) {
   document.getElementById('form-product-ingredients').value = prod.ingredients;
 };
 
-window.submitProductForm = function() {
+window.submitProductForm = async function() {
   const id = document.getElementById('form-product-id').value;
   const name = document.getElementById('form-product-name').value.trim();
   const category = document.getElementById('form-product-category').value;
@@ -1408,51 +1589,94 @@ window.submitProductForm = function() {
     return;
   }
 
-  const isRecipe = category === 'barf' || category === 'cooked';
-  const ingredientsArray = ingredients.split(', ');
+  const ingredients_array = ingredients.split(', ');
 
-  if (id) {
-    if (isRecipe) {
-      const idx = appState.recipes.findIndex(r => r.id === id);
-      if (idx !== -1) {
-        appState.recipes[idx] = { id, name, category, price, icon, ingredients, ingredientsArray };
+  const recipeData = {
+    id: id || null,
+    name,
+    category,
+    price,
+    icon,
+    ingredients,
+    ingredients_array
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/recipes`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify(recipeData)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudo guardar el producto");
+    }
+
+    const data = await res.json();
+    const savedProd = mapRecipeFromAPI(data.recipe);
+    const isRecipe = category === 'barf' || category === 'cooked';
+
+    if (id) {
+      if (isRecipe) {
+        const idx = appState.recipes.findIndex(r => r.id === id);
+        if (idx !== -1) appState.recipes[idx] = savedProd;
+      } else {
+        const idx = appState.snacks.findIndex(s => s.id === id);
+        if (idx !== -1) appState.snacks[idx] = savedProd;
       }
     } else {
-      const idx = appState.snacks.findIndex(s => s.id === id);
-      if (idx !== -1) {
-        const oldUnit = appState.snacks[idx].unit || 'unidad';
-        appState.snacks[idx] = { id, name, category, price, icon, ingredients, unit: oldUnit };
+      if (isRecipe) {
+        appState.recipes.push(savedProd);
+      } else {
+        appState.snacks.push(savedProd);
       }
     }
-  } else {
-    const newId = (isRecipe ? 'b-' : 's-') + Math.floor(1000 + Math.random() * 9000);
-    const unit = category === 'snack' ? 'unidad' : 'kg';
-    
-    if (isRecipe) {
-      appState.recipes.push({ id: newId, name, category, price, icon, ingredients, ingredientsArray });
-    } else {
-      appState.snacks.push({ id: newId, name, category, price, icon, ingredients, unit });
-    }
-  }
 
-  saveStateToStorage();
-  hideProductForm();
-  renderAdminProductsTable();
-  renderWebProducts();
-  alert('¡Catálogo actualizado!');
-};
-
-window.deleteProductInAdmin = function(prodId) {
-  if (confirm('¿Eliminar producto?')) {
-    const isRecipe = prodId.startsWith('b-') || prodId.startsWith('c-');
-    if (isRecipe) {
-      appState.recipes = appState.recipes.filter(r => r.id !== prodId);
-    } else {
-      appState.snacks = appState.snacks.filter(s => s.id !== prodId);
-    }
-    saveStateToStorage();
+    hideProductForm();
     renderAdminProductsTable();
     renderWebProducts();
+    alert('¡Catálogo actualizado!');
+  } catch (err) {
+    alert("Error al guardar: " + err.message);
+  }
+};
+
+window.deleteProductInAdmin = async function(prodId) {
+  if (confirm('¿Eliminar producto?')) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/recipes/${prodId}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${appState.adminToken}`
+        }
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          alert("Sesión expirada. Por favor inicia sesión.");
+          logoutAdmin();
+          return;
+        }
+        throw new Error("No se pudo eliminar el producto");
+      }
+
+      appState.recipes = appState.recipes.filter(r => r.id !== prodId);
+      appState.snacks = appState.snacks.filter(s => s.id !== prodId);
+
+      renderAdminProductsTable();
+      renderWebProducts();
+      alert('¡Producto eliminado!');
+    } catch (err) {
+      alert("Error al eliminar: " + err.message);
+    }
   }
 };
 
@@ -1559,7 +1783,7 @@ window.editTestimonialInAdmin = function(id) {
   document.getElementById('form-testimonial-quote').value = t.quote;
 };
 
-window.submitTestimonialForm = function() {
+window.submitTestimonialForm = async function() {
   const id = document.getElementById('form-testimonial-id').value;
   const author = document.getElementById('form-testimonial-author').value.trim();
   const location = document.getElementById('form-testimonial-location').value.trim();
@@ -1572,29 +1796,79 @@ window.submitTestimonialForm = function() {
     return;
   }
 
-  if (id) {
-    const idx = appState.testimonials.findIndex(item => item.id === id);
-    if (idx !== -1) {
-      appState.testimonials[idx] = { id, author, location, dog_name, photo_url, quote };
+  const testimonialData = {
+    id: id || null,
+    author,
+    location,
+    dog_name,
+    photo_url,
+    quote
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/testimonials`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify(testimonialData)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudo guardar el testimonio");
     }
-  } else {
-    const newId = 't-' + Math.floor(1000 + Math.random() * 9000);
-    appState.testimonials.push({ id: newId, author, location, dog_name, photo_url, quote });
-  }
 
-  saveStateToStorage();
-  hideTestimonialForm();
-  renderAdminTestimonialsTable();
-  renderWebTestimonials();
-  alert('¡Testimonio guardado exitosamente!');
-};
+    const data = await res.json();
+    const savedTest = data.testimonial;
 
-window.deleteTestimonialInAdmin = function(id) {
-  if (confirm('¿Seguro que deseas eliminar este testimonio de la web?')) {
-    appState.testimonials = appState.testimonials.filter(item => item.id !== id);
-    saveStateToStorage();
+    if (id) {
+      const idx = appState.testimonials.findIndex(item => item.id === id);
+      if (idx !== -1) appState.testimonials[idx] = savedTest;
+    } else {
+      appState.testimonials.push(savedTest);
+    }
+
+    hideTestimonialForm();
     renderAdminTestimonialsTable();
     renderWebTestimonials();
+    alert('¡Testimonio guardado exitosamente!');
+  } catch (err) {
+    alert("Error al guardar: " + err.message);
+  }
+};
+
+window.deleteTestimonialInAdmin = async function(id) {
+  if (confirm('¿Seguro que deseas eliminar este testimonio de la web?')) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/testimonials/${id}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${appState.adminToken}`
+        }
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          alert("Sesión expirada. Por favor inicia sesión.");
+          logoutAdmin();
+          return;
+        }
+        throw new Error("No se pudo eliminar el testimonio");
+      }
+
+      appState.testimonials = appState.testimonials.filter(item => item.id !== id);
+      renderAdminTestimonialsTable();
+      renderWebTestimonials();
+      alert('¡Testimonio eliminado!');
+    } catch (err) {
+      alert("Error al eliminar: " + err.message);
+    }
   }
 };
 
@@ -1647,7 +1921,7 @@ window.editFaqInAdmin = function(id) {
   document.getElementById('form-faq-answer').value = f.answer;
 };
 
-window.submitFaqForm = function() {
+window.submitFaqForm = async function() {
   const id = document.getElementById('form-faq-id').value;
   const question = document.getElementById('form-faq-question').value.trim();
   const answer = document.getElementById('form-faq-answer').value.trim();
@@ -1657,27 +1931,42 @@ window.submitFaqForm = function() {
     return;
   }
 
-  if (id) {
-    const idx = appState.faqs.findIndex(item => item.id === id);
-    if (idx !== -1) {
-      appState.faqs[idx] = { id, question, answer };
+  const faqData = {
+    id: id || null,
+    question,
+    answer
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/faqs`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify(faqData)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudo guardar la FAQ");
     }
-  } else {
-    const newId = 'f-' + Math.floor(1000 + Math.random() * 9000);
-    appState.faqs.push({ id: newId, question, answer });
-  }
 
-  saveStateToStorage();
-  hideFaqForm();
-  renderAdminFaqsTable();
-  renderWebFaqs();
-  alert('¡FAQ guardada exitosamente!');
-};
+    const data = await res.json();
+    const savedFaq = data.faq;
 
-window.deleteFaqInAdmin = function(id) {
-  if (confirm('¿Seguro que deseas eliminar esta FAQ del sitio?')) {
-    appState.faqs = appState.faqs.filter(item => item.id !== id);
-    saveStateToStorage();
+    if (id) {
+      const idx = appState.faqs.findIndex(item => item.id === id);
+      if (idx !== -1) appState.faqs[idx] = savedFaq;
+    } else {
+      appState.faqs.push(savedFaq);
+    }
+
+    hideFaqForm();
     renderAdminFaqsTable();
     renderWebFaqs();
   }
@@ -1703,7 +1992,7 @@ window.closePpvModal = function() {
   }
 };
 
-window.submitPpvForm = function(event) {
+window.submitPpvForm = async function(event) {
   if (event) event.preventDefault();
   
   const name = document.getElementById('ppv-name').value.trim();
@@ -1716,32 +2005,78 @@ window.submitPpvForm = function(event) {
     return;
   }
 
-  // Guardar lead en localStorage para posterior contacto
-  const leads = JSON.parse(localStorage.getItem('ppv_contact_leads')) || [];
-  leads.push({
-    id: 'lead-' + Date.now(),
-    name,
-    email,
-    phone,
-    message,
-    date: new Date().toISOString()
-  });
-  localStorage.setItem('ppv_contact_leads', JSON.stringify(leads));
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/leads`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, phone, message })
+    });
+    if (!res.ok) throw new Error("Error al enviar tus datos");
 
-  // Ocultar formulario y mostrar éxito
-  document.getElementById('ppv-contact-form').style.display = 'none';
-  document.getElementById('ppv-form-success').style.display = 'block';
+    // Ocultar formulario y mostrar éxito
+    document.getElementById('ppv-contact-form').style.display = 'none';
+    document.getElementById('ppv-form-success').style.display = 'block';
+  } catch (err) {
+    alert("Error al enviar solicitud: " + err.message);
+  }
+};
+
+window.loginAdmin = async function() {
+  const username = document.getElementById('admin-user-input').value.trim();
+  const password = document.getElementById('admin-pass-input').value.trim();
+
+  if (!username || !password) {
+    alert('Por favor, ingresa usuario y contraseña.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || "Usuario o contraseña inválidos");
+    }
+
+    const data = await res.json();
+    appState.adminToken = data.token;
+    localStorage.setItem('oc_admin_token', data.token);
+
+    // Ocultar login y mostrar mantenedores
+    document.getElementById('admin-login-box').style.display = 'none';
+    document.getElementById('admin-dashboard-wrapper').style.display = 'flex';
+
+    // Cargar datos
+    initAdminPanel();
+  } catch (err) {
+    alert("Error de autenticación: " + err.message);
+  }
+};
+
+window.logoutAdmin = function() {
+  appState.adminToken = null;
+  localStorage.removeItem('oc_admin_token');
+  document.getElementById('admin-login-box').style.display = 'flex';
+  document.getElementById('admin-dashboard-wrapper').style.display = 'none';
+  document.getElementById('admin-user-input').value = '';
+  document.getElementById('admin-pass-input').value = '';
 };
 
 // ----------------------------------------------------
 // 11. INICIALIZACIÓN DE LA APLICACIÓN
 // ----------------------------------------------------
 document.addEventListener('DOMContentLoaded', () => {
-  renderWebProducts();
-  renderWebTestimonials();
-  renderWebFaqs();
-  renderMobileWelcomeScreen();
+  loadInitialDataFromAPI();
   
-  // Guardar estado inicial para asegurar persistencia de valores en localStorage
-  saveStateToStorage();
+  if (appState.adminToken) {
+    document.getElementById('admin-login-box').style.display = 'none';
+    document.getElementById('admin-dashboard-wrapper').style.display = 'flex';
+  } else {
+    document.getElementById('admin-login-box').style.display = 'flex';
+    document.getElementById('admin-dashboard-wrapper').style.display = 'none';
+  }
 });

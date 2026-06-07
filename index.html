@@ -671,7 +671,27 @@
          VISTA 3: PANEL ADMIN (MANTENEDORES)
          ========================================== -->
     <section id="view-admin" class="view-section">
-      <div class="admin-dashboard-container">
+      <!-- Formulario de Autenticación de Administrador -->
+      <div id="admin-login-box" class="admin-login-box" style="display: flex; justify-content: center; align-items: center; min-height: 400px; padding: 2rem 0;">
+        <div class="admin-login-card" style="background: var(--bg-cream); padding: 2rem; border-radius: var(--radius-md); border: 1px solid rgba(44,26,14,0.08); width: 100%; max-width: 360px; box-shadow: var(--shadow-sm); text-align: center;">
+          <i class="fa-solid fa-shield-halved" style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+          <h3 style="font-family: var(--font-serif); color: var(--secondary-brown); margin-bottom: 0.5rem; font-size: 1.4rem;">Panel de Control</h3>
+          <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1.5rem;">Ingresa tus credenciales para administrar la plataforma.</p>
+          <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+            <label for="admin-user-input" style="color: var(--text-dark); font-size: 0.8rem; font-weight: 700;">Usuario</label>
+            <input type="text" id="admin-user-input" class="form-input" placeholder="admin" style="width: 100%;">
+          </div>
+          <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+            <label for="admin-pass-input" style="color: var(--text-dark); font-size: 0.8rem; font-weight: 700;">Contraseña</label>
+            <input type="password" id="admin-pass-input" class="form-input" placeholder="••••••••" style="width: 100%;" onkeydown="if(event.key==='Enter') loginAdmin()">
+          </div>
+          <button class="btn btn-primary" style="width: 100%;" onclick="loginAdmin()">
+            <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-dashboard-container" id="admin-dashboard-wrapper" style="display: none;">
         
         <!-- Sidebar del Administrador -->
         <aside class="admin-sidebar">
@@ -689,6 +709,9 @@
           </button>
           <button class="admin-menu-btn" onclick="switchAdminTab('faqs')">
             <i class="fa-solid fa-circle-question"></i> Preguntas Frecuentes (FAQs)
+          </button>
+          <button class="admin-menu-btn" onclick="logoutAdmin()" style="margin-top: auto; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2);">
+            <i class="fa-solid fa-power-off"></i> Cerrar Sesión Admin
           </button>
         </aside>
 

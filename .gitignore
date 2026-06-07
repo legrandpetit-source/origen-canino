@@ -1,0 +1,12 @@
+# Ignorar base de datos SQLite local de desarrollo
+backend/origen_canino.db
+backend/origen_canino.db-journal
+
+# Ignorar cache de Python
+**/__pycache__/
+**/*.pyc
+
+# Ignorar entornos virtuales locales
+backend/venv/
+venv/
+.venv/

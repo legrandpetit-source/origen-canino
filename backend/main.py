@@ -398,6 +398,80 @@ def delete_faq(faq_id: str, db: Session = Depends(get_db), admin: str = Depends(
     db.commit()
     return {"status": "success"}
 
+# ----------------------------------------------------
+# ADMIN USER MANAGEMENT ENDPOINTS (PROTECTED)
+# ----------------------------------------------------
+
+@app.get("/api/admin/users")
+def get_admin_users(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Retrieve all admin users."""
+    users = db.query(models.Admin).all()
+    return [{"id": u.id, "username": u.username} for u in users]
+
+@app.post("/api/admin/users")
+def create_admin_user(user_data: AdminLogin, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Create a new administrator user."""
+    existing = db.query(models.Admin).filter(models.Admin.username == user_data.username).first()
+    if existing:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El nombre de usuario ya está registrado"
+        )
+    
+    hashed = bcrypt.hashpw(user_data.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    new_user = models.Admin(username=user_data.username, password_hash=hashed)
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+    return {"status": "success", "user": {"id": new_user.id, "username": new_user.username}}
+
+@app.put("/api/admin/users/{user_id}")
+def update_admin_user(user_id: int, user_data: AdminLogin, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Update administrator username and/or password."""
+    target_user = db.query(models.Admin).filter(models.Admin.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    if user_data.username != target_user.username:
+        existing = db.query(models.Admin).filter(models.Admin.username == user_data.username).first()
+        if existing:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El nombre de usuario ya está registrado"
+            )
+        target_user.username = user_data.username
+        
+    if user_data.password and user_data.password.strip() != "":
+        hashed = bcrypt.hashpw(user_data.password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+        target_user.password_hash = hashed
+        
+    db.commit()
+    return {"status": "success", "user": {"id": target_user.id, "username": target_user.username}}
+
+@app.delete("/api/admin/users/{user_id}")
+def delete_admin_user(user_id: int, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Delete an administrator user."""
+    target_user = db.query(models.Admin).filter(models.Admin.id == user_id).first()
+    if not target_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+        
+    if target_user.username == admin:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No puedes eliminar tu propio usuario activo"
+        )
+        
+    total_admins = db.query(models.Admin).count()
+    if total_admins <= 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No se puede eliminar el único administrador restante"
+        )
+        
+    db.delete(target_user)
+    db.commit()
+    return {"status": "success"}
+
 @app.get("/api/admin/orders")
 def get_orders(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
     """Retrieve all sales and subscription requests."""

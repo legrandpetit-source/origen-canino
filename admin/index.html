@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Origen Canino - Panel de Control</title>
+  
+  <!-- Estilos e iconos idénticos al sitio principal -->
+  <link rel="stylesheet" href="../style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <style>
+    body {
+      background: var(--bg-cream);
+      margin: 0;
+      font-family: var(--font-sans);
+      color: var(--text-dark);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    /* Header de Admin simplificado */
+    .admin-header {
+      background: var(--bg-cream);
+      border-bottom: 1px solid rgba(44, 26, 14, 0.08);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .admin-logo-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .admin-logo-img {
+      height: 36px;
+      width: auto;
+      border-radius: var(--radius-sm);
+    }
+
+    .admin-logo-title {
+      font-family: var(--font-serif);
+      font-size: 1.25rem;
+      color: var(--secondary-brown);
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .admin-logo-subtitle {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin: 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .admin-back-btn {
+      color: var(--secondary-brown);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+    .admin-back-btn:hover {
+      color: var(--primary-green);
+    }
+    
+    .admin-main-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 2rem;
+      max-width: 1400px;
+      width: 100%;
+      box-sizing: border-box;
+      margin: 0 auto;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Encabezado de la página de administración -->
+  <header class="admin-header">
+    <div class="admin-logo-wrapper">
+      <img src="../assets/logo.jpg" alt="Origen Canino" class="admin-logo-img" onerror="this.src='../assets/logo.jpg'">
+      <div>
+        <h1 class="admin-logo-title">Origen Canino</h1>
+        <p class="admin-logo-subtitle">Panel de Administración</p>
+      </div>
+    </div>
+    <a href="../index.html" class="admin-back-btn">
+      <i class="fa-solid fa-arrow-left"></i> Volver a la Web
+    </a>
+  </header>
+
+  <main class="admin-main-area">
+
+    <!-- Formulario de Autenticación de Administrador -->
+    <div id="admin-login-box" class="admin-login-box" style="display: flex; justify-content: center; align-items: center; min-height: 400px; padding: 2rem 0;">
+      <div class="admin-login-card" style="background: var(--bg-cream); padding: 2rem; border-radius: var(--radius-md); border: 1px solid rgba(44,26,14,0.08); width: 100%; max-width: 360px; box-shadow: var(--shadow-sm); text-align: center;">
+        <i class="fa-solid fa-shield-halved" style="font-size: 2.5rem; color: var(--primary-green); margin-bottom: 1rem;"></i>
+        <h3 style="font-family: var(--font-serif); color: var(--secondary-brown); margin-bottom: 0.5rem; font-size: 1.4rem;">Panel de Control</h3>
+        <p style="color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1.5rem;">Ingresa tus credenciales para administrar la plataforma.</p>
+        <div class="form-group" style="text-align: left; margin-bottom: 1rem;">
+          <label for="admin-user-input" style="color: var(--text-dark); font-size: 0.8rem; font-weight: 700;">Usuario</label>
+          <input type="text" id="admin-user-input" class="form-input" placeholder="admin" style="width: 100%;">
+        </div>
+        <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
+          <label for="admin-pass-input" style="color: var(--text-dark); font-size: 0.8rem; font-weight: 700;">Contraseña</label>
+          <input type="password" id="admin-pass-input" class="form-input" placeholder="••••••••" style="width: 100%;" onkeydown="if(event.key==='Enter') loginAdmin()">
+        </div>
+        <button class="btn btn-primary" style="width: 100%;" onclick="loginAdmin()">
+          <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
+        </button>
+      </div>
+    </div>
+
+    <!-- Dashboard del Administrador (Oculto al inicio) -->
+    <div class="admin-dashboard-container" id="admin-dashboard-wrapper" style="display: none;">
+      
+      <!-- Sidebar del Administrador -->
+      <aside class="admin-sidebar">
+        <button class="admin-menu-btn active" id="btn-tab-parameters" onclick="switchAdminTab('parameters')">
+          <i class="fa-solid fa-sliders"></i> Parámetros de Dietas
+        </button>
+        <button class="admin-menu-btn" id="btn-tab-recipes" onclick="switchAdminTab('recipes')">
+          <i class="fa-solid fa-utensils"></i> Menús & Recetas
+        </button>
+        <button class="admin-menu-btn" id="btn-tab-orders" onclick="switchAdminTab('orders')">
+          <i class="fa-solid fa-receipt"></i> Suscripciones Activas
+        </button>
+        <button class="admin-menu-btn" id="btn-tab-testimonials" onclick="switchAdminTab('testimonials')">
+          <i class="fa-solid fa-comments"></i> Testimonios Familias
+        </button>
+        <button class="admin-menu-btn" id="btn-tab-faqs" onclick="switchAdminTab('faqs')">
+          <i class="fa-solid fa-circle-question"></i> Preguntas Frecuentes (FAQs)
+        </button>
+        <button class="admin-menu-btn" id="btn-tab-users" onclick="switchAdminTab('users')">
+          <i class="fa-solid fa-users-gear"></i> Administradores
+        </button>
+        <button class="admin-menu-btn" onclick="logoutAdmin()" style="margin-top: auto; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2);">
+          <i class="fa-solid fa-power-off"></i> Cerrar Sesión Admin
+        </button>
+      </aside>
+
+      <!-- Contenido del Panel Admin -->
+      <main class="admin-content-card">
+        
+        <!-- PANEL A: CONFIGURACIÓN DE PARÁMETROS -->
+        <div id="admin-panel-parameters" class="admin-view-panel active">
+          <h2 style="font-family: var(--font-serif); color: var(--secondary-brown); margin-bottom: 0.5rem;">
+            Mantenedor de Parámetros Nutricionales
+          </h2>
+          <p style="color: var(--text-muted); margin-bottom: 2rem;">
+            Configura los multiplicadores de ración para los cálculos automáticos y los precios por kg.
+          </p>
+
+          <div class="inline-form-grid">
+            <div class="form-group">
+              <label for="cfg-barf-price" style="color: var(--text-dark);">Precio por kg Dieta BARF ($)</label>
+              <input type="number" id="cfg-barf-price" class="form-input" value="4200">
+            </div>
+            <div class="form-group">
+              <label for="cfg-cooked-price" style="color: var(--text-dark);">Precio por kg Comida Cocinada ($)</label>
+              <input type="number" id="cfg-cooked-price" class="form-input" value="5200">
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+            Porcentajes para Dieta BARF (Adultos)
+          </h3>
+          <div class="inline-form-grid">
+            <div class="form-group">
+              <label for="cfg-barf-adult-sedentary" style="color: var(--text-dark);">Sedentario / Senior (%)</label>
+              <input type="number" id="cfg-barf-adult-sedentary" class="form-input" value="2.0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="cfg-barf-adult-normal" style="color: var(--text-dark);">Normal (%)</label>
+              <input type="number" id="cfg-barf-adult-normal" class="form-input" value="2.5" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="cfg-barf-adult-active" style="color: var(--text-dark);">Activo (%)</label>
+              <input type="number" id="cfg-barf-adult-active" class="form-input" value="3.0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="cfg-barf-adult-working" style="color: var(--text-dark);">Muy Activo (%)</label>
+              <input type="number" id="cfg-barf-adult-working" class="form-input" value="3.5" step="0.1">
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+            Porcentajes para Comida Cocinada (Adultos)
+          </h3>
+          <div class="inline-form-grid">
+            <div class="form-group">
+              <label for="cfg-cooked-adult-sedentary" style="color: var(--text-dark);">Sedentario / Senior (%)</label>
+              <input type="number" id="cfg-cooked-adult-sedentary" class="form-input" value="3.0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="cfg-cooked-adult-normal" style="color: var(--text-dark);">Normal (%)</label>
+              <input type="number" id="cfg-cooked-adult-normal" class="form-input" value="3.5" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="cfg-cooked-adult-active" style="color: var(--text-dark);">Activo (%)</label>
+              <input type="number" id="cfg-cooked-adult-active" class="form-input" value="4.0" step="0.1">
+            </div>
+            <div class="form-group">
+              <label for="cfg-cooked-adult-working" style="color: var(--text-dark);">Muy Activo (%)</label>
+              <input type="number" id="cfg-cooked-adult-working" class="form-input" value="4.5" step="0.1">
+            </div>
+          </div>
+
+          <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+            Porcentajes para Cachorros (Según Edad)
+          </h3>
+          <div class="inline-form-grid">
+            <div class="form-group">
+              <label for="cfg-puppy-early" style="color: var(--text-dark);">Cachorros 2-4 meses (%)</label>
+              <input type="number" id="cfg-puppy-early" class="form-input" value="8.0" step="0.5">
+            </div>
+            <div class="form-group">
+              <label for="cfg-puppy-mid" style="color: var(--text-dark);">Cachorros 4-6 meses (%)</label>
+              <input type="number" id="cfg-puppy-mid" class="form-input" value="6.0" step="0.5">
+            </div>
+            <div class="form-group">
+              <label for="cfg-puppy-late" style="color: var(--text-dark);">Cachorros 6-12 meses (%)</label>
+              <input type="number" id="cfg-puppy-late" class="form-input" value="4.0" step="0.5">
+            </div>
+          </div>
+
+          <button class="btn btn-primary" onclick="saveAdminParameters()">
+            <i class="fa-solid fa-floppy-disk"></i> Guardar Parámetros
+          </button>
+        </div>
+
+        <!-- PANEL B: GESTIÓN DE CATÁLOGO / RECETAS -->
+        <div id="admin-panel-recipes" class="admin-view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+              Catálogo de Productos y Recetas
+            </h2>
+            <button class="btn btn-primary" onclick="showAddProductForm()">
+              <i class="fa-solid fa-plus"></i> Nuevo Producto
+            </button>
+          </div>
+
+          <!-- Formulario de agregar/editar -->
+          <div id="add-product-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+            <h3 id="form-product-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Nuevo Producto</h3>
+            <input type="hidden" id="form-product-id">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="form-product-name" style="color: var(--text-dark);">Nombre del Producto</label>
+                <input type="text" id="form-product-name" class="form-input" required placeholder="Ej: BARF Salmón Premium">
+              </div>
+              <div class="form-group">
+                <label for="form-product-category" style="color: var(--text-dark);">Categoría</label>
+                <select id="form-product-category" class="form-input">
+                  <option value="barf">Dieta BARF</option>
+                  <option value="cooked">Comida Cocinada</option>
+                  <option value="snack">Snack / Suplemento</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="form-product-price" style="color: var(--text-dark);">Precio ($)</label>
+                <input type="number" id="form-product-price" class="form-input" required placeholder="Ej: 4500 (BARF/Cocido es por kg, Snack por unidad)">
+              </div>
+              <div class="form-group">
+                <label for="form-product-icon" style="color: var(--text-dark);">Emoji / Icono representativo</label>
+                <input type="text" id="form-product-icon" class="form-input" placeholder="Ej: 🍣 o 🦴">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="form-product-ingredients" style="color: var(--text-dark);">Ingredientes o Descripción Corta</label>
+              <input type="text" id="form-product-ingredients" class="form-input" placeholder="Ej: 60% carne de salmón, 20% huesos triturados, 10% zapallo...">
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary" onclick="submitProductForm()">
+                Guardar Producto
+              </button>
+              <button class="btn btn-secondary" onclick="hideProductForm()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla de Catálogo -->
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Icono</th>
+                  <th>Nombre</th>
+                  <th>Categoría</th>
+                  <th>Ingredientes / Detalle</th>
+                  <th>Precio</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PANEL C: GESTIÓN DE SUSCRIPCIONES / PEDIDOS -->
+        <div id="admin-panel-orders" class="admin-view-panel">
+          <h2 style="font-family: var(--font-serif); color: var(--secondary-brown); margin-bottom: 0.5rem;">
+            Control de Suscripciones Mensuales
+          </h2>
+          <p style="color: var(--text-muted); margin-bottom: 1.5rem;">
+            Revisa y gestiona las solicitudes de dietas personalizadas y pedidos ingresados por los clientes en la App.
+          </p>
+
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Foto Mascota</th>
+                  <th>Mascotas & Dueño</th>
+                  <th>Detalles Físicos</th>
+                  <th>Fórmula Solicitada</th>
+                  <th>Porción Diaria</th>
+                  <th>Total Mensual</th>
+                  <th>Estado de Pago</th>
+                </tr>
+              </thead>
+              <tbody id="admin-orders-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PANEL D: GESTIÓN DE TESTIMONIOS -->
+        <div id="admin-panel-testimonials" class="admin-view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+              Testimonios de Familias
+            </h2>
+            <button class="btn btn-primary" onclick="showAddTestimonialForm()">
+              <i class="fa-solid fa-plus"></i> Nuevo Testimonio
+            </button>
+          </div>
+
+          <!-- Formulario de agregar/editar testimonio -->
+          <div id="add-testimonial-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+            <h3 id="form-testimonial-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Testimonio</h3>
+            <input type="hidden" id="form-testimonial-id">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="form-testimonial-author" style="color: var(--text-dark);">Nombre del Autor</label>
+                <input type="text" id="form-testimonial-author" class="form-input" required placeholder="Ej: Camila Rojas">
+              </div>
+              <div class="form-group">
+                <label for="form-testimonial-location" style="color: var(--text-dark);">Ubicación</label>
+                <input type="text" id="form-testimonial-location" class="form-input" required placeholder="Ej: Providencia">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="form-testimonial-dog" style="color: var(--text-dark);">Nombre de la Mascota</label>
+                <input type="text" id="form-testimonial-dog" class="form-input" placeholder="Ej: Mateo">
+              </div>
+              <div class="form-group">
+                <label for="form-testimonial-photo" style="color: var(--text-dark);">Avatar (URL de foto o Base64)</label>
+                <input type="text" id="form-testimonial-photo" class="form-input" placeholder="Opcional. Por defecto usa logo.">
+              </div>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="form-testimonial-quote" style="color: var(--text-dark);">Testimonio / Opinión</label>
+              <textarea id="form-testimonial-quote" class="form-input" style="height: 80px; resize: none;" required placeholder="Escribe aquí el testimonio de la familia..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary" onclick="submitTestimonialForm()">
+                Guardar Testimonio
+              </button>
+              <button class="btn btn-secondary" onclick="hideTestimonialForm()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla de Testimonios -->
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Avatar</th>
+                  <th>Autor</th>
+                  <th>Ubicación</th>
+                  <th>Mascota</th>
+                  <th>Opinión</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-testimonials-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PANEL E: GESTIÓN DE FAQS -->
+        <div id="admin-panel-faqs" class="admin-view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+              Preguntas Frecuentes (FAQs)
+            </h2>
+            <button class="btn btn-primary" onclick="showAddFaqForm()">
+              <i class="fa-solid fa-plus"></i> Nueva FAQ
+            </button>
+          </div>
+
+          <!-- Formulario de agregar/editar FAQ -->
+          <div id="add-faq-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+            <h3 id="form-faq-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar FAQ</h3>
+            <input type="hidden" id="form-faq-id">
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="form-faq-question" style="color: var(--text-dark);">Pregunta</label>
+              <input type="text" id="form-faq-question" class="form-input" required placeholder="Ej: ¿Es seguro dar huesos a mi perro?">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 1.25rem;">
+              <label for="form-faq-answer" style="color: var(--text-dark);">Respuesta</label>
+              <textarea id="form-faq-answer" class="form-input" style="height: 100px; resize: none;" required placeholder="Escribe aquí la respuesta oficial..."></textarea>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary" onclick="submitFaqForm()">
+                Guardar FAQ
+              </button>
+              <button class="btn btn-secondary" onclick="hideFaqForm()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla de FAQs -->
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 250px;">Pregunta</th>
+                  <th>Respuesta Oficial</th>
+                  <th style="width: 100px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-faqs-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- PANEL F: GESTIÓN DE USUARIOS ADMINISTRADORES -->
+        <div id="admin-panel-users" class="admin-view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+              Usuarios Administradores
+            </h2>
+            <button class="btn btn-primary" onclick="showAddUserForm()">
+              <i class="fa-solid fa-user-plus"></i> Nuevo Administrador
+            </button>
+          </div>
+
+          <!-- Formulario de agregar/editar usuario admin -->
+          <div id="add-user-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+            <h3 id="form-user-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Administrador</h3>
+            <input type="hidden" id="form-user-id">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label for="form-user-name" style="color: var(--text-dark); font-weight: 700;">Nombre de Usuario</label>
+                <input type="text" id="form-user-name" class="form-input" required placeholder="Ej: admin2">
+              </div>
+              <div class="form-group">
+                <label for="form-user-pass" style="color: var(--text-dark); font-weight: 700;">Contraseña</label>
+                <input type="password" id="form-user-pass" class="form-input" placeholder="Escribe la contraseña (vacío en edición para no cambiar)">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary" onclick="submitUserForm()">
+                Guardar Usuario
+              </button>
+              <button class="btn btn-secondary" onclick="hideUserForm()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla de Administradores -->
+          <div class="admin-table-wrapper" style="max-width: 600px;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre de Usuario</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-users-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </main>
+    </div>
+
+  </main>
+
+  <script src="admin.js?v=1.0"></script>
+</body>
+</html>

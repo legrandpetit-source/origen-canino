@@ -957,59 +957,34 @@ body {
   background: radial-gradient(circle at center, hsla(85, 34%, 28%, 0.05) 0%, transparent 80%);
 }
 
-/* Carcasa del Teléfono (Smartphone Frame) */
+/* Carcasa del Teléfono (Smartphone Frame) - Adaptado a contenedor limpio en PC */
 .phone-mockup {
-  width: 385px;
-  height: 810px;
-  background: #111;
-  border-radius: 50px;
-  padding: 14px;
-  box-shadow: 0px 25px 50px -12px rgba(0, 0, 0, 0.5),
-              0px 0px 0px 4px #222,
-              0px 0px 0px 8px #444;
+  width: 500px;
+  height: 780px;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  box-shadow: none;
   position: relative;
   display: flex;
   flex-direction: column;
+  margin: 0 auto;
 }
 
 /* Elementos del Marco */
-.phone-notch {
-  width: 150px;
-  height: 28px;
-  background: #111;
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  border-bottom-left-radius: 20px;
-  border-bottom-right-radius: 20px;
-  z-index: 999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.phone-camera {
-  width: 12px;
-  height: 12px;
-  background: #222;
-  border-radius: 50%;
-  margin-right: 15px;
-  box-shadow: inset 0 0 3px rgba(255, 255, 255, 0.3);
-}
-
+.phone-notch,
+.phone-camera,
 .phone-speaker {
-  width: 45px;
-  height: 4px;
-  background: #333;
-  border-radius: 2px;
+  display: none !important;
 }
 
 /* Contenido Interno de la App Móvil */
 .phone-screen {
   flex: 1;
   background: var(--bg-cream);
-  border-radius: 38px;
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(44, 26, 14, 0.08);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   position: relative;
   display: flex;

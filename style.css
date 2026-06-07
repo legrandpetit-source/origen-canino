@@ -958,10 +958,18 @@ body {
 }
 
 /* Carcasa del Teléfono (Smartphone Frame) - Adaptado a contenedor limpio en PC */
+.pc-columns-wrapper {
+  display: contents;
+}
+.pc-column {
+  display: contents;
+}
+
 .phone-mockup {
-  width: 500px;
-  height: 850px;
-  max-height: 90vh;
+  width: 1050px;
+  max-width: 95vw;
+  height: 820px;
+  max-height: 88vh;
   background: transparent;
   border-radius: 0;
   padding: 0;
@@ -2700,4 +2708,42 @@ body.mobile-native-mode .phone-header {
   font-size: 0.8rem;
   font-weight: 600;
   color: var(--primary-green);
+}
+
+/* PC Column Layouts & Display Optimizations */
+body:not(.mobile-native-mode) .pc-columns-wrapper {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+  width: 100%;
+}
+
+body:not(.mobile-native-mode) .pc-column {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  height: 100%;
+}
+
+/* Specific grids for elements inside columns */
+body:not(.mobile-native-mode) .mobile-snacks-list {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* Form layout side-by-side within card */
+body:not(.mobile-native-mode) #mobile-profile-setup .mobile-card {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+/* Welcome and success receipt centered constraints */
+body:not(.mobile-native-mode) .mobile-welcome-screen,
+body:not(.mobile-native-mode) .order-success-box {
+  max-width: 500px;
+  margin: 0 auto;
 }

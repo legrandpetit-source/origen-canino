@@ -270,158 +270,171 @@
               <!-- 2.2 PANTALLA: FORMULARIO PERFIL MASCOTA -->
               <div id="mobile-profile-setup" class="mobile-view">
                 <div class="mobile-card" style="margin-top: 1rem;">
-                  <h3 class="mobile-title" id="profile-wizard-title">Perfil de tu Mascota</h3>
-                  <p class="mobile-subtitle">Configura los datos clave para armar la receta ideal.</p>
+                  <h3 class="mobile-title" id="profile-wizard-title" style="grid-column: 1 / -1;">Perfil de tu Mascota</h3>
+                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1rem;">Configura los datos clave para armar la receta ideal.</p>
                   
-                  <div class="photo-uploader">
-                    <div class="photo-preview-box" onclick="triggerPhotoUpload()" id="pet-photo-preview">
-                      <i class="fa-solid fa-camera"></i>
-                      <span>Subir Foto</span>
-                    </div>
-                    <input type="file" id="pet-photo-input" accept="image/*" onchange="previewPetPhoto(event)">
-                  </div>
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column">
+                      <div class="photo-uploader">
+                        <div class="photo-preview-box" onclick="triggerPhotoUpload()" id="pet-photo-preview">
+                          <i class="fa-solid fa-camera"></i>
+                          <span>Subir Foto</span>
+                        </div>
+                        <input type="file" id="pet-photo-input" accept="image/*" onchange="previewPetPhoto(event)">
+                      </div>
 
-                  <div class="mobile-input-group">
-                    <label for="pet-name">Nombre de la Mascota</label>
-                    <input type="text" id="pet-name" class="mobile-input" placeholder="Ej: Toby">
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pet-breed">Raza</label>
-                    <input type="text" id="pet-breed" class="mobile-input" placeholder="Ej: Border Collie">
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pet-weight">Peso Corporal (kg)</label>
-                    <input type="number" id="pet-weight" class="mobile-input" placeholder="Ej: 15" min="0.5" step="0.1">
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pet-age">Etapa de Vida</label>
-                    <select id="pet-age" class="mobile-select">
-                      <option value="adult">Adulto (Mayor a 1 año)</option>
-                      <option value="puppy">Cachorro (2 a 4 meses)</option>
-                      <option value="puppy-mid">Cachorro (4 a 6 meses)</option>
-                      <option value="puppy-late">Cachorro (6 a 12 meses)</option>
-                    </select>
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pet-activity">Nivel de Actividad</label>
-                    <select id="pet-activity" class="mobile-select">
-                      <option value="sedentary">Bajo (Sedentario / Senior)</option>
-                      <option value="normal" selected>Normal (Paseo diario)</option>
-                      <option value="active">Activo (Deporte recreativo)</option>
-                      <option value="working">Muy Activo (Trabajo / Canicross)</option>
-                    </select>
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pet-notes">Observaciones / Alergias</label>
-                    <input type="text" id="pet-notes" class="mobile-input" placeholder="Ej: Alérgico al pollo, piel sensible">
-                  </div>
-                  
-                  <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
-                    <button class="mobile-btn mobile-btn-secondary" onclick="cancelPetWizard()" style="flex:1;">
-                      Cancelar
-                    </button>
-                    <button class="mobile-btn mobile-btn-primary" onclick="savePetProfileAndGoToCalculator()" style="flex:2;">
-                      Calcular Ración <i class="fa-solid fa-arrow-right"></i>
-                    </button>
+                      <div class="mobile-input-group">
+                        <label for="pet-name">Nombre de la Mascota</label>
+                        <input type="text" id="pet-name" class="mobile-input" placeholder="Ej: Toby">
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pet-breed">Raza</label>
+                        <input type="text" id="pet-breed" class="mobile-input" placeholder="Ej: Border Collie">
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pet-weight">Peso Corporal (kg)</label>
+                        <input type="number" id="pet-weight" class="mobile-input" placeholder="Ej: 15" min="0.5" step="0.1">
+                      </div>
+                    </div>
+
+                    <div class="pc-column">
+                      <div class="mobile-input-group">
+                        <label for="pet-age">Etapa de Vida</label>
+                        <select id="pet-age" class="mobile-select">
+                          <option value="adult">Adulto (Mayor a 1 año)</option>
+                          <option value="puppy">Cachorro (2 a 4 meses)</option>
+                          <option value="puppy-mid">Cachorro (4 a 6 meses)</option>
+                          <option value="puppy-late">Cachorro (6 a 12 meses)</option>
+                        </select>
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pet-activity">Nivel de Actividad</label>
+                        <select id="pet-activity" class="mobile-select">
+                          <option value="sedentary">Bajo (Sedentario / Senior)</option>
+                          <option value="normal" selected>Normal (Paseo diario)</option>
+                          <option value="active">Activo (Deporte recreativo)</option>
+                          <option value="working">Muy Activo (Trabajo / Canicross)</option>
+                        </select>
+                      </div>
+                      <div class="mobile-input-group" style="margin-bottom: 1.5rem;">
+                        <label for="pet-notes">Observaciones / Alergias</label>
+                        <input type="text" id="pet-notes" class="mobile-input" placeholder="Ej: Alérgico al pollo, piel sensible">
+                      </div>
+                      
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="cancelPetWizard()" style="flex:1;">
+                          Cancelar
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="savePetProfileAndGoToCalculator()" style="flex:2;">
+                          Calcular Ración <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
               <!-- 2.3 PANTALLA: CALCULADORA Y PERSONALIZACIÓN INTERACTIVA DE RECETA -->
               <div id="mobile-calculator" class="mobile-view">
-                <div class="mobile-card" style="margin-top: 1rem; margin-bottom: 0.5rem;">
-                  <div class="pet-profile-summary">
-                    <img id="calc-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
-                    <div class="pet-meta-text">
-                      <h3 id="calc-pet-name">Toby</h3>
-                      <p id="calc-pet-details">Border Collie • 15 kg</p>
+                <div class="pc-columns-wrapper" style="display: contents;">
+                  <div class="pc-column">
+                    <div class="mobile-card" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+                      <div class="pet-profile-summary">
+                        <img id="calc-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
+                        <div class="pet-meta-text">
+                          <h3 id="calc-pet-name">Toby</h3>
+                          <p id="calc-pet-details">Border Collie • 15 kg</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Desglose de gramos diario -->
+                    <div class="portion-breakdown-card">
+                      <div class="portion-header">
+                        <span>Porción Diaria:</span>
+                        <span class="portion-total" id="calc-daily-total">375g</span>
+                      </div>
+                      <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;" id="calc-explanation">
+                        Calculado al 2.5% del peso corporal para mantenimiento adulto normal.
+                      </p>
+                      
+                      <!-- Desglose de barras -->
+                      <div class="breakdown-bars" id="calc-breakdown-bars">
+                        <div class="bar-part bar-bones" style="width: 50%"></div>
+                        <div class="bar-part bar-meat" style="width: 30%"></div>
+                        <div class="bar-part bar-organs" style="width: 10%"></div>
+                        <div class="bar-part bar-veggies" style="width: 10%"></div>
+                      </div>
+
+                      <!-- Leyenda -->
+                      <div class="breakdown-legend" id="calc-breakdown-legend">
+                        <!-- Dinámico -->
+                      </div>
+                    </div>
+
+                    <!-- Selección de Receta Base -->
+                    <div class="mobile-card">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.65rem; color: var(--secondary-brown);">
+                        1. Elige su Receta Base
+                      </h4>
+                      <div class="recipe-selector-grid" id="mobile-recipe-selector">
+                        <!-- Rellenado dinámicamente -->
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <!-- Desglose de gramos diario -->
-                <div class="portion-breakdown-card">
-                  <div class="portion-header">
-                    <span>Porción Diaria:</span>
-                    <span class="portion-total" id="calc-daily-total">375g</span>
-                  </div>
-                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;" id="calc-explanation">
-                    Calculado al 2.5% del peso corporal para mantenimiento adulto normal.
-                  </p>
-                  
-                  <!-- Desglose de barras -->
-                  <div class="breakdown-bars" id="calc-breakdown-bars">
-                    <div class="bar-part bar-bones" style="width: 50%"></div>
-                    <div class="bar-part bar-meat" style="width: 30%"></div>
-                    <div class="bar-part bar-organs" style="width: 10%"></div>
-                    <div class="bar-part bar-veggies" style="width: 10%"></div>
-                  </div>
+                  <div class="pc-column">
+                    <!-- Formulador Interactivo de Ingredientes -->
+                    <div class="mobile-card" style="margin-top: 1rem;">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
+                        2. Personaliza la Comida
+                      </h4>
+                      <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        Desmarca ingredientes para excluirlos de su porción mensual (se tacharán en la etiqueta).
+                      </p>
 
-                  <!-- Leyenda -->
-                  <div class="breakdown-legend" id="calc-breakdown-legend">
-                    <!-- Dinámico -->
-                  </div>
-                </div>
+                      <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Ingredientes de Receta:</span>
+                      <div class="pills-container" id="calc-ingredients-container" style="margin-bottom: 1rem;">
+                        <!-- Ingredientes de la receta activa -->
+                      </div>
 
-                <!-- Selección de Receta Base -->
-                <div class="mobile-card">
-                  <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.65rem; color: var(--secondary-brown);">
-                    1. Elige su Receta Base
-                  </h4>
-                  <div class="recipe-selector-grid" id="mobile-recipe-selector">
-                    <!-- Rellenado dinámicamente -->
-                  </div>
-                </div>
+                      <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Superalimentos (+$1.500 c/u al mes):</span>
+                      <div class="pills-container" id="calc-superfoods-container">
+                        <!-- Suplementos opcionales -->
+                      </div>
+                    </div>
 
-                <!-- Formulador Interactivo de Ingredientes -->
-                <div class="mobile-card">
-                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
-                    2. Personaliza la Comida
-                  </h4>
-                  <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">
-                    Desmarca ingredientes para excluirlos de su porción mensual (se tacharán en la etiqueta).
-                  </p>
+                    <!-- Etiqueta de empaque final -->
+                    <div class="mobile-card">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
+                        3. Vista Previa de Etiqueta
+                      </h4>
+                      <div class="package-label-mockup" id="calc-package-label">
+                        <!-- Generado dinámicamente -->
+                      </div>
+                    </div>
 
-                  <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Ingredientes de Receta:</span>
-                  <div class="pills-container" id="calc-ingredients-container" style="margin-bottom: 1rem;">
-                    <!-- Ingredientes de la receta activa -->
-                  </div>
-
-                  <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Superalimentos (+$1.500 c/u al mes):</span>
-                  <div class="pills-container" id="calc-superfoods-container">
-                    <!-- Suplementos opcionales -->
-                  </div>
-                </div>
-
-                <!-- Etiqueta de empaque final -->
-                <div class="mobile-card">
-                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
-                    3. Vista Previa de Etiqueta
-                  </h4>
-                  <div class="package-label-mockup" id="calc-package-label">
-                    <!-- Generado dinámicamente -->
-                  </div>
-                </div>
-
-                <!-- Envío e instrucciones -->
-                <div class="mobile-card">
-                  <div class="mobile-input-group">
-                    <label for="custom-instructions">Instrucciones Especiales de Empaque</label>
-                    <input type="text" id="custom-instructions" class="mobile-input" placeholder="Ej: Congelar en porciones de 150g">
-                  </div>
-                  
-                  <div class="receipt-row" style="margin-bottom: 0.75rem; border-top: 1px solid rgba(44,26,14,0.06); padding-top: 0.75rem;">
-                    <span>Suscripción Mensual (<span id="calc-monthly-weight">11.3</span> kg):</span>
-                    <strong id="calc-diet-price">$45.000</strong>
-                  </div>
-                  
-                  <div style="display: flex; gap: 0.5rem;">
-                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('welcome')" style="flex: 1;">
-                      Atrás
-                    </button>
-                    <button class="mobile-btn mobile-btn-primary" onclick="proceedToSnacks()" style="flex: 2;">
-                      Confirmar Dieta <i class="fa-solid fa-arrow-right"></i>
-                    </button>
+                    <!-- Envío e instrucciones -->
+                    <div class="mobile-card">
+                      <div class="mobile-input-group">
+                        <label for="custom-instructions">Instrucciones Especiales de Empaque</label>
+                        <input type="text" id="custom-instructions" class="mobile-input" placeholder="Ej: Congelar en porciones de 150g">
+                      </div>
+                      
+                      <div class="receipt-row" style="margin-bottom: 0.75rem; border-top: 1px solid rgba(44,26,14,0.06); padding-top: 0.75rem;">
+                        <span>Suscripción Mensual (<span id="calc-monthly-weight">11.3</span> kg):</span>
+                        <strong id="calc-diet-price">$45.000</strong>
+                      </div>
+                      
+                      <div style="display: flex; gap: 0.5rem;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('welcome')" style="flex: 1;">
+                          Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="proceedToSnacks()" style="flex: 2;">
+                          Confirmar Dieta <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -429,33 +442,39 @@
               <!-- 2.4 PANTALLA: CATÁLOGO DE SNACKS -->
               <div id="mobile-snacks" class="mobile-view">
                 <div class="mobile-card" style="margin-top: 1rem;">
-                  <h3 class="mobile-title">Suplementos & Snacks</h3>
-                  <p class="mobile-subtitle">Acompaña la dieta mensual con deliciosos snacks deshidratados y caldos de colágeno.</p>
-                  
-                  <div class="mobile-snacks-list" id="mobile-snacks-container">
-                    <!-- Cargados dinámicamente -->
-                  </div>
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column">
+                      <h3 class="mobile-title">Suplementos & Snacks</h3>
+                      <p class="mobile-subtitle" style="margin-bottom: 1rem;">Acompaña la dieta mensual con deliciosos snacks deshidratados y caldos de colágeno.</p>
+                      
+                      <div class="mobile-snacks-list" id="mobile-snacks-container">
+                        <!-- Cargados dinámicamente -->
+                      </div>
+                    </div>
 
-                  <div class="receipt-row" style="margin-top: 1rem; border-top: 1px solid rgba(44, 26, 14, 0.1); padding-top: 0.75rem;">
-                    <span>Dietas de Mascotas:</span>
-                    <span id="snacks-diet-subtotal">$0</span>
-                  </div>
-                  <div class="receipt-row">
-                    <span>Snacks Generales:</span>
-                    <span id="snacks-only-subtotal">$0</span>
-                  </div>
-                  <div class="receipt-row" style="font-weight: 700; color: var(--primary-green);">
-                    <span>Total Mensual Compra:</span>
-                    <span id="snacks-total">$0</span>
-                  </div>
-                  
-                  <div style="display: flex; gap: 0.5rem; margin-top: 1.25rem;">
-                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('calculator')" style="flex: 1;">
-                      Atrás
-                    </button>
-                    <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckout()" style="flex: 2;">
-                      Ir a Pagar <i class="fa-solid fa-credit-card"></i>
-                    </button>
+                    <div class="pc-column">
+                      <div class="receipt-row" style="margin-top: 1.5rem; border-top: 1px solid rgba(44, 26, 14, 0.1); padding-top: 0.75rem;">
+                        <span>Dietas de Mascotas:</span>
+                        <span id="snacks-diet-subtotal">$0</span>
+                      </div>
+                      <div class="receipt-row">
+                        <span>Snacks Generales:</span>
+                        <span id="snacks-only-subtotal">$0</span>
+                      </div>
+                      <div class="receipt-row" style="font-weight: 700; color: var(--primary-green); font-size: 1.1rem; border-bottom: 1px solid rgba(44,26,14,0.06); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                        <span>Total Mensual Compra:</span>
+                        <span id="snacks-total">$0</span>
+                      </div>
+                      
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('calculator')" style="flex: 1;">
+                          Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckout()" style="flex: 2;">
+                          Ir a Pagar <i class="fa-solid fa-credit-card"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -463,85 +482,91 @@
               <!-- 2.5 PANTALLA: CHECKOUT & PASARELA DE PAGO INTERACTIVA (MULTI-MASCOTA) -->
               <div id="mobile-checkout" class="mobile-view">
                 <div class="mobile-card" style="margin-top: 1rem;">
-                  <h3 class="mobile-title">Suscripción Mensual</h3>
-                  <p class="mobile-subtitle">Revisa el detalle de tus mascotas y realiza el pago seguro.</p>
+                  <h3 class="mobile-title" style="grid-column: 1 / -1;">Suscripción Mensual</h3>
+                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1rem;">Revisa el detalle de tus mascotas y realiza el pago seguro.</p>
                   
-                  <!-- Desglose por perro en Checkout -->
-                  <div class="checkout-pets-breakdown" id="checkout-pets-list">
-                    <!-- Llenado dinámico per pet -->
-                  </div>
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column">
+                      <!-- Desglose por perro en Checkout -->
+                      <div class="checkout-pets-breakdown" id="checkout-pets-list" style="margin-bottom: 1rem;">
+                        <!-- Llenado dinámico per pet -->
+                      </div>
 
-                  <!-- Tarjeta de Crédito 3D Interactiva -->
-                  <div class="credit-card-wrapper" id="checkout-credit-card">
-                    <div class="credit-card-inner">
-                      <!-- Lado Frontal -->
-                      <div class="credit-card-front">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                          <div class="card-chip"></div>
-                          <i class="fa-brands fa-cc-visa" style="font-size: 1.8rem;"></i>
-                        </div>
-                        <div class="card-number" id="card-num-preview">•••• •••• •••• ••••</div>
-                        <div class="card-holder-group">
-                          <div>
-                            <span>Titular</span>
-                            <div class="card-holder-name" id="card-name-preview">Nombre Completo</div>
+                      <!-- Tarjeta de Crédito 3D Interactiva -->
+                      <div class="credit-card-wrapper" id="checkout-credit-card" style="margin-bottom: 1.5rem;">
+                        <div class="credit-card-inner">
+                          <!-- Lado Frontal -->
+                          <div class="credit-card-front">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                              <div class="card-chip"></div>
+                              <i class="fa-brands fa-cc-visa" style="font-size: 1.8rem;"></i>
+                            </div>
+                            <div class="card-number" id="card-num-preview">•••• •••• •••• ••••</div>
+                            <div class="card-holder-group">
+                              <div>
+                                <span>Titular</span>
+                                <div class="card-holder-name" id="card-name-preview">Nombre Completo</div>
+                              </div>
+                              <div>
+                                <span>Expira</span>
+                                <div id="card-exp-preview">MM/AA</div>
+                              </div>
+                            </div>
                           </div>
-                          <div>
-                            <span>Expira</span>
-                            <div id="card-exp-preview">MM/AA</div>
+                          <!-- Lado Posterior -->
+                          <div class="credit-card-back">
+                            <div class="card-magnetic-strip"></div>
+                            <div style="margin-top: 1rem;">
+                              <div class="card-signature-strip" id="card-cvv-preview">123</div>
+                              <div style="text-align: right; font-size: 0.6rem; opacity: 0.8; margin-top: 4px;">CVV</div>
+                            </div>
+                            <div style="text-align: left; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">
+                              ORIGEN CANINO
+                            </div>
                           </div>
                         </div>
                       </div>
-                      <!-- Lado Posterior -->
-                      <div class="credit-card-back">
-                        <div class="card-magnetic-strip"></div>
-                        <div style="margin-top: 1rem;">
-                          <div class="card-signature-strip" id="card-cvv-preview">123</div>
-                          <div style="text-align: right; font-size: 0.6rem; opacity: 0.8; margin-top: 4px;">CVV</div>
+                    </div>
+
+                    <div class="pc-column">
+                      <!-- Campos de Entrada del Pago -->
+                      <div class="mobile-input-group">
+                        <label for="pay-cardholder">Nombre del Titular</label>
+                        <input type="text" id="pay-cardholder" class="mobile-input" placeholder="Ej: Patricio Silva" oninput="updateCardPreview('name', this.value)">
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pay-cardnumber">Número de Tarjeta</label>
+                        <input type="text" id="pay-cardnumber" class="mobile-input" placeholder="4556 1234 5678 9012" maxlength="19" oninput="updateCardPreview('number', this.value)">
+                      </div>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div class="mobile-input-group">
+                          <label for="pay-expiry">Fecha Vencimiento</label>
+                          <input type="text" id="pay-expiry" class="mobile-input" placeholder="MM/AA" maxlength="5" oninput="updateCardPreview('expiry', this.value)">
                         </div>
-                        <div style="text-align: left; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">
-                          ORIGEN CANINO
+                        <div class="mobile-input-group">
+                          <label for="pay-cvv">Código CVV</label>
+                          <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
                         </div>
                       </div>
-                    </div>
-                  </div>
+                      <div class="mobile-input-group">
+                        <label for="pay-address">Dirección de Entrega</label>
+                        <input type="text" id="pay-address" class="mobile-input" placeholder="Av. Principal 1234, Santiago">
+                      </div>
 
-                  <!-- Campos de Entrada del Pago -->
-                  <div class="mobile-input-group">
-                    <label for="pay-cardholder">Nombre del Titular</label>
-                    <input type="text" id="pay-cardholder" class="mobile-input" placeholder="Ej: Patricio Silva" oninput="updateCardPreview('name', this.value)">
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pay-cardnumber">Número de Tarjeta</label>
-                    <input type="text" id="pay-cardnumber" class="mobile-input" placeholder="4556 1234 5678 9012" maxlength="19" oninput="updateCardPreview('number', this.value)">
-                  </div>
-                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
-                    <div class="mobile-input-group">
-                      <label for="pay-expiry">Fecha Vencimiento</label>
-                      <input type="text" id="pay-expiry" class="mobile-input" placeholder="MM/AA" maxlength="5" oninput="updateCardPreview('expiry', this.value)">
-                    </div>
-                    <div class="mobile-input-group">
-                      <label for="pay-cvv">Código CVV</label>
-                      <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
-                    </div>
-                  </div>
-                  <div class="mobile-input-group">
-                    <label for="pay-address">Dirección de Entrega</label>
-                    <input type="text" id="pay-address" class="mobile-input" placeholder="Av. Principal 1234, Santiago">
-                  </div>
+                      <div class="receipt-row" style="font-weight: 700; font-size: 1.1rem; color: var(--primary-green); margin: 0.5rem 0 1rem 0;">
+                        <span>Total a Pagar:</span>
+                        <span id="checkout-total-val">$0</span>
+                      </div>
 
-                  <div class="receipt-row" style="font-weight: 700; font-size: 1.1rem; color: var(--primary-green); margin: 1rem 0;">
-                    <span>Total a Pagar:</span>
-                    <span id="checkout-total-val">$0</span>
-                  </div>
-
-                  <div style="display: flex; gap: 0.5rem;">
-                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('snacks')" style="flex: 1;">
-                      Atrás
-                    </button>
-                    <button class="mobile-btn mobile-btn-accent" onclick="processSecurePayment()" style="flex: 2;" id="pay-btn">
-                      <i class="fa-solid fa-shield-halved"></i> Pagar Suscripción
-                    </button>
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('snacks')" style="flex: 1;">
+                          Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-accent" onclick="processSecurePayment()" style="flex: 2;" id="pay-btn">
+                          <i class="fa-solid fa-shield-halved"></i> Pagar Suscripción
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -549,57 +574,61 @@
               <!-- 2.4.5 PANTALLA: AUTENTICACIÓN MÓVIL (LOGIN/REGISTRO) -->
               <div id="mobile-auth" class="mobile-view">
                 <div class="mobile-card" style="margin-top: 1rem;">
-                  <h3 class="mobile-title" id="mobile-auth-title">Inicia Sesión</h3>
-                  <p class="mobile-subtitle">Identifícate para poder procesar tu pago y sincronizar tus mascotas.</p>
+                  <h3 class="mobile-title" id="mobile-auth-title" style="grid-column: 1 / -1;">Inicia Sesión</h3>
+                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1.5rem;">Identifícate para poder procesar tu pago y sincronizar tus mascotas.</p>
                   
-                  <!-- Login Social Móvil -->
-                  <div style="margin-bottom: 1.5rem;">
-                    <button class="social-login-btn google-btn" onclick="loginCustomerSocialMobile('google')" style="padding: 0.6rem; font-size: 0.8rem; margin-bottom: 0.5rem; width: 100%;">
-                      <i class="fa-brands fa-google"></i> Continuar con Google
-                    </button>
-                    <button class="social-login-btn apple-btn" onclick="loginCustomerSocialMobile('apple')" style="padding: 0.6rem; font-size: 0.8rem; width: 100%;">
-                      <i class="fa-brands fa-apple"></i> Continuar con Apple
-                    </button>
-                  </div>
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column" style="justify-content: center; padding-right: 1.5rem; border-right: 1px solid rgba(44, 26, 14, 0.08);">
+                      <!-- Login Social Móvil -->
+                      <div style="margin-bottom: 1.5rem; width: 100%;">
+                        <button class="social-login-btn google-btn" onclick="loginCustomerSocialMobile('google')" style="padding: 0.6rem; font-size: 0.8rem; margin-bottom: 0.5rem; width: 100%;">
+                          <i class="fa-brands fa-google"></i> Continuar con Google
+                        </button>
+                        <button class="social-login-btn apple-btn" onclick="loginCustomerSocialMobile('apple')" style="padding: 0.6rem; font-size: 0.8rem; width: 100%;">
+                          <i class="fa-brands fa-apple"></i> Continuar con Apple
+                        </button>
+                      </div>
+                    </div>
 
-                  <div class="auth-divider" style="margin: 1rem 0;">O</div>
+                    <div class="pc-column" style="padding-left: 0.5rem;">
+                      <!-- Formulario Correo -->
+                      <div id="mobile-login-fields" style="width: 100%;">
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
+                          <input type="email" id="mb-auth-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                          <label for="mb-auth-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
+                          <input type="password" id="mb-auth-pass" class="mobile-input" placeholder="••••••••">
+                        </div>
+                        <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('login')">Ingresar</button>
+                        <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
+                          ¿No tienes cuenta? <a href="#" onclick="toggleMobileAuthView(true); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Regístrate aquí</a>
+                        </p>
+                      </div>
 
-                  <!-- Formulario Correo -->
-                  <div id="mobile-login-fields">
-                    <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
-                      <label for="mb-auth-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
-                      <input type="email" id="mb-auth-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                      <div id="mobile-register-fields" style="display: none; width: 100%;">
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-reg-name" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Nombre</label>
+                          <input type="text" id="mb-auth-reg-name" class="mobile-input" placeholder="Tu Nombre">
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-reg-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
+                          <input type="email" id="mb-auth-reg-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                          <label for="mb-auth-reg-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
+                          <input type="password" id="mb-auth-reg-pass" class="mobile-input" placeholder="••••••••">
+                        </div>
+                        <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('register')">Registrarse</button>
+                        <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
+                          ¿Ya tienes cuenta? <a href="#" onclick="toggleMobileAuthView(false); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Inicia sesión</a>
+                        </p>
+                      </div>
+                      
+                      <button class="mobile-btn mobile-btn-secondary" style="margin-top: 1rem; width: 100%;" onclick="changeMobileView('snacks')">Atrás</button>
                     </div>
-                    <div class="mobile-input-group" style="margin-bottom: 1rem;">
-                      <label for="mb-auth-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
-                      <input type="password" id="mb-auth-pass" class="mobile-input" placeholder="••••••••">
-                    </div>
-                    <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('login')">Ingresar</button>
-                    <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
-                      ¿No tienes cuenta? <a href="#" onclick="toggleMobileAuthView(true); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Regístrate aquí</a>
-                    </p>
                   </div>
-
-                  <div id="mobile-register-fields" style="display: none;">
-                    <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
-                      <label for="mb-auth-reg-name" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Nombre</label>
-                      <input type="text" id="mb-auth-reg-name" class="mobile-input" placeholder="Tu Nombre">
-                    </div>
-                    <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
-                      <label for="mb-auth-reg-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
-                      <input type="email" id="mb-auth-reg-email" class="mobile-input" placeholder="ejemplo@gmail.com">
-                    </div>
-                    <div class="mobile-input-group" style="margin-bottom: 1rem;">
-                      <label for="mb-auth-reg-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
-                      <input type="password" id="mb-auth-reg-pass" class="mobile-input" placeholder="••••••••">
-                    </div>
-                    <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('register')">Registrarse</button>
-                    <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
-                      ¿Ya tienes cuenta? <a href="#" onclick="toggleMobileAuthView(false); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Inicia sesión</a>
-                    </p>
-                  </div>
-                  
-                  <button class="mobile-btn mobile-btn-secondary" style="margin-top: 1rem; width: 100%;" onclick="changeMobileView('snacks')">Atrás</button>
                 </div>
               </div>
 
@@ -635,62 +664,68 @@
               <div id="mobile-pet-dashboard" class="mobile-view">
                 
                 <!-- Slider Horizontal de Avatares de Perros -->
-                <div class="pet-selector-bar" id="dash-pet-selector">
+                <div class="pet-selector-bar" id="dash-pet-selector" style="grid-column: 1 / -1;">
                   <!-- Avatares circulares cargados con JS, más botón de agregar -->
                 </div>
 
-                <div class="mobile-card">
-                  <div class="pet-profile-summary">
-                    <img id="dash-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
-                    <div class="pet-meta-text">
-                      <h3 id="dash-pet-name">Toby</h3>
-                      <p id="dash-pet-details">Border Collie • 15 kg</p>
+                <div class="pc-columns-wrapper" style="display: contents;">
+                  <div class="pc-column">
+                    <div class="mobile-card">
+                      <div class="pet-profile-summary">
+                        <img id="dash-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
+                        <div class="pet-meta-text">
+                          <h3 id="dash-pet-name">Toby</h3>
+                          <p id="dash-pet-details">Border Collie • 15 kg</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Cuenta regresiva de entrega -->
+                    <div class="delivery-countdown">
+                      <h4>Siguiente Despacho en</h4>
+                      <div class="days">08 Días</div>
+                      <p style="font-size: 0.7rem; opacity: 0.9;">Entrega estimada: 15 de Junio</p>
+                    </div>
+
+                    <button class="mobile-btn mobile-btn-secondary" onclick="editCurrentPlanFromDashboard()" style="margin-top: 1rem; width: 100%;">
+                      <i class="fa-solid fa-pen-to-square"></i> Modificar Plan Mascota
+                    </button>
+                    <button class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2); width: 100%;" onclick="logoutApp()">
+                      <i class="fa-solid fa-power-off"></i> Cerrar Sesión
+                    </button>
+                  </div>
+
+                  <div class="pc-column">
+                    <!-- Info de Plan -->
+                    <div class="mobile-card">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.5rem;">
+                        Suscripción Activa Mascota
+                      </h4>
+                      <div class="receipt-row">
+                        <span>Fórmula Base:</span>
+                        <strong id="dash-diet-recipe">BARF Res</strong>
+                      </div>
+                      <div class="receipt-row">
+                        <span>Ración Diaria:</span>
+                        <strong id="dash-daily-portion">375 g / día</strong>
+                      </div>
+                      <div class="receipt-row" style="color: var(--primary-green); font-weight: 700; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 0.5rem; margin-top: 0.5rem;">
+                        <span>Pago Mensual Mascota:</span>
+                        <span id="dash-monthly-cost">$45.000</span>
+                      </div>
+                    </div>
+
+                    <!-- Guía de alimentación diaria -->
+                    <div class="mobile-card">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.75rem;">
+                        Guía de Porción Diaria
+                      </h4>
+                      <div id="dash-feeding-guide">
+                        <!-- Generado dinámicamente -->
+                      </div>
                     </div>
                   </div>
                 </div>
-
-                <!-- Cuenta regresiva de entrega -->
-                <div class="delivery-countdown">
-                  <h4>Siguiente Despacho en</h4>
-                  <div class="days">08 Días</div>
-                  <p style="font-size: 0.7rem; opacity: 0.9;">Entrega estimada: 15 de Junio</p>
-                </div>
-
-                <!-- Info de Plan -->
-                <div class="mobile-card">
-                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.5rem;">
-                    Suscripción Activa Mascota
-                  </h4>
-                  <div class="receipt-row">
-                    <span>Fórmula Base:</span>
-                    <strong id="dash-diet-recipe">BARF Res</strong>
-                  </div>
-                  <div class="receipt-row">
-                    <span>Ración Diaria:</span>
-                    <strong id="dash-daily-portion">375 g / día</strong>
-                  </div>
-                  <div class="receipt-row" style="color: var(--primary-green); font-weight: 700; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 0.5rem; margin-top: 0.5rem;">
-                    <span>Pago Mensual Mascota:</span>
-                    <span id="dash-monthly-cost">$45.000</span>
-                  </div>
-                </div>
-
-                <!-- Guía de alimentación diaria -->
-                <div class="mobile-card">
-                  <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.75rem;">
-                    Guía de Porción Diaria
-                  </h4>
-                  <div id="dash-feeding-guide">
-                    <!-- Generado dinámicamente -->
-                  </div>
-                </div>
-
-                <button class="mobile-btn mobile-btn-secondary" onclick="editCurrentPlanFromDashboard()">
-                  <i class="fa-solid fa-pen-to-square"></i> Modificar Plan Mascota
-                </button>
-                <button class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2);" onclick="logoutApp()">
-                  <i class="fa-solid fa-power-off"></i> Cerrar Sesión
-                </button>
               </div>
 
             </div>

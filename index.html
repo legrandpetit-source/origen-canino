@@ -15,7 +15,7 @@
 
   <!-- Encabezado Principal de la Suite -->
   <header class="app-header">
-    <div class="logo-container">
+    <div class="logo-container" onclick="resetToWelcome()" style="cursor: pointer;">
       <img src="assets/logo.jpg" alt="Logo Origen Canino" class="logo-img">
       <div class="logo-text">
         <div class="logo-brand-wrapper">
@@ -241,15 +241,7 @@
           </div>
           
           <div class="phone-screen">
-            <!-- Barra de estado del móvil -->
-            <div class="phone-status-bar">
-              <div id="simulated-time">10:47</div>
-              <div class="status-icons">
-                <i class="fa-solid fa-signal"></i>
-                <i class="fa-solid fa-wifi"></i>
-                <i class="fa-solid fa-battery-three-quarters"></i>
-              </div>
-            </div>
+            <!-- Barra de estado del móvil removida -->
             
             <!-- Contenido de las pantallas de la App -->
             <div class="phone-content" id="mobile-app-content">
@@ -257,8 +249,8 @@
               <!-- 2.1 PANTALLA: BIENVENIDA / SELECCIÓN DE MASCOTAS -->
               <div id="mobile-welcome" class="mobile-view active">
                 <div class="mobile-welcome-screen">
-                  <img src="assets/logo.jpg" alt="Origen Canino Logo" class="welcome-logo">
-                  <h2>Origen Canino</h2>
+                  <img src="assets/logo.jpg" alt="Origen Canino Logo" class="welcome-logo" onclick="resetToWelcome()" style="cursor: pointer;">
+                  <h2 onclick="resetToWelcome()" style="cursor: pointer;">Origen Canino</h2>
                   <p>Nutrición natural premium formulada a medida para tus mascotas.</p>
                   
                   <!-- Listado de mascotas existentes -->

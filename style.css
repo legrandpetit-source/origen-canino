@@ -2440,7 +2440,7 @@ body.mobile-native-mode {
   overflow: hidden;
 }
 
-body.mobile-native-mode .site-header {
+body.mobile-native-mode .app-header {
   display: none !important;
 }
 
@@ -2508,7 +2508,7 @@ body.mobile-native-mode .phone-header {
   body {
     background: var(--bg-cream);
   }
-  .site-header {
+  .app-header {
     display: none !important;
   }
   #view-web {

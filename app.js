@@ -792,8 +792,8 @@ function updatePortionCalculatorUI() {
     pet.selectedRecipeId = appState.recipes[0].id;
   }
 
-  const selectedRecipe = appState.recipes.find(r => r.id === pet.selectedRecipeId) || appState.recipes[0];
-  const dietType = selectedRecipe.category;
+  const selectedRecipe = appState.recipes.find(r => r.id === pet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+  const dietType = selectedRecipe ? selectedRecipe.category : 'barf';
 
   document.getElementById('calc-pet-avatar').src = pet.photo;
   document.getElementById('calc-pet-name').textContent = pet.name;
@@ -1353,7 +1353,7 @@ function renderPetDashboard() {
   document.getElementById('dash-pet-name').textContent = activePet.name;
   document.getElementById('dash-pet-details').textContent = `${activePet.breed} • ${activePet.weight} kg`;
   
-  const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0];
+  const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
   document.getElementById('dash-diet-recipe').textContent = rec.name;
   document.getElementById('dash-daily-portion').textContent = `${activePet.portionResults.dailyGrams} g / día`;
   document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')}`;
@@ -1604,8 +1604,8 @@ window.handleDesktopPetPhotoSelect = function(event) {
 };
 
 function setupDkStep2() {
-  const selectedRecipe = appState.recipes.find(r => r.id === dkPet.selectedRecipeId) || appState.recipes[0];
-  const dietType = selectedRecipe.category;
+  const selectedRecipe = appState.recipes.find(r => r.id === dkPet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+  const dietType = selectedRecipe ? selectedRecipe.category : 'barf';
   const portion = calculatePortion(dkPet.weight, dkPet.age, dkPet.activity, dietType);
   dkPet.portionResults = portion;
   
@@ -2201,6 +2201,14 @@ window.loginCustomerSocialMobile = async function(provider) {
     changeMobileView('checkout');
   } catch (err) {
     alert("Error de inicio social: " + err.message);
+  }
+};
+
+window.resetToWelcome = function() {
+  if (isMobileDevice()) {
+    changeMobileView('welcome');
+  } else {
+    switchView('web');
   }
 };
 

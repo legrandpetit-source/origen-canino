@@ -1971,6 +1971,8 @@ window.submitFaqForm = async function() {
     hideFaqForm();
     renderAdminFaqsTable();
     renderWebFaqs();
+  } catch (err) {
+    alert("Error al guardar FAQ: " + err.message);
   }
 };
 // ----------------------------------------------------

@@ -2747,3 +2747,20 @@ body:not(.mobile-native-mode) .order-success-box {
   max-width: 500px;
   margin: 0 auto;
 }
+
+/* PC simulator container responsive height adjustments */
+body:not(.mobile-native-mode) .phone-mockup {
+  height: auto !important;
+  max-height: 94vh !important;
+}
+
+body:not(.mobile-native-mode) .phone-screen {
+  height: auto !important;
+  max-height: 94vh !important;
+}
+
+body:not(.mobile-native-mode) .phone-content {
+  height: auto !important;
+  flex: none !important;
+  overflow-y: auto !important;
+}

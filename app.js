@@ -670,7 +670,15 @@ window.initNewPetWizard = function() {
 };
 
 window.cancelPetWizard = function() {
-  changeMobileView('welcome');
+  const paidPets = appState.pets.filter(p => p.subscriptionPaid);
+  if (paidPets.length > 0) {
+    if (!appState.activePetIdDashboard) {
+      appState.activePetIdDashboard = paidPets[0].id;
+    }
+    changeMobileView('pet-dashboard');
+  } else {
+    changeMobileView('welcome');
+  }
 };
 
 window.savePetProfileAndGoToCalculator = async function() {
@@ -1410,8 +1418,29 @@ function renderPetDashboard() {
   }
 }
 
+window.goBackToProfileSetup = function() {
+  const pet = appState.pets.find(p => p.id === appState.currentPetId);
+  if (pet) {
+    document.getElementById('profile-wizard-title').textContent = pet.subscriptionPaid ? 'Modificar Perfil de ' + pet.name : 'Perfil de tu Mascota';
+    document.getElementById('pet-name').value = pet.name || '';
+    document.getElementById('pet-breed').value = pet.breed || '';
+    document.getElementById('pet-weight').value = pet.weight || '';
+    document.getElementById('pet-age').value = pet.age || 'adult';
+    document.getElementById('pet-activity').value = pet.activity || 'normal';
+    document.getElementById('pet-notes').value = pet.notes || '';
+    petPhotoBase64 = pet.photo || 'assets/logo.jpg';
+    if (petPhotoBase64 && petPhotoBase64 !== 'assets/logo.jpg') {
+      document.getElementById('pet-photo-preview').innerHTML = `<img src="${petPhotoBase64}" alt="Vista previa" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
+    } else {
+      document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
+    }
+  }
+  changeMobileView('profile-setup');
+};
+
 window.editCurrentPlanFromDashboard = function() {
   appState.currentPetId = appState.activePetIdDashboard;
+  window.goBackToProfileSetup();
 };
 
 window.logoutApp = function() {

@@ -466,11 +466,14 @@
                         <span id="snacks-total">$0</span>
                       </div>
                       
-                      <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                        <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('calculator')" style="flex: 1;">
-                          Atrás
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto; flex-wrap: wrap;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('calculator')" style="flex: 1; min-width: 90px;">
+                          <i class="fa-solid fa-arrow-left"></i> Atrás
                         </button>
-                        <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckout()" style="flex: 2;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="initNewPetWizard()" style="flex: 1.5; min-width: 150px; border-color: var(--primary-green-light); color: var(--primary-green);">
+                          <i class="fa-solid fa-plus"></i> Ingresar otro perro
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckout()" style="flex: 2; min-width: 120px;">
                           Ir a Pagar <i class="fa-solid fa-credit-card"></i>
                         </button>
                       </div>

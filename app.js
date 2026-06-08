@@ -2034,3 +2034,77 @@ window.triggerWhatsAppAlertSimulation = function() {
   alert(`Simulación de WhatsApp:\n\nPara: ${cleanPhone}\nMensaje: "${message}"\n\nSe abrirá WhatsApp Web/App para enviar el mensaje real.`);
   window.open(url, '_blank');
 };
+
+// ----------------------------------------------------
+// MODAL DE CONTACTO PPV SOLUCIONES INFORMÁTICAS
+// ----------------------------------------------------
+window.openPpvModal = function(event) {
+  if (event) event.preventDefault();
+  const modal = document.getElementById('ppv-contact-modal');
+  if (modal) {
+    modal.classList.add('active');
+    
+    // Restablecer vista del formulario y limpiar inputs
+    const form = document.getElementById('ppv-contact-form');
+    const successMsg = document.getElementById('ppv-form-success');
+    if (form) {
+      form.reset();
+      form.style.display = 'block';
+    }
+    if (successMsg) successMsg.style.display = 'none';
+  }
+};
+
+window.closePpvModal = function() {
+  const modal = document.getElementById('ppv-contact-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+};
+
+window.submitPpvForm = async function(event) {
+  if (event) event.preventDefault();
+  
+  const name = document.getElementById('ppv-name')?.value || '';
+  const email = document.getElementById('ppv-email')?.value || '';
+  const phone = document.getElementById('ppv-phone')?.value || '';
+  const message = document.getElementById('ppv-message')?.value || '';
+  
+  // Guardar prospecto en el servidor si está activo
+  try {
+    await fetch(`${API_BASE_URL}/api/leads`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ name, email, phone, message })
+    });
+  } catch (err) {
+    console.warn("Servidor backend offline o error al guardar lead:", err);
+  }
+  
+  // Configurar enlace mailto para enviar correo a legrandpetit@gmail.com
+  const subject = encodeURIComponent(`Consulta PPV Soluciones Informáticas - ${name}`);
+  const body = encodeURIComponent(
+    `Hola PPV / Origen Canino,\n\n` +
+    `Has recibido una nueva consulta de desarrollo de software desde el sitio web:\n\n` +
+    `- Nombre Completo: ${name}\n` +
+    `- Teléfono de Contacto: ${phone}\n` +
+    `- Correo Electrónico: ${email}\n\n` +
+    `- Detalle del Proyecto / Consulta:\n${message}\n\n` +
+    `Saludos cordiales.`
+  );
+  
+  const mailtoUrl = `mailto:legrandpetit@gmail.com?subject=${subject}&body=${body}`;
+  
+  // Mostrar pantalla de éxito
+  const form = document.getElementById('ppv-contact-form');
+  const successMsg = document.getElementById('ppv-form-success');
+  if (form) form.style.display = 'none';
+  if (successMsg) successMsg.style.display = 'block';
+  
+  // Abrir cliente de correo tras un leve retardo para la animación
+  setTimeout(() => {
+    window.location.href = mailtoUrl;
+  }, 300);
+};

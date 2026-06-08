@@ -851,36 +851,80 @@
   <!-- Modal de Contacto PPV Soluciones Informáticas -->
   <div id="ppv-contact-modal" class="ppv-modal">
     <div class="ppv-modal-content">
-      <button class="ppv-modal-close" onclick="closePpvModal()">&times;</button>
-      <div class="ppv-modal-header">
-        <i class="fa-solid fa-laptop-code ppv-modal-icon"></i>
-        <h3>PPV Soluciones Informáticas</h3>
-        <p>¿Te gusta esta web? Cuéntanos sobre tu proyecto y te contactaremos para hacerlo realidad.</p>
+      <!-- Background glowing dust particles -->
+      <div class="ppv-dust-purple"></div>
+      <div class="ppv-dust-cyan"></div>
+      
+      <!-- Spaceship orbiting / targetting -->
+      <div id="ppv-spaceship" class="ppv-spaceship animate-spaceship-orbit">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L8 9.5C8 9.5 2 12.5 2 15.5C2 18.5 7.5 18 7.5 18L9 21.5L12 19L15 21.5L16.5 18C16.5 18 22 18.5 22 15.5C22 12.5 16 9.5 16 9.5L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+          <circle cx="12" cy="11" r="1.5" fill="#070312" />
+          <path d="M10.5 19L12 23L13.5 19H10.5Z" fill="#ef4444" style="animation: pulse 1s infinite;" />
+        </svg>
       </div>
-      <form id="ppv-contact-form" onsubmit="submitPpvForm(event)">
-        <div class="ppv-form-group">
-          <label for="ppv-name">Nombre Completo</label>
-          <input type="text" id="ppv-name" required placeholder="Ej: Juan Pérez">
+
+      <!-- Fired Missile -->
+      <div id="ppv-missile" class="ppv-missile" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L9 7V16H15V7L12 2Z" fill="currentColor" />
+          <path d="M7 12L9 14V16H7V12Z" fill="#F97316" />
+          <path d="M17 12L15 14V16H17V12Z" fill="#F97316" />
+          <path d="M10 16L12 22L14 16H10Z" fill="#ef4444" style="animation: pulse 1s infinite;" />
+        </svg>
+      </div>
+
+      <!-- Explosion -->
+      <div id="ppv-explosion" class="ppv-explosion" style="display: none;">
+        <div class="ppv-explode-ring"></div>
+        <div class="ppv-explode-particles"></div>
+        <div class="ppv-explode-ring-delayed"></div>
+      </div>
+
+      <button class="ppv-modal-close" onclick="closePpvModal()">&times;</button>
+      
+      <div id="ppv-form-wrapper">
+        <div class="ppv-modal-header">
+          <div class="ppv-terminal-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+            </svg>
+          </div>
+          <h3>PPV Soluciones</h3>
+          <p class="ppv-subtitle">Sistemas & Software Espacial</p>
+          <p class="ppv-intro">¿Quieres llevar tu negocio a otra dimensión? Cuéntanos sobre tu idea y la haremos realidad con tecnología de vanguardia.</p>
         </div>
-        <div class="ppv-form-group">
-          <label for="ppv-email">Correo Electrónico</label>
-          <input type="email" id="ppv-email" required placeholder="Ej: juan@empresa.cl">
-        </div>
-        <div class="ppv-form-group">
-          <label for="ppv-phone">Teléfono de Contacto</label>
-          <input type="tel" id="ppv-phone" required placeholder="Ej: +56 9 1234 5678">
-        </div>
-        <div class="ppv-form-group">
-          <label for="ppv-message">Cuéntanos sobre tu idea o proyecto</label>
-          <textarea id="ppv-message" required placeholder="Describe brevemente qué tipo de sitio web, aplicación o sistema necesitas..."></textarea>
-        </div>
-        <button type="submit" class="ppv-btn-submit">Enviar Solicitud</button>
-      </form>
+        
+        <form id="ppv-contact-form" onsubmit="submitPpvForm(event)">
+          <div class="ppv-form-group">
+            <label for="ppv-name">Nombre Completo</label>
+            <input type="text" id="ppv-name" required placeholder="Ej: Juan Pérez">
+          </div>
+          <div class="ppv-form-group">
+            <label for="ppv-email">Correo Electrónico</label>
+            <input type="email" id="ppv-email" required placeholder="Ej: juan@empresa.cl">
+          </div>
+          <div class="ppv-form-group">
+            <label for="ppv-phone">Teléfono de Contacto</label>
+            <input type="tel" id="ppv-phone" required placeholder="Ej: +56 9 1234 5678">
+          </div>
+          <div class="ppv-form-group">
+            <label for="ppv-message">Cuéntanos sobre tu idea o proyecto</label>
+            <textarea id="ppv-message" required placeholder="Describe brevemente qué tipo de sitio web, aplicación o sistema necesitas..."></textarea>
+          </div>
+          <button type="submit" class="ppv-btn-submit">Lanzar Solicitud</button>
+        </form>
+      </div>
+
       <div id="ppv-form-success" class="ppv-success-msg" style="display: none;">
-        <i class="fa-solid fa-circle-check ppv-success-icon"></i>
-        <h4>¡Solicitud Recibida!</h4>
-        <p>Tu información ha sido registrada con éxito. Nos pondremos en contacto contigo a la brevedad para asesorarte.</p>
-        <button class="btn btn-primary" onclick="closePpvModal()" style="margin-top: 1rem; width: 100%;">Cerrar</button>
+        <div class="ppv-success-icon-container">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.748-5.25Z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h4>¡Contacto Establecido!</h4>
+        <p>Tu mensaje ha viajado con éxito a través del espacio digital. Nuestro equipo responderá a tu llamado interconectado a la brevedad.</p>
+        <button class="ppv-btn-close-cabin" onclick="closePpvModal()">Cerrar Cabina</button>
       </div>
     </div>
   </div>

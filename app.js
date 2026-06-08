@@ -2038,20 +2038,135 @@ window.triggerWhatsAppAlertSimulation = function() {
 // ----------------------------------------------------
 // MODAL DE CONTACTO PPV SOLUCIONES INFORMÁTICAS
 // ----------------------------------------------------
+// Audio synthesis functions
+const playLaunchSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    const oscNode = ctx.createOscillator();
+    oscNode.type = 'sawtooth';
+    oscNode.frequency.setValueAtTime(80, ctx.currentTime);
+    oscNode.frequency.exponentialRampToValueAtTime(1000, ctx.currentTime + 0.9);
+
+    const filterNode = ctx.createBiquadFilter();
+    filterNode.type = 'lowpass';
+    filterNode.frequency.setValueAtTime(1500, ctx.currentTime);
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.setValueAtTime(0.12, ctx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+
+    oscNode.connect(filterNode);
+    filterNode.connect(gainNode);
+    gainNode.connect(ctx.destination);
+
+    oscNode.start(ctx.currentTime);
+    oscNode.stop(ctx.currentTime + 0.9);
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
+const playExplosionSound = () => {
+  try {
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const ctx = new AudioContext();
+
+    const sampleRate = ctx.sampleRate;
+    const bufferSize = sampleRate * 1.5;
+    const buffer = ctx.createBuffer(1, bufferSize, sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = Math.random() * 2 - 1;
+    }
+
+    const noiseNode = ctx.createBufferSource();
+    noiseNode.buffer = buffer;
+
+    const oscNode = ctx.createOscillator();
+    oscNode.type = 'sawtooth';
+    oscNode.frequency.setValueAtTime(180, ctx.currentTime);
+    oscNode.frequency.exponentialRampToValueAtTime(15, ctx.currentTime + 1.2);
+
+    const rumbleFilter = ctx.createBiquadFilter();
+    rumbleFilter.type = 'lowpass';
+    rumbleFilter.frequency.setValueAtTime(220, ctx.currentTime);
+    rumbleFilter.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 1.2);
+
+    const noiseFilter = ctx.createBiquadFilter();
+    noiseFilter.type = 'lowpass';
+    noiseFilter.frequency.setValueAtTime(1000, ctx.currentTime);
+    noiseFilter.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 1.5);
+
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.6, ctx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.4);
+
+    const rumbleGain = ctx.createGain();
+    rumbleGain.gain.setValueAtTime(0.8, ctx.currentTime);
+    rumbleGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+
+    const masterGain = ctx.createGain();
+    masterGain.gain.setValueAtTime(0.7, ctx.currentTime);
+
+    noiseNode.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(masterGain);
+
+    oscNode.connect(rumbleFilter);
+    rumbleFilter.connect(rumbleGain);
+    rumbleGain.connect(masterGain);
+
+    masterGain.connect(ctx.destination);
+
+    noiseNode.start(ctx.currentTime);
+    oscNode.start(ctx.currentTime);
+
+    noiseNode.stop(ctx.currentTime + 1.5);
+    oscNode.stop(ctx.currentTime + 1.2);
+  } catch (e) {
+    console.warn(e);
+  }
+};
+
 window.openPpvModal = function(event) {
   if (event) event.preventDefault();
   const modal = document.getElementById('ppv-contact-modal');
   if (modal) {
     modal.classList.add('active');
     
-    // Restablecer vista del formulario y limpiar inputs
+    // Reset form elements
     const form = document.getElementById('ppv-contact-form');
+    const formWrapper = document.getElementById('ppv-form-wrapper');
     const successMsg = document.getElementById('ppv-form-success');
+    const spaceship = document.getElementById('ppv-spaceship');
+    const missile = document.getElementById('ppv-missile');
+    const explosion = document.getElementById('ppv-explosion');
+
     if (form) {
       form.reset();
-      form.style.display = 'block';
+    }
+    if (formWrapper) {
+      formWrapper.style.display = 'block';
+      formWrapper.classList.remove('faded');
     }
     if (successMsg) successMsg.style.display = 'none';
+
+    // Reset animations
+    if (spaceship) {
+      spaceship.style.display = 'flex';
+      spaceship.className = 'ppv-spaceship animate-spaceship-orbit';
+    }
+    if (missile) {
+      missile.style.display = 'none';
+      missile.className = 'ppv-missile';
+    }
+    if (explosion) {
+      explosion.style.display = 'none';
+    }
   }
 };
 
@@ -2070,7 +2185,42 @@ window.submitPpvForm = async function(event) {
   const phone = document.getElementById('ppv-phone')?.value || '';
   const message = document.getElementById('ppv-message')?.value || '';
   
-  // Guardar prospecto en el servidor si está activo
+  const formWrapper = document.getElementById('ppv-form-wrapper');
+  const spaceship = document.getElementById('ppv-spaceship');
+  const missile = document.getElementById('ppv-missile');
+  const explosion = document.getElementById('ppv-explosion');
+  const successMsg = document.getElementById('ppv-form-success');
+
+  // Trigger battle sequence
+  if (formWrapper) formWrapper.classList.add('faded');
+  
+  if (spaceship) {
+    spaceship.className = 'ppv-spaceship animate-ship-shake';
+  }
+  
+  if (missile) {
+    missile.style.display = 'flex';
+    missile.className = 'ppv-missile animate-missile-launch';
+  }
+  
+  playLaunchSound();
+
+  // Collision & explosion
+  setTimeout(() => {
+    playExplosionSound();
+    if (spaceship) spaceship.style.display = 'none';
+    if (missile) missile.style.display = 'none';
+    if (explosion) explosion.style.display = 'block';
+  }, 900);
+
+  // Success screen
+  setTimeout(() => {
+    if (explosion) explosion.style.display = 'none';
+    if (formWrapper) formWrapper.style.display = 'none';
+    if (successMsg) successMsg.style.display = 'block';
+  }, 1700);
+
+  // Send request in background
   try {
     await fetch(`${API_BASE_URL}/api/leads`, {
       method: 'POST',
@@ -2082,10 +2232,4 @@ window.submitPpvForm = async function(event) {
   } catch (err) {
     console.warn("Servidor backend offline o error al guardar lead:", err);
   }
-  
-  // Mostrar pantalla de éxito
-  const form = document.getElementById('ppv-contact-form');
-  const successMsg = document.getElementById('ppv-form-success');
-  if (form) form.style.display = 'none';
-  if (successMsg) successMsg.style.display = 'block';
 };

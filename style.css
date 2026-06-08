@@ -2207,16 +2207,15 @@ body {
    6. CRÉDITOS Y MODAL DE CONTACTO PPV SOLUCIONES INFORMÁTICAS
    ========================================================================= */
 .ppv-credit {
-  font-size: 0.8rem;
-  color: var(--text-muted);
+  font-size: 11px;
+  color: #cbd5e1;
   margin-top: 0.5rem;
 }
 
 .ppv-link {
-  color: var(--primary-green) !important;
-  font-weight: 700;
+  font-weight: 800;
   text-decoration: none;
-  background: linear-gradient(120deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  background: linear-gradient(90deg, #22d3ee 0%, #c084fc 50%, #818cf8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   display: inline-block;
@@ -2232,7 +2231,7 @@ body {
   height: 1.5px;
   bottom: 0;
   left: 0;
-  background: linear-gradient(120deg, var(--primary-green) 0%, var(--primary-green-light) 100%);
+  background: linear-gradient(90deg, #22d3ee 0%, #c084fc 50%, #818cf8 100%);
   transform-origin: bottom right;
   transition: transform 0.25s ease-out;
 }

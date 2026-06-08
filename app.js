@@ -15,7 +15,8 @@ function mapPetFromAPI(p) {
     selectedRecipeId: p.selected_recipe_id,
     excludedIngredients: p.excluded_ingredients || [],
     addedSuperfoods: p.added_superfoods || [],
-    customInstructions: p.custom_instructions || ""
+    customInstructions: p.custom_instructions || "",
+    deliveryPeriod: p.delivery_period || p.deliveryPeriod || 30
   };
 }
 
@@ -417,7 +418,7 @@ window.navigateMobileNav = function(destination) {
 // 3. FÓRMULAS DE CÁLCULO DE PORCIONES
 // ----------------------------------------------------
 
-function calculatePortion(weight, stage, activity, dietType) {
+function calculatePortion(weight, stage, activity, dietType, days = 30) {
   let percentage = 2.5;
 
   if (stage === 'adult') {
@@ -434,7 +435,7 @@ function calculatePortion(weight, stage, activity, dietType) {
   }
 
   const dailyGrams = Math.round(weight * (percentage / 100) * 1000);
-  const monthlyKg = Math.ceil((dailyGrams * 30) / 1000);
+  const monthlyKg = Math.ceil((dailyGrams * days) / 1000);
   
   return {
     dailyGrams,
@@ -710,7 +711,8 @@ window.savePetProfileAndGoToCalculator = async function() {
     selected_recipe_id: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipeId || null) : null,
     excluded_ingredients: petIndex !== -1 ? (appState.pets[petIndex].excludedIngredients || []) : [],
     added_superfoods: petIndex !== -1 ? (appState.pets[petIndex].addedSuperfoods || []) : [],
-    custom_instructions: petIndex !== -1 ? (appState.pets[petIndex].customInstructions || '') : ''
+    custom_instructions: petIndex !== -1 ? (appState.pets[petIndex].customInstructions || '') : '',
+    delivery_period: petIndex !== -1 ? (appState.pets[petIndex].deliveryPeriod || 30) : 30
   };
 
   try {
@@ -744,7 +746,8 @@ window.savePetProfileAndGoToCalculator = async function() {
       selectedRecipeId: petData.selected_recipe_id,
       excludedIngredients: petData.excluded_ingredients,
       addedSuperfoods: petData.added_superfoods,
-      customInstructions: petData.custom_instructions
+      customInstructions: petData.custom_instructions,
+      deliveryPeriod: petData.delivery_period
     };
     if (petIndex !== -1) {
       appState.pets[petIndex] = fallbackPet;
@@ -828,11 +831,19 @@ function updatePortionCalculatorUI() {
   document.getElementById('calc-pet-details').textContent = `${pet.breed} • ${pet.weight} kg`;
   document.getElementById('custom-instructions').value = pet.customInstructions || '';
 
-  const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType);
+  const selectPeriod = document.getElementById('calc-delivery-period');
+  if (selectPeriod && pet.deliveryPeriod) {
+    selectPeriod.value = pet.deliveryPeriod;
+  }
+  const deliveryPeriodVal = selectPeriod ? parseInt(selectPeriod.value) : 30;
+  pet.deliveryPeriod = deliveryPeriodVal;
+
+  const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType, deliveryPeriodVal);
   pet.portionResults = results;
 
   document.getElementById('calc-daily-total').textContent = `${results.dailyGrams}g`;
   document.getElementById('calc-monthly-weight').textContent = results.monthlyKg;
+  document.getElementById('calc-delivery-label').textContent = deliveryPeriodVal === 15 ? 'Cada 15 días' : 'Cada 30 días';
   
   const descActivity = { sedentary: 'sedentario/senior', normal: 'actividad normal', active: 'activo', working: 'muy activo' };
   const descStage = { adult: 'mantenimiento adulto', puppy: 'crecimiento cachorro 2-4 meses', 'puppy-mid': 'crecimiento cachorro 4-6 meses', 'puppy-late': 'crecimiento cachorro 6-12 meses' };
@@ -1136,6 +1147,20 @@ window.proceedToCheckout = function() {
 
 function setupCheckoutUI() {
   document.getElementById('checkout-total-val').textContent = `$${globalCartTotal.toLocaleString('es-CL')}`;
+
+  currentPaymentMethod = 'card';
+  transferFileBase64 = null;
+  transferFileName = '';
+  const prevContainer = document.getElementById('transfer-preview-container');
+  if (prevContainer) prevContainer.style.display = 'none';
+  const statusTxt = document.getElementById('transfer-file-status');
+  if (statusTxt) statusTxt.textContent = 'Haz clic para subir comprobante';
+  const box = document.getElementById('transfer-file-box');
+  if (box) box.style.borderColor = 'rgba(85, 114, 46, 0.3)';
+  
+  if (typeof selectPaymentMethod === 'function') {
+    selectPaymentMethod('card');
+  }
   
   const listContainer = document.getElementById('checkout-pets-list');
   if (listContainer) {
@@ -1220,31 +1245,60 @@ window.updateCardPreview = function(field, value) {
 };
 
 window.processSecurePayment = async function() {
-  const holder = document.getElementById('pay-cardholder').value.trim();
-  const num = document.getElementById('pay-cardnumber').value.trim();
-  const expiry = document.getElementById('pay-expiry').value.trim();
-  const cvv = document.getElementById('pay-cvv').value.trim();
-  
   const recipient = document.getElementById('pay-recipient-name').value.trim();
   const phone = document.getElementById('pay-phone').value.trim();
   const addressVal = document.getElementById('pay-address').value.trim();
   const deliveryBlock = document.getElementById('pay-delivery-block').value;
 
-  if (!holder || !num || !expiry || !cvv || !recipient || !phone || !addressVal) {
-    alert('Ingresa todos los campos requeridos para el pago seguro y el despacho.');
+  if (!recipient || !phone || !addressVal) {
+    alert('Ingresa todos los campos requeridos para el despacho (Nombre, Teléfono y Dirección).');
     return;
   }
 
   const address = `${recipient} | Tel: ${phone} | Dir: ${addressVal} | Horario: ${deliveryBlock}`;
-
-  if (num.replace(/\s/g, '').length < 16) {
-    alert('El número de tarjeta de crédito es incorrecto.');
-    return;
-  }
-
   const payBtn = document.getElementById('pay-btn');
-  payBtn.disabled = true;
-  payBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando Transacción...`;
+  let paidStatus = 'Verificado';
+
+  if (currentPaymentMethod === 'card') {
+    const holder = document.getElementById('pay-cardholder').value.trim();
+    const num = document.getElementById('pay-cardnumber').value.trim();
+    const expiry = document.getElementById('pay-expiry').value.trim();
+    const cvv = document.getElementById('pay-cvv').value.trim();
+
+    if (!holder || !num || !expiry || !cvv) {
+      alert('Ingresa todos los campos de la tarjeta de crédito para el pago seguro.');
+      return;
+    }
+
+    if (num.replace(/\s/g, '').length < 16) {
+      alert('El número de tarjeta de crédito es incorrecto.');
+      return;
+    }
+
+    payBtn.disabled = true;
+    payBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Procesando Transacción...`;
+    
+    // Simulate short network delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    paidStatus = 'Verificado (Tarjeta)';
+
+  } else { // Transferencia
+    if (!transferFileBase64) {
+      alert('Por favor, adjunta el comprobante de transferencia bancaria para validar el pago.');
+      return;
+    }
+
+    payBtn.disabled = true;
+    payBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Validando comprobante con IA...`;
+    
+    // Simulate validator checking the file
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    
+    payBtn.innerHTML = `<i class="fa-solid fa-circle-check"></i> ¡Comprobante Verificado!`;
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    paidStatus = 'Verificado (Transferencia)';
+  }
 
   const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
   const orderId = `OC-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -1282,7 +1336,7 @@ window.processSecurePayment = async function() {
     snacks: snacksArr.join(', ') || 'Ninguno',
     total_price: globalCartTotal,
     address: address,
-    paid_status: 'Verificado'
+    paid_status: paidStatus
   };
 
   try {
@@ -1421,7 +1475,21 @@ function renderPetDashboard() {
   const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
   document.getElementById('dash-diet-recipe').textContent = rec.name;
   document.getElementById('dash-daily-portion').textContent = `${activePet.portionResults.dailyGrams} g / día`;
-  document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')}`;
+  
+  const periodText = activePet.deliveryPeriod === 15 ? 'Cada 15 días' : 'Cada 30 días';
+  document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')} (${periodText})`;
+
+  const deliveryDays = document.getElementById('dash-delivery-days');
+  const deliveryEstimate = document.getElementById('dash-delivery-estimate');
+  if (deliveryDays && deliveryEstimate) {
+    if (activePet.deliveryPeriod === 15) {
+      deliveryDays.textContent = '05 Días';
+      deliveryEstimate.textContent = 'Entrega estimada: 12 de Junio';
+    } else {
+      deliveryDays.textContent = '08 Días';
+      deliveryEstimate.textContent = 'Entrega estimada: 15 de Junio';
+    }
+  }
 
   const guideWrapper = document.getElementById('dash-feeding-guide');
   const results = activePet.portionResults;
@@ -1762,3 +1830,123 @@ document.addEventListener('DOMContentLoaded', () => {
 window.addEventListener('resize', () => {
   configureDeviceMode();
 });
+
+// ==========================================================================
+// NUEVAS MEJORAS: PAGO POR TRANSFERENCIA, PERIODO DE ENTREGA Y ALERTAS WHATSAPP
+// ==========================================================================
+
+let currentPaymentMethod = 'card';
+window.selectPaymentMethod = function(method) {
+  currentPaymentMethod = method;
+  const btnCard = document.getElementById('tab-pay-card');
+  const btnTransfer = document.getElementById('tab-pay-transfer');
+  const formCard = document.getElementById('form-pay-card');
+  const formTransfer = document.getElementById('form-pay-transfer');
+  const creditCardPreview = document.getElementById('checkout-credit-card');
+  const transferPlaceholder = document.getElementById('checkout-transfer-placeholder');
+
+  if (method === 'card') {
+    if (btnCard) btnCard.classList.add('active');
+    if (btnCard) {
+      btnCard.style.border = '1.5px solid var(--primary-green)';
+      btnCard.style.background = 'var(--bg-white)';
+      btnCard.style.color = 'var(--primary-green)';
+    }
+
+    if (btnTransfer) btnTransfer.classList.remove('active');
+    if (btnTransfer) {
+      btnTransfer.style.border = '1.5px solid rgba(44, 26, 14, 0.08)';
+      btnTransfer.style.background = 'hsla(24, 25%, 30%, 0.03)';
+      btnTransfer.style.color = 'var(--text-muted)';
+    }
+
+    if (formCard) formCard.style.display = 'block';
+    if (formTransfer) formTransfer.style.display = 'none';
+    if (creditCardPreview) creditCardPreview.style.display = 'block';
+    if (transferPlaceholder) transferPlaceholder.style.display = 'none';
+  } else {
+    if (btnTransfer) btnTransfer.classList.add('active');
+    if (btnTransfer) {
+      btnTransfer.style.border = '1.5px solid var(--primary-green)';
+      btnTransfer.style.background = 'var(--bg-white)';
+      btnTransfer.style.color = 'var(--primary-green)';
+    }
+
+    if (btnCard) btnCard.classList.remove('active');
+    if (btnCard) {
+      btnCard.style.border = '1.5px solid rgba(44, 26, 14, 0.08)';
+      btnCard.style.background = 'hsla(24, 25%, 30%, 0.03)';
+      btnCard.style.color = 'var(--text-muted)';
+    }
+
+    if (formCard) formCard.style.display = 'none';
+    if (formTransfer) formTransfer.style.display = 'block';
+    if (creditCardPreview) creditCardPreview.style.display = 'none';
+    if (transferPlaceholder) transferPlaceholder.style.display = 'block';
+  }
+};
+
+window.triggerTransferFileUpload = function() {
+  const fileInput = document.getElementById('pay-transfer-file');
+  if (fileInput) fileInput.click();
+};
+
+let transferFileBase64 = null;
+let transferFileName = '';
+window.handleTransferFileSelect = function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    transferFileName = file.name;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      transferFileBase64 = e.target.result;
+      
+      const prevName = document.getElementById('transfer-preview-name');
+      const prevContainer = document.getElementById('transfer-preview-container');
+      const statusTxt = document.getElementById('transfer-file-status');
+      const box = document.getElementById('transfer-file-box');
+      
+      if (prevName) prevName.textContent = file.name;
+      if (prevContainer) prevContainer.style.display = 'block';
+      if (statusTxt) statusTxt.textContent = 'Comprobante seleccionado';
+      if (box) box.style.borderColor = 'var(--primary-green)';
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+window.triggerWhatsAppAlertSimulation = function() {
+  const paidPets = appState.pets.filter(p => p.subscriptionPaid);
+  if (paidPets.length === 0) {
+    alert("No hay mascotas con suscripciones pagadas para generar la alerta.");
+    return;
+  }
+  
+  // Get pet names
+  const petNames = paidPets.map(p => p.name).join(' y ');
+  
+  // Retrieve phone number from first pet's address metadata
+  let phone = "+56 9 1234 5678"; // fallback
+  const firstPet = paidPets[0];
+  if (firstPet && firstPet.address) {
+    const parts = firstPet.address.split(' | ');
+    if (parts.length === 4) {
+      phone = parts[1].replace('Tel: ', '').trim();
+    }
+  }
+
+  // Format message
+  const daysLeft = 3;
+  const message = `Hola, te quedan ${daysLeft} días del fin del periodo para generar tu nuevo pedido. ¡No te quedes sin comida para ${petNames}! 🐾`;
+  
+  // Clean phone number
+  let cleanPhone = phone.replace(/[^0-9+]/g, '');
+  if (!cleanPhone.startsWith('+') && cleanPhone.length === 9) {
+    cleanPhone = '+56' + cleanPhone; // default Chile code if 9 digits
+  }
+  
+  const url = `https://api.whatsapp.com/send?phone=${encodeURIComponent(cleanPhone)}&text=${encodeURIComponent(message)}`;
+  
+  alert(`Simulación de WhatsApp:\n\nPara: ${cleanPhone}\nMensaje: "${message}"\n\nSe abrirá WhatsApp Web/App para enviar el mensaje real.`);
+  window.open(url, '_blank');
+};

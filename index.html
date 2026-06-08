@@ -420,9 +420,17 @@
                         <label for="custom-instructions">Instrucciones Especiales de Empaque</label>
                         <input type="text" id="custom-instructions" class="mobile-input" value="Empaquetado en porciones de 1kg">
                       </div>
-                      
+                      <!-- Periodo de Entrega (15 o 30 días) -->
+                      <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                        <label for="calc-delivery-period" style="font-weight: 700; color: var(--secondary-brown);">Periodo de Entrega</label>
+                        <select id="calc-delivery-period" class="mobile-select" onchange="updatePortionCalculatorUI()">
+                          <option value="30" selected>Cada 30 días (Suscripción Mensual)</option>
+                          <option value="15">Cada 15 días (Suscripción Quincenal)</option>
+                        </select>
+                      </div>
+
                       <div class="receipt-row" style="margin-bottom: 0.75rem; border-top: 1px solid rgba(44,26,14,0.06); padding-top: 0.75rem;">
-                        <span>Suscripción Mensual (<span id="calc-monthly-weight">11.3</span> kg):</span>
+                        <span>Suscripción (<span id="calc-delivery-label">Cada 30 días</span> - <span id="calc-monthly-weight">11.3</span> kg):</span>
                         <strong id="calc-diet-price">$45.000</strong>
                       </div>
                       
@@ -529,26 +537,73 @@
                           </div>
                         </div>
                       </div>
+
+                      <!-- Marcador para Pago por Transferencia -->
+                      <div id="checkout-transfer-placeholder" style="display: none; margin-bottom: 1.5rem; background: var(--bg-white); border: 1px solid rgba(44, 26, 14, 0.08); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; box-shadow: var(--shadow-sm);">
+                        <i class="fa-solid fa-money-bill-transfer" style="font-size: 3rem; color: var(--primary-green); margin-bottom: 0.75rem;"></i>
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--secondary-brown); margin-bottom: 0.25rem;">Pago por Transferencia</h4>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">Transfiere el monto total a nuestra cuenta bancaria y adjunta el comprobante a la derecha para validación de tu suscripción.</p>
+                      </div>
                     </div>
 
                     <div class="pc-column">
-                      <!-- Campos de Entrada del Pago -->
-                      <div class="mobile-input-group">
-                        <label for="pay-cardholder">Nombre del Titular</label>
-                        <input type="text" id="pay-cardholder" class="mobile-input" placeholder="Ej: Patricio Silva" oninput="updateCardPreview('name', this.value)">
+                      <!-- Selector de Método de Pago -->
+                      <div class="payment-methods-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; width: 100%;">
+                        <button type="button" id="tab-pay-card" class="payment-method-btn active" onclick="selectPaymentMethod('card')" style="flex:1; padding: 0.6rem; border-radius: var(--radius-sm); border: 1.5px solid var(--primary-green); background: var(--bg-white); color: var(--primary-green); font-weight:700; cursor:pointer; font-size:0.8rem;">
+                          <i class="fa-solid fa-credit-card"></i> Tarjeta de Crédito
+                        </button>
+                        <button type="button" id="tab-pay-transfer" class="payment-method-btn" onclick="selectPaymentMethod('transfer')" style="flex:1; padding: 0.6rem; border-radius: var(--radius-sm); border: 1.5px solid rgba(44, 26, 14, 0.08); background: hsla(24, 25%, 30%, 0.03); color: var(--text-muted); font-weight:700; cursor:pointer; font-size:0.8rem;">
+                          <i class="fa-solid fa-money-bill-transfer"></i> Transferencia
+                        </button>
                       </div>
-                      <div class="mobile-input-group">
-                        <label for="pay-cardnumber">Número de Tarjeta</label>
-                        <input type="text" id="pay-cardnumber" class="mobile-input" placeholder="4556 1234 5678 9012" maxlength="19" oninput="updateCardPreview('number', this.value)">
-                      </div>
-                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+
+                      <!-- Formulario 1: Tarjeta de Crédito -->
+                      <div id="form-pay-card" style="width: 100%;">
                         <div class="mobile-input-group">
-                          <label for="pay-expiry">Fecha Vencimiento</label>
-                          <input type="text" id="pay-expiry" class="mobile-input" placeholder="MM/AA" maxlength="5" oninput="updateCardPreview('expiry', this.value)">
+                          <label for="pay-cardholder">Nombre del Titular</label>
+                          <input type="text" id="pay-cardholder" class="mobile-input" placeholder="Ej: Patricio Silva" oninput="updateCardPreview('name', this.value)">
                         </div>
                         <div class="mobile-input-group">
-                          <label for="pay-cvv">Código CVV</label>
-                          <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
+                          <label for="pay-cardnumber">Número de Tarjeta</label>
+                          <input type="text" id="pay-cardnumber" class="mobile-input" placeholder="4556 1234 5678 9012" maxlength="19" oninput="updateCardPreview('number', this.value)">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                          <div class="mobile-input-group">
+                            <label for="pay-expiry">Fecha Vencimiento</label>
+                            <input type="text" id="pay-expiry" class="mobile-input" placeholder="MM/AA" maxlength="5" oninput="updateCardPreview('expiry', this.value)">
+                          </div>
+                          <div class="mobile-input-group">
+                            <label for="pay-cvv">Código CVV</label>
+                            <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Formulario 2: Transferencia Bancaria -->
+                      <div id="form-pay-transfer" style="display: none; width: 100%;">
+                        <div style="background: rgba(85, 114, 46, 0.05); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--secondary-brown); margin-bottom: 0.85rem; border: 1px solid rgba(85, 114, 46, 0.1); line-height: 1.45;">
+                          <strong>Datos para Transferencia:</strong><br>
+                          <span>• <strong>Banco:</strong> Banco de Chile</span><br>
+                          <span>• <strong>Tipo Cuenta:</strong> Cuenta Corriente</span><br>
+                          <span>• <strong>Nº Cuenta:</strong> 123-45678-90</span><br>
+                          <span>• <strong>RUT:</strong> 76.543.210-K</span><br>
+                          <span>• <strong>Nombre:</strong> Origen Canino SpA</span><br>
+                          <span>• <strong>Email:</strong> pagos@origencanino.cl</span>
+                        </div>
+                        <div class="mobile-input-group">
+                          <label>Adjuntar Comprobante de Pago</label>
+                          <div class="file-uploader-box" id="transfer-file-box" onclick="triggerTransferFileUpload()" style="border: 2px dashed rgba(85, 114, 46, 0.3); padding: 1.15rem; text-align: center; border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-white); transition: var(--transition);">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: var(--primary-green-light); margin-bottom: 0.35rem;"></i>
+                            <div style="font-size: 0.75rem; font-weight:700; color: var(--secondary-brown);" id="transfer-file-status">Haz clic para subir comprobante</div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2px;">Formatos: JPG, PNG, PDF</div>
+                          </div>
+                          <input type="file" id="pay-transfer-file" accept="image/*,application/pdf" style="display: none;" onchange="handleTransferFileSelect(event)">
+                        </div>
+                        <div id="transfer-preview-container" style="display: none; margin-top: 0.65rem; text-align: center; border: 1px solid rgba(44, 26, 14, 0.08); padding: 0.4rem; border-radius: var(--radius-sm); background: var(--bg-cream);">
+                          <div style="font-size: 0.68rem; font-weight:700; color: var(--primary-green); margin-bottom: 0.2rem;">
+                            <i class="fa-solid fa-circle-check"></i> Comprobante Cargado
+                          </div>
+                          <div id="transfer-preview-name" style="font-size: 0.7rem; color: var(--text-dark); word-break: break-all; font-weight: 600;"></div>
                         </div>
                       </div>
                       <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--secondary-brown); margin: 1rem 0 0.5rem 0; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 1rem;">
@@ -705,11 +760,16 @@
                     </div>
 
                     <!-- Cuenta regresiva de entrega -->
-                    <div class="delivery-countdown">
+                    <div class="delivery-countdown" style="margin-bottom: 0.5rem;">
                       <h4>Siguiente Despacho en</h4>
-                      <div class="days">08 Días</div>
-                      <p style="font-size: 0.7rem; opacity: 0.9;">Entrega estimada: 15 de Junio</p>
+                      <div class="days" id="dash-delivery-days">08 Días</div>
+                      <p style="font-size: 0.7rem; opacity: 0.9;" id="dash-delivery-estimate">Entrega estimada: 15 de Junio</p>
                     </div>
+
+                    <!-- Simulación de Alerta de WhatsApp de 3 días -->
+                    <button class="mobile-btn" style="margin-bottom: 1rem; width: 100%; background: #25D366; color: white; border: none; font-weight: 700; gap: 0.4rem; display: flex; align-items: center; justify-content: center;" onclick="triggerWhatsAppAlertSimulation()">
+                      <i class="fa-brands fa-whatsapp" style="font-size: 1.15rem;"></i> Alerta WhatsApp (Quedan 3 días)
+                    </button>
 
                     <button class="mobile-btn mobile-btn-secondary" onclick="editCurrentPlanFromDashboard()" style="margin-top: 1rem; width: 100%;">
                       <i class="fa-solid fa-pen-to-square"></i> Modificar Plan Mascota

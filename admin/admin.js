@@ -2,7 +2,7 @@
 // 1. CONFIGURACIÓN DEL BACKEND Y ESTADO DE ADMIN
 // ----------------------------------------------------
 
-const API_BASE_URL = (window.location.protocol === "file:" || window.location.port) 
+const API_BASE_URL = (window.location.protocol === "file:" || window.location.port || window.location.hostname.includes("github.io")) 
   ? "http://localhost:8000" 
   : "";
 

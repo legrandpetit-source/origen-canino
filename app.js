@@ -761,6 +761,16 @@ window.savePetProfileAndGoToCalculator = async function() {
     return;
   }
 
+  // Validar que no exista otra mascota con el mismo nombre para el usuario
+  const isDuplicateName = appState.pets.some(p => 
+    p.id !== appState.currentPetId && 
+    p.name.trim().toLowerCase() === name.toLowerCase()
+  );
+  if (isDuplicateName) {
+    alert(`Ya registraste una mascota llamada "${name}". Por favor, usa un nombre diferente.`);
+    return;
+  }
+
   let petIndex = appState.pets.findIndex(p => p.id === appState.currentPetId);
   const photo = petPhotoBase64 || (petIndex !== -1 ? appState.pets[petIndex].photo : 'assets/logo.jpg');
   

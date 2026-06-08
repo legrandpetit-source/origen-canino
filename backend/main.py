@@ -531,6 +531,14 @@ def save_customer_pet(pet_data: PetCreate, db: Session = Depends(get_db), custom
     if not cust:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
         
+    # Evitar mascotas con nombres duplicados para el mismo dueño
+    duplicate_pet = db.query(models.Pet).filter(
+        models.Pet.customer_email == customer_email,
+        models.Pet.id != pet_data.id
+    ).all()
+    if any(p.name.strip().lower() == pet_data.name.strip().lower() for p in duplicate_pet):
+        raise HTTPException(status_code=400, detail=f"Ya registraste una mascota llamada '{pet_data.name}'")
+
     existing_pet = db.query(models.Pet).filter(models.Pet.id == pet_data.id).first()
     
     attrs = pet_data.model_dump()

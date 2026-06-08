@@ -3036,9 +3036,39 @@ body:not(.mobile-native-mode) .phone-screen {
 }
 
 body:not(.mobile-native-mode) .phone-content {
-  height: auto !important;
-  flex: none !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
   overflow-y: auto !important;
+}
+
+body:not(.mobile-native-mode) .mobile-simulator-container {
+  padding: 1rem 2rem !important;
+}
+
+/* Desktop compact layouts to avoid scrolling on PC/notebook */
+body:not(.mobile-native-mode) #mobile-calculator .pc-columns-wrapper {
+  grid-template-columns: 1fr 1fr 1fr !important;
+  gap: 1rem !important;
+}
+
+body:not(.mobile-native-mode) .mobile-card {
+  padding: 0.8rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body:not(.mobile-native-mode) .portion-breakdown-card {
+  padding: 0.8rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+body:not(.mobile-native-mode) .pill-label {
+  padding: 0.35rem 0.6rem !important;
+  font-size: 0.7rem !important;
+}
+
+body:not(.mobile-native-mode) .package-label-mockup {
+  padding: 0.8rem !important;
+  margin-top: 0.5rem !important;
 }
 
 /* Ocultar botones de cambio de vista de entorno */

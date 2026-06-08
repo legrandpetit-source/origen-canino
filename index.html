@@ -7,7 +7,7 @@
   <meta name="description" content="Alimentación natural personalizada para tu mascota. Calculadora de porciones BARF y cocinada, snacks deshidratados, caldo de hueso y suscripción mensual con entrega segura.">
   
   <!-- Estilos CSS y Fuentes -->
-  <link rel="stylesheet" href="style.css?v=3.2">
+  <link rel="stylesheet" href="style.css?v=3.9">
   <!-- Iconos de Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -340,6 +340,8 @@
               <!-- 2.3 PANTALLA: CALCULADORA Y PERSONALIZACIÓN INTERACTIVA DE RECETA -->
               <div id="mobile-calculator" class="mobile-view">
                 <div class="pc-columns-wrapper" style="display: contents;">
+                  
+                  <!-- COLUMNA 1: PERFIL, PORCIÓN Y DIETA BASE -->
                   <div class="pc-column">
                     <div class="mobile-card" style="margin-top: 1rem; margin-bottom: 0.5rem;">
                       <div class="pet-profile-summary">
@@ -386,6 +388,7 @@
                     </div>
                   </div>
 
+                  <!-- COLUMNA 2: PERSONALIZACIÓN DE INGREDIENTES -->
                   <div class="pc-column">
                     <!-- Formulador Interactivo de Ingredientes -->
                     <div class="mobile-card" style="margin-top: 1rem;">
@@ -411,9 +414,12 @@
                         <!-- Suplementos opcionales -->
                       </div>
                     </div>
+                  </div>
 
+                  <!-- COLUMNA 3: ETIQUETA Y CONFIRMACIÓN DE DIETA -->
+                  <div class="pc-column">
                     <!-- Etiqueta de empaque final -->
-                    <div class="mobile-card">
+                    <div class="mobile-card" style="margin-top: 1rem;">
                       <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
                         3. Vista Previa de Etiqueta
                       </h4>
@@ -423,7 +429,7 @@
                     </div>
 
                     <!-- Envío e instrucciones -->
-                    <div class="mobile-card">
+                    <div class="mobile-card" id="calc-checkout-card">
                       <div class="mobile-input-group" style="display: none;">
                         <label for="custom-instructions">Instrucciones Especiales de Empaque</label>
                         <input type="text" id="custom-instructions" class="mobile-input" value="Empaquetado en porciones de 1kg">
@@ -452,6 +458,8 @@
                       </div>
                     </div>
                   </div>
+                </div>
+              </div>
                 </div>
               </div>
 

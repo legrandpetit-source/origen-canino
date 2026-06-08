@@ -403,6 +403,14 @@ window.changeMobileView = function(viewName) {
       document.getElementById('mb-auth-reg-name').value = '';
       document.getElementById('mb-auth-reg-email').value = '';
       document.getElementById('mb-auth-reg-pass').value = '';
+      const phoneEl = document.getElementById('mb-auth-reg-phone');
+      if (phoneEl) phoneEl.value = '';
+      const streetEl = document.getElementById('mb-auth-reg-street');
+      if (streetEl) streetEl.value = '';
+      const commEl = document.getElementById('mb-auth-reg-commune');
+      if (commEl) commEl.value = '';
+      const regEl = document.getElementById('mb-auth-reg-region');
+      if (regEl) regEl.value = '';
       toggleMobileAuthView(false);
     }
   }
@@ -1298,8 +1306,18 @@ function setupCheckoutUI() {
     if (el) el.value = appState.customerPhone;
   }
   if (appState.customerAddress) {
-    const el = document.getElementById('pay-address');
-    if (el) el.value = appState.customerAddress;
+    const parts = appState.customerAddress.split(', ');
+    if (parts.length >= 3) {
+      const streetEl = document.getElementById('pay-street');
+      if (streetEl) streetEl.value = parts[0];
+      const commEl = document.getElementById('pay-commune');
+      if (commEl) commEl.value = parts[1];
+      const regEl = document.getElementById('pay-region');
+      if (regEl) regEl.value = parts[2];
+    } else {
+      const streetEl = document.getElementById('pay-street');
+      if (streetEl) streetEl.value = appState.customerAddress;
+    }
   }
 
   currentPaymentMethod = 'card';
@@ -1427,13 +1445,17 @@ window.updateCardPreview = function(field, value) {
 window.processSecurePayment = async function() {
   const recipient = document.getElementById('pay-recipient-name').value.trim();
   const phone = document.getElementById('pay-phone').value.trim();
-  const addressVal = document.getElementById('pay-address').value.trim();
+  const streetVal = document.getElementById('pay-street').value.trim();
+  const communeVal = document.getElementById('pay-commune').value.trim();
+  const regionVal = document.getElementById('pay-region').value.trim();
   const deliveryBlock = document.getElementById('pay-delivery-block').value;
 
-  if (!recipient || !phone || !addressVal) {
-    alert('Ingresa todos los campos requeridos para el despacho (Nombre, Teléfono y Dirección).');
+  if (!recipient || !phone || !streetVal || !communeVal || !regionVal) {
+    alert('Ingresa todos los campos requeridos para el despacho (Nombre, Teléfono, Calle, Comuna y Región).');
     return;
   }
+
+  const addressVal = `${streetVal}, ${communeVal}, ${regionVal}`;
 
   const address = `${recipient} | Tel: ${phone} | Dir: ${addressVal} | Horario: ${deliveryBlock}`;
   const payBtn = document.getElementById('pay-btn');
@@ -1959,12 +1981,15 @@ window.submitCustomerAuthMobile = async function(type) {
     const name = document.getElementById('mb-auth-reg-name').value.trim();
     const email = document.getElementById('mb-auth-reg-email').value.trim();
     const phone = document.getElementById('mb-auth-reg-phone').value.trim();
-    const address = document.getElementById('mb-auth-reg-address').value.trim();
+    const street = document.getElementById('mb-auth-reg-street').value.trim();
+    const commune = document.getElementById('mb-auth-reg-commune').value.trim();
+    const region = document.getElementById('mb-auth-reg-region').value.trim();
     const password = document.getElementById('mb-auth-reg-pass').value;
-    if (!name || !email || !password || !phone || !address) {
-      alert('Por favor, ingresa tu nombre, correo, teléfono, dirección y contraseña.');
+    if (!name || !email || !password || !phone || !street || !commune || !region) {
+      alert('Por favor, ingresa tu nombre, correo, teléfono, calle, comuna, región y contraseña.');
       return;
     }
+    const address = `${street}, ${commune}, ${region}`;
     url = `${API_BASE_URL}/api/customer/register`;
     payload = { name, email, password, provider: 'email', phone, address };
   }
@@ -1994,7 +2019,10 @@ window.submitCustomerAuthMobile = async function(type) {
       ? email.split('@')[0] 
       : document.getElementById('mb-auth-reg-name').value.trim();
     const phone = type === 'login' ? '' : document.getElementById('mb-auth-reg-phone').value.trim();
-    const address = type === 'login' ? '' : document.getElementById('mb-auth-reg-address').value.trim();
+    const street = type === 'login' ? '' : document.getElementById('mb-auth-reg-street').value.trim();
+    const commune = type === 'login' ? '' : document.getElementById('mb-auth-reg-commune').value.trim();
+    const region = type === 'login' ? '' : document.getElementById('mb-auth-reg-region').value.trim();
+    const address = type === 'login' ? '' : `${street}, ${commune}, ${region}`;
       
     setCustomerSession("mock_token_email", name, email, phone, address);
     await handlePostAuthRedirect();
@@ -2066,12 +2094,16 @@ async function handlePostAuthRedirect() {
 
 window.submitSocialProfileCompletion = async function() {
   const phone = document.getElementById('mb-social-phone').value.trim();
-  const address = document.getElementById('mb-social-address').value.trim();
+  const street = document.getElementById('mb-social-street').value.trim();
+  const commune = document.getElementById('mb-social-commune').value.trim();
+  const region = document.getElementById('mb-social-region').value.trim();
   
-  if (!phone || !address) {
-    alert('Por favor, ingresa tu teléfono y dirección para continuar.');
+  if (!phone || !street || !commune || !region) {
+    alert('Por favor, ingresa tu teléfono, calle, comuna y región para continuar.');
     return;
   }
+  
+  const address = `${street}, ${commune}, ${region}`;
   
   try {
     const res = await fetch(`${API_BASE_URL}/api/customer/profile`, {
@@ -2090,7 +2122,9 @@ window.submitSocialProfileCompletion = async function() {
     
     // Reset inputs
     document.getElementById('mb-social-phone').value = '';
-    document.getElementById('mb-social-address').value = '';
+    document.getElementById('mb-social-street').value = '';
+    document.getElementById('mb-social-commune').value = '';
+    document.getElementById('mb-social-region').value = '';
     
     // Continue
     if (appState.pendingWizardInit) {
@@ -2116,7 +2150,9 @@ window.submitSocialProfileCompletion = async function() {
     setCustomerSession(appState.customerToken, appState.customerName, appState.customerEmail, phone, address);
     
     document.getElementById('mb-social-phone').value = '';
-    document.getElementById('mb-social-address').value = '';
+    document.getElementById('mb-social-street').value = '';
+    document.getElementById('mb-social-commune').value = '';
+    document.getElementById('mb-social-region').value = '';
     
     if (appState.pendingWizardInit) {
       appState.pendingWizardInit = false;

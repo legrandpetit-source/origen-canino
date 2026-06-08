@@ -627,9 +627,19 @@
                           <input type="tel" id="pay-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
                         </div>
                       </div>
-                      <div class="mobile-input-group">
-                        <label for="pay-address">Dirección de Entrega</label>
-                        <input type="text" id="pay-address" class="mobile-input" placeholder="Av. Principal 1234, Santiago">
+                      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <div class="mobile-input-group">
+                          <label for="pay-street">Calle y Número</label>
+                          <input type="text" id="pay-street" class="mobile-input" placeholder="Ej: Av. Principal 1234">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-commune">Comuna</label>
+                          <input type="text" id="pay-commune" class="mobile-input" placeholder="Ej: Santiago">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-region">Región</label>
+                          <input type="text" id="pay-region" class="mobile-input" placeholder="Ej: Metropolitana">
+                        </div>
                       </div>
                       <div class="mobile-input-group">
                         <label for="pay-delivery-block">Horario de Entrega Preferido</label>
@@ -707,9 +717,19 @@
                           <label for="mb-auth-reg-phone" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Teléfono</label>
                           <input type="tel" id="mb-auth-reg-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
                         </div>
-                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
-                          <label for="mb-auth-reg-address" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Dirección de Despacho</label>
-                          <input type="text" id="mb-auth-reg-address" class="mobile-input" placeholder="Ej: Av. Principal 1234, Santiago">
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                          <div class="mobile-input-group">
+                            <label for="mb-auth-reg-street" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Calle y Número</label>
+                            <input type="text" id="mb-auth-reg-street" class="mobile-input" placeholder="Ej: Av. Principal 1234">
+                          </div>
+                          <div class="mobile-input-group">
+                            <label for="mb-auth-reg-commune" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Comuna</label>
+                            <input type="text" id="mb-auth-reg-commune" class="mobile-input" placeholder="Ej: Santiago">
+                          </div>
+                          <div class="mobile-input-group">
+                            <label for="mb-auth-reg-region" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Región</label>
+                            <input type="text" id="mb-auth-reg-region" class="mobile-input" placeholder="Ej: Metropolitana">
+                          </div>
                         </div>
                         <div class="mobile-input-group" style="margin-bottom: 1rem;">
                           <label for="mb-auth-reg-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
@@ -738,9 +758,19 @@
                     <input type="tel" id="mb-social-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
                   </div>
                   
-                  <div class="mobile-input-group" style="margin-bottom: 1.5rem;">
-                    <label for="mb-social-address" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Dirección de Entrega</label>
-                    <input type="text" id="mb-social-address" class="mobile-input" placeholder="Ej: Av. Principal 1234, Santiago">
+                  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div class="mobile-input-group">
+                      <label for="mb-social-street" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Calle y Número</label>
+                      <input type="text" id="mb-social-street" class="mobile-input" placeholder="Ej: Av. Principal 1234">
+                    </div>
+                    <div class="mobile-input-group">
+                      <label for="mb-social-commune" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Comuna</label>
+                      <input type="text" id="mb-social-commune" class="mobile-input" placeholder="Ej: Santiago">
+                    </div>
+                    <div class="mobile-input-group">
+                      <label for="mb-social-region" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Región</label>
+                      <input type="text" id="mb-social-region" class="mobile-input" placeholder="Ej: Metropolitana">
+                    </div>
                   </div>
                   
                   <button class="mobile-btn mobile-btn-primary" style="width: 100%;" onclick="submitSocialProfileCompletion()">Continuar</button>
@@ -966,6 +996,6 @@
 </main>
 
   <!-- Lógica JavaScript Principal -->
-  <script src="app.js?v=3.3"></script>
+  <script src="app.js?v=3.6"></script>
 </body>
 </html>

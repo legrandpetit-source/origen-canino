@@ -142,3 +142,13 @@ class Additional(Base):
     category = Column(String(50), nullable=False)  # superfood, vegfruit
     icon = Column(String(20), nullable=False)
     price = Column(Integer, default=1500)
+    vitamins = Column(String(255), nullable=True)
+    benefits = Column(Text, nullable=True)
+
+class IngredientInfo(Base):
+    __tablename__ = "ingredients_info"
+
+    id = Column(String(50), primary_key=True, index=True)
+    name = Column(String(100), nullable=False, unique=True)
+    vitamins = Column(String(255), nullable=True)
+    benefits = Column(Text, nullable=True)

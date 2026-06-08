@@ -235,6 +235,7 @@ let appState = {
   faqs: [],
   superfoods: SUPERALIMENTOS,
   vegetablesFruits: VERDURAS_FRUTAS,
+  ingredientsInfo: [],
   
   currentPetId: null,
   activePetIdDashboard: null,
@@ -267,6 +268,7 @@ async function loadInitialDataFromAPI() {
       appState.superfoods = data.additionals.filter(a => a.category === 'superfood');
       appState.vegetablesFruits = data.additionals.filter(a => a.category === 'vegfruit');
     }
+    appState.ingredientsInfo = data.ingredients_info || [];
     
     // CHECK FOR CUSTOMER TOKEN
     const token = localStorage.getItem('oc_customer_token');
@@ -315,6 +317,7 @@ async function loadInitialDataFromAPI() {
     appState.faqs = DEFAULT_FAQS;
     appState.superfoods = SUPERALIMENTOS;
     appState.vegetablesFruits = VERDURAS_FRUTAS;
+    appState.ingredientsInfo = [];
     
     renderWebProducts();
     renderWebTestimonials();
@@ -957,7 +960,10 @@ function renderInteractiveIngredients(pet, recipe) {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
       <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleIngredient('${ing}', this.checked)">
-      <label for="${checkboxId}" class="pill-label base-ing">
+      <label for="${checkboxId}" class="pill-label base-ing"
+             onmouseenter="showIngredientTooltip(event, 'base', '${ing}')"
+             onmousemove="moveIngredientTooltip(event)"
+             onmouseleave="hideIngredientTooltip()">
         <i class="fa-solid fa-check"></i> ${ing}
       </label>
     `;
@@ -975,7 +981,10 @@ function renderInteractiveIngredients(pet, recipe) {
       const wrapper = document.createElement('div');
       wrapper.innerHTML = `
         <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${isAdded ? 'checked' : ''} onchange="toggleVegetableFruit('${vf.id}', this.checked)">
-        <label for="${checkboxId}" class="pill-label veg-fruit-ing">
+        <label for="${checkboxId}" class="pill-label veg-fruit-ing"
+               onmouseenter="showIngredientTooltip(event, 'additional', '${vf.id}')"
+               onmousemove="moveIngredientTooltip(event)"
+               onmouseleave="hideIngredientTooltip()">
           <i class="fa-solid fa-plus"></i> ${vf.icon} ${vf.name}
         </label>
       `;
@@ -991,7 +1000,10 @@ function renderInteractiveIngredients(pet, recipe) {
     const wrapper = document.createElement('div');
     wrapper.innerHTML = `
       <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${isAdded ? 'checked' : ''} onchange="toggleSuperfood('${sup.id}', this.checked)">
-      <label for="${checkboxId}" class="pill-label super-ing">
+      <label for="${checkboxId}" class="pill-label super-ing"
+             onmouseenter="showIngredientTooltip(event, 'additional', '${sup.id}')"
+             onmousemove="moveIngredientTooltip(event)"
+             onmouseleave="hideIngredientTooltip()">
         <i class="fa-solid fa-plus"></i> ${sup.icon} ${sup.name}
       </label>
     `;
@@ -2326,5 +2338,116 @@ window.submitPpvForm = async function(event) {
     });
   } catch (err) {
     console.warn("Servidor backend offline o error al guardar lead:", err);
+  }
+};
+
+// ==========================================================================
+// INTERACTIVE TOOLTIPS FOR VITAMINS AND BENEFITS
+// ==========================================================================
+
+let tooltipEl = document.getElementById('origen-tooltip');
+if (!tooltipEl) {
+  tooltipEl = document.createElement('div');
+  tooltipEl.id = 'origen-tooltip';
+  tooltipEl.style.position = 'absolute';
+  tooltipEl.style.background = 'rgba(44, 26, 14, 0.96)';
+  tooltipEl.style.color = '#f4ece1';
+  tooltipEl.style.padding = '0.75rem 1rem';
+  tooltipEl.style.borderRadius = '8px';
+  tooltipEl.style.fontSize = '0.75rem';
+  tooltipEl.style.boxShadow = '0 6px 20px rgba(0,0,0,0.2)';
+  tooltipEl.style.zIndex = '99999';
+  tooltipEl.style.pointerEvents = 'none';
+  tooltipEl.style.opacity = '0';
+  tooltipEl.style.transition = 'opacity 0.15s ease, transform 0.15s ease';
+  tooltipEl.style.transform = 'translateY(5px)';
+  tooltipEl.style.maxWidth = '260px';
+  tooltipEl.style.border = '1px solid rgba(244, 236, 225, 0.15)';
+  tooltipEl.style.display = 'none';
+  tooltipEl.style.lineHeight = '1.4';
+  document.body.appendChild(tooltipEl);
+}
+
+window.showIngredientTooltip = function(event, type, itemIdOrName) {
+  let item = null;
+  const searchName = itemIdOrName.trim().toLowerCase().replace(/\.$/, '');
+
+  if (type === 'additional') {
+    const allAdd = [...(appState.superfoods || []), ...(appState.vegetablesFruits || [])];
+    item = allAdd.find(a => a.id === itemIdOrName || a.name.toLowerCase() === searchName);
+  } else if (type === 'base') {
+    item = (appState.ingredientsInfo || []).find(i => i.name.toLowerCase() === searchName || i.id === itemIdOrName);
+    if (!item) {
+      item = (appState.ingredientsInfo || []).find(i => searchName.includes(i.name.toLowerCase()) || i.name.toLowerCase().includes(searchName));
+    }
+  }
+
+  if (item && (item.vitamins || item.benefits)) {
+    const vitaminsText = item.vitamins || 'N/A';
+    const benefitsText = item.benefits || 'N/A';
+    tooltipEl.innerHTML = `
+      <div style="font-weight: 700; color: #8a8d6b; margin-bottom: 0.35rem; font-size: 0.82rem; display: flex; align-items: center; gap: 0.25rem;">
+        ${item.icon ? item.icon : '🐾'} ${item.name}
+      </div>
+      <div style="margin-bottom: 0.35rem;"><span style="color: #c9af92; font-weight: 600;">Vitaminas:</span> ${vitaminsText}</div>
+      <div><span style="color: #c9af92; font-weight: 600;">Beneficios:</span> ${benefitsText}</div>
+    `;
+    tooltipEl.style.display = 'block';
+    
+    // Position it
+    const tooltipHeight = tooltipEl.offsetHeight;
+    const tooltipWidth = tooltipEl.offsetWidth;
+    let top = event.pageY - tooltipHeight - 15;
+    let left = event.pageX - (tooltipWidth / 2);
+
+    // Prevent screen overflow
+    if (top < window.scrollY) {
+      top = event.pageY + 15;
+    }
+    if (left < 10) {
+      left = 10;
+    } else if (left + tooltipWidth > window.innerWidth - 10) {
+      left = window.innerWidth - tooltipWidth - 10;
+    }
+
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
+    
+    // Animate in
+    setTimeout(() => {
+      tooltipEl.style.opacity = '1';
+      tooltipEl.style.transform = 'translateY(0)';
+    }, 10);
+  }
+};
+
+window.hideIngredientTooltip = function() {
+  tooltipEl.style.opacity = '0';
+  tooltipEl.style.transform = 'translateY(5px)';
+  setTimeout(() => {
+    if (tooltipEl.style.opacity === '0') {
+      tooltipEl.style.display = 'none';
+    }
+  }, 150);
+};
+
+window.moveIngredientTooltip = function(event) {
+  if (tooltipEl.style.display === 'block') {
+    const tooltipHeight = tooltipEl.offsetHeight;
+    const tooltipWidth = tooltipEl.offsetWidth;
+    let top = event.pageY - tooltipHeight - 15;
+    let left = event.pageX - (tooltipWidth / 2);
+
+    if (top < window.scrollY) {
+      top = event.pageY + 15;
+    }
+    if (left < 10) {
+      left = 10;
+    } else if (left + tooltipWidth > window.innerWidth - 10) {
+      left = window.innerWidth - tooltipWidth - 10;
+    }
+
+    tooltipEl.style.left = `${left}px`;
+    tooltipEl.style.top = `${top}px`;
   }
 };

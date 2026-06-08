@@ -15,6 +15,7 @@ let appState = {
   testimonials: [],
   faqs: [],
   additionals: [],
+  ingredientsInfo: [],
   users: [], // Listado de administradores
   leads: [],
   adminTab: 'parameters',
@@ -93,6 +94,7 @@ async function loadInitialDataFromAPI() {
     appState.testimonials = data.testimonials;
     appState.faqs = data.faqs;
     appState.additionals = data.additionals || [];
+    appState.ingredientsInfo = data.ingredients_info || [];
     
     if (appState.adminToken) {
       initAdminPanel();
@@ -105,6 +107,7 @@ async function loadInitialDataFromAPI() {
     appState.testimonials = [];
     appState.faqs = [];
     appState.additionals = [];
+    appState.ingredientsInfo = [];
     
     if (appState.adminToken) {
       initAdminPanel();
@@ -146,6 +149,8 @@ async function initAdminPanel() {
   renderAdminFaqsTable();
   await fetchAdminAdditionals();
   renderAdminAdditionalsTables();
+  await fetchAdminIngredientsInfo();
+  renderAdminIngredientsInfoTable();
   await fetchAdminUsers();
   renderAdminUsersTable();
   await fetchAdminLeads();
@@ -178,6 +183,8 @@ window.switchAdminTab = async function(tabName) {
   } else if (tabName === 'additionals') {
     await fetchAdminAdditionals();
     renderAdminAdditionalsTables();
+    await fetchAdminIngredientsInfo();
+    renderAdminIngredientsInfoTable();
   } else if (tabName === 'leads') {
     await fetchAdminLeads();
     renderAdminLeadsTable();
@@ -1242,7 +1249,7 @@ function renderAdminAdditionalsTables() {
   const vegfruits = appState.additionals.filter(a => a.category === 'vegfruit');
 
   if (superfoods.length === 0) {
-    superfoodsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay suplementos o superalimentos registrados.</td></tr>`;
+    superfoodsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay suplementos o superalimentos registrados.</td></tr>`;
   } else {
     superfoods.forEach(a => {
       const tr = document.createElement('tr');
@@ -1250,6 +1257,8 @@ function renderAdminAdditionalsTables() {
         <td style="font-size: 1.3rem; text-align: center;">${a.icon}</td>
         <td style="font-weight: 700; color: var(--secondary-brown);">${a.name}</td>
         <td style="font-weight: 700; color: var(--primary-green);">$${a.price.toLocaleString('es-CL')}</td>
+        <td style="font-size: 0.8rem; color: var(--text-muted);">${a.vitamins || 'N/A'}</td>
+        <td style="font-size: 0.8rem; color: var(--text-muted);">${a.benefits || 'N/A'}</td>
         <td class="admin-actions-cell">
           <button class="btn-icon btn-edit" onclick="editAdditionalInAdmin('${a.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-icon btn-delete" onclick="deleteAdditionalInAdmin('${a.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -1260,7 +1269,7 @@ function renderAdminAdditionalsTables() {
   }
 
   if (vegfruits.length === 0) {
-    vegfruitsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay verduras o frutas adicionales registradas.</td></tr>`;
+    vegfruitsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay verduras o frutas adicionales registradas.</td></tr>`;
   } else {
     vegfruits.forEach(a => {
       const tr = document.createElement('tr');
@@ -1268,6 +1277,8 @@ function renderAdminAdditionalsTables() {
         <td style="font-size: 1.3rem; text-align: center;">${a.icon}</td>
         <td style="font-weight: 700; color: var(--secondary-brown);">${a.name}</td>
         <td style="font-weight: 700; color: var(--primary-green);">$${a.price.toLocaleString('es-CL')}</td>
+        <td style="font-size: 0.8rem; color: var(--text-muted);">${a.vitamins || 'N/A'}</td>
+        <td style="font-size: 0.8rem; color: var(--text-muted);">${a.benefits || 'N/A'}</td>
         <td class="admin-actions-cell">
           <button class="btn-icon btn-edit" onclick="editAdditionalInAdmin('${a.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-icon btn-delete" onclick="deleteAdditionalInAdmin('${a.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -1286,6 +1297,8 @@ window.showAddAdditionalForm = function() {
   document.getElementById('form-additional-category').value = 'superfood';
   document.getElementById('form-additional-price').value = '1500';
   document.getElementById('form-additional-icon').value = '';
+  document.getElementById('form-additional-vitamins').value = '';
+  document.getElementById('form-additional-benefits').value = '';
 };
 
 window.hideAdditionalForm = function() {
@@ -1303,6 +1316,8 @@ window.editAdditionalInAdmin = function(id) {
   document.getElementById('form-additional-category').value = a.category;
   document.getElementById('form-additional-price').value = a.price;
   document.getElementById('form-additional-icon').value = a.icon;
+  document.getElementById('form-additional-vitamins').value = a.vitamins || '';
+  document.getElementById('form-additional-benefits').value = a.benefits || '';
 };
 
 window.submitAdditionalForm = async function() {
@@ -1311,6 +1326,8 @@ window.submitAdditionalForm = async function() {
   const category = document.getElementById('form-additional-category').value;
   const price = parseInt(document.getElementById('form-additional-price').value);
   const icon = document.getElementById('form-additional-icon').value.trim() || '🌱';
+  const vitamins = document.getElementById('form-additional-vitamins').value.trim();
+  const benefits = document.getElementById('form-additional-benefits').value.trim();
 
   if (!name || isNaN(price) || price <= 0) {
     alert('Ingresa el nombre y un precio válido.');
@@ -1322,7 +1339,9 @@ window.submitAdditionalForm = async function() {
     name,
     category,
     price,
-    icon
+    icon,
+    vitamins: vitamins || null,
+    benefits: benefits || null
   };
 
   try {
@@ -1386,6 +1405,157 @@ window.deleteAdditionalInAdmin = async function(id) {
       alert('¡Adicional eliminado!');
     } catch (err) {
       alert("Error al eliminar adicional: " + err.message);
+    }
+  }
+};
+
+// ----------------------------------------------------
+// 13. CRUD DE INFORMACIÓN DE INGREDIENTES BASE
+// ----------------------------------------------------
+
+async function fetchAdminIngredientsInfo() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/ingredients-info`);
+    if (!res.ok) throw new Error("No se pudieron cargar los ingredientes base");
+    appState.ingredientsInfo = await res.json();
+  } catch (err) {
+    console.error("Error al cargar ingredientes base:", err);
+  }
+}
+
+function renderAdminIngredientsInfoTable() {
+  const tbody = document.getElementById('admin-ingredients-info-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  if (appState.ingredientsInfo.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay información de ingredientes base registrada.</td></tr>`;
+    return;
+  }
+
+  // Sort alphabetically by name
+  const sorted = [...appState.ingredientsInfo].sort((a, b) => a.name.localeCompare(b.name));
+
+  sorted.forEach(i => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="font-weight: 700; color: var(--secondary-brown);">${i.name}</td>
+      <td style="font-size: 0.8rem; color: var(--text-muted);">${i.vitamins || 'N/A'}</td>
+      <td style="font-size: 0.8rem; color: var(--text-muted);">${i.benefits || 'N/A'}</td>
+      <td class="admin-actions-cell">
+        <button class="btn-icon btn-edit" onclick="editIngredientInfoInAdmin('${i.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+        <button class="btn-icon btn-delete" onclick="deleteIngredientInfoInAdmin('${i.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.showAddIngredientInfoForm = function() {
+  document.getElementById('add-ingredient-info-form-container').style.display = 'block';
+  document.getElementById('form-ingredient-info-title').textContent = 'Agregar Información de Ingrediente Base';
+  document.getElementById('form-ingredient-info-id').value = '';
+  document.getElementById('form-ingredient-info-name').value = '';
+  document.getElementById('form-ingredient-info-vitamins').value = '';
+  document.getElementById('form-ingredient-info-benefits').value = '';
+};
+
+window.hideIngredientInfoForm = function() {
+  document.getElementById('add-ingredient-info-form-container').style.display = 'none';
+};
+
+window.editIngredientInfoInAdmin = function(id) {
+  const i = appState.ingredientsInfo.find(item => item.id === id);
+  if (!i) return;
+
+  document.getElementById('add-ingredient-info-form-container').style.display = 'block';
+  document.getElementById('form-ingredient-info-title').textContent = `Editar Ingrediente Base: ${i.name}`;
+  document.getElementById('form-ingredient-info-id').value = i.id;
+  document.getElementById('form-ingredient-info-name').value = i.name;
+  document.getElementById('form-ingredient-info-vitamins').value = i.vitamins || '';
+  document.getElementById('form-ingredient-info-benefits').value = i.benefits || '';
+};
+
+window.submitIngredientInfoForm = async function() {
+  const id = document.getElementById('form-ingredient-info-id').value;
+  const name = document.getElementById('form-ingredient-info-name').value.trim();
+  const vitamins = document.getElementById('form-ingredient-info-vitamins').value.trim();
+  const benefits = document.getElementById('form-ingredient-info-benefits').value.trim();
+
+  if (!name) {
+    alert('Ingresa el nombre del ingrediente base.');
+    return;
+  }
+
+  const infoData = {
+    id: id || null,
+    name,
+    vitamins: vitamins || null,
+    benefits: benefits || null
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/ingredients-info`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify(infoData)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudo guardar la información del ingrediente");
+    }
+
+    const data = await res.json();
+    const savedInfo = data.ingredient_info;
+
+    if (id) {
+      const idx = appState.ingredientsInfo.findIndex(item => item.id === id);
+      if (idx !== -1) appState.ingredientsInfo[idx] = savedInfo;
+    } else {
+      appState.ingredientsInfo.push(savedInfo);
+    }
+
+    hideIngredientInfoForm();
+    renderAdminIngredientsInfoTable();
+    alert('¡Información de ingrediente base guardada!');
+  } catch (err) {
+    alert("Error al guardar: " + err.message);
+  }
+};
+
+window.deleteIngredientInfoInAdmin = async function(id) {
+  if (confirm('¿Seguro que deseas eliminar la información de este ingrediente base?')) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/ingredients-info/${id}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${appState.adminToken}`
+        }
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          alert("Sesión expirada. Por favor inicia sesión.");
+          logoutAdmin();
+          return;
+        }
+        throw new Error("No se pudo eliminar el ingrediente base");
+      }
+
+      appState.ingredientsInfo = appState.ingredientsInfo.filter(item => item.id !== id);
+      renderAdminIngredientsInfoTable();
+      alert('¡Información de ingrediente base eliminada!');
+    } catch (err) {
+      alert("Error al eliminar ingrediente base: " + err.message);
     }
   }
 };

@@ -841,7 +841,7 @@
               </div>
             </div>
 
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
               <div class="form-group">
                 <label for="form-additional-price" style="color: var(--text-dark);">Precio ($)</label>
                 <input type="number" id="form-additional-price" class="form-input" required placeholder="Ej: 1500">
@@ -849,6 +849,17 @@
               <div class="form-group">
                 <label for="form-additional-icon" style="color: var(--text-dark);">Emoji / Icono representativo</label>
                 <input type="text" id="form-additional-icon" class="form-input" placeholder="Ej: 🌱 o 🍌">
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label for="form-additional-vitamins" style="color: var(--text-dark);">Vitaminas</label>
+                <input type="text" id="form-additional-vitamins" class="form-input" placeholder="Ej: Omega 3, Vitaminas del grupo B">
+              </div>
+              <div class="form-group">
+                <label for="form-additional-benefits" style="color: var(--text-dark);">Beneficios para el perro</label>
+                <input type="text" id="form-additional-benefits" class="form-input" placeholder="Ej: Antiinflamatorio natural, mejora piel y pelaje...">
               </div>
             </div>
 
@@ -873,6 +884,8 @@
                   <th style="width: 80px;">Icono</th>
                   <th>Nombre</th>
                   <th>Precio</th>
+                  <th>Vitaminas</th>
+                  <th>Beneficios</th>
                   <th style="width: 150px;">Acciones</th>
                 </tr>
               </thead>
@@ -885,17 +898,75 @@
           <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
             Verduras y Frutas Adicionales
           </h3>
-          <div class="admin-table-wrapper">
+          <div class="admin-table-wrapper" style="margin-bottom: 2rem;">
             <table class="admin-table">
               <thead>
                 <tr>
                   <th style="width: 80px;">Icono</th>
                   <th>Nombre</th>
                   <th>Precio</th>
+                  <th>Vitaminas</th>
+                  <th>Beneficios</th>
                   <th style="width: 150px;">Acciones</th>
                 </tr>
               </thead>
               <tbody id="admin-vegfruits-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+
+          <!-- DICCIONARIO DE INGREDIENTES BASE -->
+          <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 2.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Información de Ingredientes Base de Recetas</span>
+            <button class="btn btn-primary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem;" onclick="showAddIngredientInfoForm()">
+              <i class="fa-solid fa-plus"></i> Nuevo Ingrediente Base
+            </button>
+          </h3>
+
+          <!-- Formulario de agregar/editar información de ingrediente base -->
+          <div id="add-ingredient-info-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+            <h3 id="form-ingredient-info-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Información de Ingrediente Base</h3>
+            <input type="hidden" id="form-ingredient-info-id">
+            
+            <div class="form-group" style="margin-bottom: 1rem;">
+              <label for="form-ingredient-info-name" style="color: var(--text-dark);">Nombre del Ingrediente (Debe coincidir exactamente con el nombre en las recetas)</label>
+              <input type="text" id="form-ingredient-info-name" class="form-input" required placeholder="Ej: Hueso de pollo triturado">
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label for="form-ingredient-info-vitamins" style="color: var(--text-dark);">Vitaminas</label>
+                <input type="text" id="form-ingredient-info-vitamins" class="form-input" placeholder="Ej: Calcio, Fósforo, Vitamina D">
+              </div>
+              <div class="form-group">
+                <label for="form-ingredient-info-benefits" style="color: var(--text-dark);">Beneficios para el perro</label>
+                <input type="text" id="form-ingredient-info-benefits" class="form-input" placeholder="Ej: Aporte mineral para mantener huesos fuertes...">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary" onclick="submitIngredientInfoForm()">
+                Guardar Ingrediente Base
+              </button>
+              <button class="btn btn-secondary" onclick="hideIngredientInfoForm()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tabla de Listado de Ingredientes Base -->
+          <div class="admin-table-wrapper" style="margin-bottom: 2rem;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th>Nombre del Ingrediente Base</th>
+                  <th>Vitaminas</th>
+                  <th>Beneficios para el Perro</th>
+                  <th style="width: 150px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-ingredients-info-tbody">
                 <!-- Carga dinámica -->
               </tbody>
             </table>
@@ -927,6 +998,6 @@
     </div>
   </div>
 
-  <script src="admin.js?v=3.5"></script>
+  <script src="admin.js?v=3.6"></script>
 </body>
 </html>

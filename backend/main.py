@@ -119,6 +119,14 @@ class AdditionalCreate(BaseModel):
     category: str
     icon: str
     price: int
+    vitamins: Optional[str] = None
+    benefits: Optional[str] = None
+
+class IngredientInfoCreate(BaseModel):
+    id: Optional[str] = None
+    name: str
+    vitamins: Optional[str] = None
+    benefits: Optional[str] = None
 
 class LeadCreate(BaseModel):
     name: str
@@ -210,19 +218,62 @@ def startup_populate():
     if count == 0:
         defaults = [
             # Superfoods
-            models.Additional(id='sup-chia', name='Semillas de Chía', icon='🌱', price=1500, category='superfood'),
-            models.Additional(id='sup-coco', name='Aceite de Coco', icon='🥥', price=1500, category='superfood'),
-            models.Additional(id='sup-levadura', name='Levadura Nutricional', icon='🌾', price=1500, category='superfood'),
-            models.Additional(id='sup-curcuma', name='Cúrcuma & Pimienta', icon='🟡', price=1500, category='superfood'),
+            models.Additional(id='sup-chia', name='Semillas de Chía', icon='🌱', price=1500, category='superfood', vitamins='Omega 3, Vitaminas del grupo B', benefits='Antiinflamatorio natural, mejora piel y pelaje, favorece salud articular.'),
+            models.Additional(id='sup-coco', name='Aceite de Coco', icon='🥥', price=1500, category='superfood', vitamins='Ácidos grasos de cadena media (ácido láurico)', benefits='Fortalece el sistema inmune, mejora la digestión y combate el mal aliento.'),
+            models.Additional(id='sup-levadura', name='Levadura Nutricional', icon='🌾', price=1500, category='superfood', vitamins='Vitaminas del complejo B, Zinc, Aminoácidos', benefits='Aporte de energía, fortalece defensas y realza el sabor de la comida.'),
+            models.Additional(id='sup-curcuma', name='Cúrcuma & Pimienta', icon='🟡', price=1500, category='superfood', vitamins='Curcumina, Vitaminas C y E, antioxidantes', benefits='Potente antiinflamatorio natural, protector hepático y mejora la digestión.'),
             # Veg & Fruits
-            models.Additional(id='vf-betarraga', name='Betarraga', icon='🍠', price=1500, category='vegfruit'),
-            models.Additional(id='vf-manzana', name='Manzana', icon='🍎', price=1500, category='vegfruit'),
-            models.Additional(id='vf-zapallo', name='Zapallo Camote', icon='🎃', price=1500, category='vegfruit'),
-            models.Additional(id='vf-arandanos', name='Arándanos', icon='🫐', price=1500, category='vegfruit'),
-            models.Additional(id='vf-zanahoria', name='Zanahoria', icon='🥕', price=1500, category='vegfruit'),
-            models.Additional(id='vf-espinaca', name='Espinaca', icon='🥬', price=1500, category='vegfruit'),
+            models.Additional(id='vf-betarraga', name='Betarraga', icon='🍠', price=1500, category='vegfruit', vitamins='Vitamina C, Hierro, Potasio, Ácido fólico', benefits='Mejora la circulación sanguínea, aporta energía y favorece la digestión.'),
+            models.Additional(id='vf-manzana', name='Manzana', icon='🍎', price=1500, category='vegfruit', vitamins='Vitamina C, A, Potasio, Pectina (fibra)', benefits='Ayuda a limpiar los dientes, mejora el tránsito intestinal y saciedad.'),
+            models.Additional(id='vf-zapallo', name='Zapallo Camote', icon='🎃', price=1500, category='vegfruit', vitamins='Vitamina A (betacaroteno), C, E, Potasio', benefits='Excelente para la digestión, ayuda a regular el tránsito intestinal.'),
+            models.Additional(id='vf-arandanos', name='Arándanos', icon='🫐', price=1500, category='vegfruit', vitamins='Vitamina C, K, antioxidantes naturales', benefits='Previene infecciones urinarias y combate el envejecimiento celular.'),
+            models.Additional(id='vf-zanahoria', name='Zanahoria', icon='🥕', price=1500, category='vegfruit', vitamins='Vitamina A (betacaroteno), K, Calcio', benefits='Favorece la salud visual, limpia dientes mecánicamente y aporta fibra.'),
+            models.Additional(id='vf-espinaca', name='Espinaca', icon='🥬', price=1500, category='vegfruit', vitamins='Hierro, Calcio, Vitamina K, A, Ácido fólico', benefits='Favorece la salud ósea, combate la anemia y es rica en antioxidantes.'),
         ]
         for d in defaults:
+            db.add(d)
+        db.commit()
+
+    # 4. Seed default ingredients info if table is empty
+    count_ing = db.query(models.IngredientInfo).count()
+    if count_ing == 0:
+        default_ings = [
+            models.IngredientInfo(id='ing-1', name='Hueso de pollo triturado', vitamins='Calcio, Fósforo, Vitamina D', benefits='Aporte mineral de fácil absorción para mantener huesos fuertes y dientes sanos.'),
+            models.IngredientInfo(id='ing-2', name='Carne magra de pollo', vitamins='Proteína de alto valor biológico, Vitamina B3, B6', benefits='Ayuda en la construcción de masa muscular magra, fácil digestión y energía diaria.'),
+            models.IngredientInfo(id='ing-3', name='Hígado de pollo', vitamins='Vitamina A, Hierro, Cobre, Vitamina B12', benefits='Combate la anemia, favorece una excelente visión y la salud de la piel.'),
+            models.IngredientInfo(id='ing-4', name='Vísceras trituradas', vitamins='Vitaminas del complejo B, Hierro, Zinc', benefits='Aporte concentrado de nutrientes esenciales para el soporte de órganos vitales.'),
+            models.IngredientInfo(id='ing-5', name='Espinaca fresca', vitamins='Hierro, Calcio, Vitamina K, Ácido fólico', benefits='Aporte de fibra vegetal, ayuda a combatir la anemia y favorece el sistema óseo.'),
+            models.IngredientInfo(id='ing-6', name='Zanahoria picada', vitamins='Vitamina A (betacaroteno), K, Fibra', benefits='Promueve una visión saludable, mejora el pelaje y ayuda a fortalecer el sistema inmune.'),
+            models.IngredientInfo(id='ing-7', name='betarraga', vitamins='Vitamina C, Hierro, Potasio, Fibra soluble', benefits='Aporta energía natural, promueve la salud digestiva y la oxigenación celular.'),
+            models.IngredientInfo(id='ing-8', name='Carne magra de res', vitamins='Proteínas de alta calidad, Hierro, Zinc, Vitamina B12', benefits='Desarrollo y mantenimiento de masa muscular fuerte, energía y sistema inmune.'),
+            models.IngredientInfo(id='ing-9', name='Hueso de vacuno molido', vitamins='Calcio, Fósforo, Magnesio', benefits='Excelente fuente mineral natural equilibrada para la integridad de la estructura ósea.'),
+            models.IngredientInfo(id='ing-10', name='Hígado de res', vitamins='Vitamina A, B12, Hierro, Cobre', benefits='El superalimento de la naturaleza; aporta vitalidad, energía y salud inmunológica.'),
+            models.IngredientInfo(id='ing-11', name='Vísceras (bofe/riñón)', vitamins='Vitaminas del grupo B, Selenio, Fósforo', benefits='Gran fuente de enzimas y minerales traza para la desintoxicación y metabolismo.'),
+            models.IngredientInfo(id='ing-12', name='Manzana verde', vitamins='Vitamina C, Potasio, Fibra pectina', benefits='Ayuda a limpiar los dientes y su fibra pectina promueve una flora intestinal sana.'),
+            models.IngredientInfo(id='ing-13', name='Zanahoria', vitamins='Vitamina A (betacaroteno), K', benefits='Promueve una visión excelente, piel elástica y un pelaje brillante.'),
+            models.IngredientInfo(id='ing-14', name='Carne magra de pavo', vitamins='Proteínas magras de alta calidad, Selenio, Vitamina B6', benefits='Excelente alternativa hipoalergénica, ideal para control de peso corporal.'),
+            models.IngredientInfo(id='ing-15', name='Filete de salmón', vitamins='Omega 3 (EPA/DHA), Vitamina D, Selenio', benefits='Potente efecto antiinflamatorio para articulaciones; promueve piel y pelo brillantes.'),
+            models.IngredientInfo(id='ing-16', name='Hueso de pavo triturado', vitamins='Calcio, Fósforo', benefits='Fuente de minerales esenciales naturales de muy fácil asimilación y digestión.'),
+            models.IngredientInfo(id='ing-17', name='Hígado de pavo', vitamins='Vitamina A, Complejo B, Hierro', benefits='Refuerza el sistema hematopoyético (sangre) y promueve defensas altas.'),
+            models.IngredientInfo(id='ing-18', name='Acelga fresca', vitamins='Vitamina K, C, Magnesio, Hierro', benefits='Efecto antioxidante, favorece la coagulación sana y la salud de los vasos sanguíneos.'),
+            models.IngredientInfo(id='ing-19', name='Arándanos silvestres', vitamins='Vitaminas C, E, Potentes antioxidantes', benefits='Combate el daño celular oxidativo, protege el cerebro y las vías urinarias.'),
+            models.IngredientInfo(id='ing-20', name='Pechuga de pollo cocida', vitamins='Proteína de alta digestibilidad, baja en grasa', benefits='Ideal para estómagos delicados o en periodo de transición de dieta.'),
+            models.IngredientInfo(id='ing-21', name='Trutro de pollo cocido', vitamins='Proteínas de alta asimilación, Grasa saludable', benefits='Excelente sabor y aporte calórico óptimo para perros activos.'),
+            models.IngredientInfo(id='ing-22', name='Zapallo camote al vapor', vitamins='Fibra soluble, Vitamina A, C, Potasio', benefits='Excelente regulador digestivo natural; idóneo contra diarrea o estreñimiento.'),
+            models.IngredientInfo(id='ing-23', name='Zanahoria cocida', vitamins='Vitamina A, Carotenos, Fibra suave', benefits='Muy digerible y suave para el estómago, promueve la hidratación celular.'),
+            models.IngredientInfo(id='ing-24', name='Arroz integral cocido', vitamins='Vitaminas del complejo B, Manganeso, Fibra', benefits='Carbohidrato complejo que aporta energía constante y de liberación lenta.'),
+            models.IngredientInfo(id='ing-25', name='Aceite de oliva', vitamins='Vitamina E, Polifenoles, Grasas saludables', benefits='Mejora la elasticidad de la piel, da brillo al pelaje y protege el corazón.'),
+            models.IngredientInfo(id='ing-26', name='Posta de vacuno picada', vitamins='Proteína de alta calidad, Hierro de fácil absorción', benefits='Promueve el apetito y ayuda al crecimiento muscular saludable.'),
+            models.IngredientInfo(id='ing-27', name='Camote al vapor', vitamins='Vitamina A, Potasio, Fibra digestiva', benefits='Carbohidrato saludable de bajo índice glucémico, excelente fuente de energía.'),
+            models.IngredientInfo(id='ing-28', name='Espinaca al vapor', vitamins='Hierro, Ácido fólico, Vitamina K', benefits='Minerales y vitaminas en forma altamente absorbible para la vitalidad.'),
+            models.IngredientInfo(id='ing-29', name='Arvejas tiernas', vitamins='Vitamina C, A, Proteínas vegetales, Fibra', benefits='Aportan fibra saludable para el intestino y antioxidantes protectores.'),
+            models.IngredientInfo(id='ing-30', name='Hígado de res cocido', vitamins='Vitamina A, B12, Hierro, Ácido fólico', benefits='Soporte nutricional máximo en periodos de crecimiento o alta demanda energética.'),
+            models.IngredientInfo(id='ing-31', name='Pulpa de cerdo cocida', vitamins='Proteína, Tiamina (Vitamina B1), Zinc', benefits='Excelente perfil de aminoácidos esenciales para el desarrollo muscular activo.'),
+            models.IngredientInfo(id='ing-32', name='Manzana roja cocida', vitamins='Vitamina C, Pectina (fibra suave)', benefits='Calma la mucosa gástrica y apoya el tránsito intestinal de forma muy suave.'),
+            models.IngredientInfo(id='ing-33', name='Avena integral cocida', vitamins='Fibra soluble (betaglucanos), Vitaminas del grupo B', benefits='Apoya el sistema nervioso, regula la digestión y brinda saciedad.'),
+            models.IngredientInfo(id='ing-34', name='Carbonato de calcio', vitamins='Calcio puro', benefits='Suplemento mineral necesario para equilibrar la relación calcio/fósforo de las carnes.')
+        ]
+        for d in default_ings:
             db.add(d)
         db.commit()
 
@@ -241,6 +292,7 @@ def get_config(db: Session = Depends(get_db)):
     testimonials = db.query(models.Testimonial).all()
     faqs = db.query(models.Faq).all()
     additionals = db.query(models.Additional).all()
+    ingredients_info = db.query(models.IngredientInfo).all()
 
     # If parameters somehow don't exist, use default values
     params_dict = {}
@@ -268,7 +320,8 @@ def get_config(db: Session = Depends(get_db)):
         "params": params_dict,
         "testimonials": testimonials,
         "faqs": faqs,
-        "additionals": additionals
+        "additionals": additionals,
+        "ingredients_info": ingredients_info
     }
 
 @app.get("/api/pets/{pet_id}")
@@ -658,6 +711,50 @@ def delete_additional(additional_id: str, db: Session = Depends(get_db), admin: 
     if not additional:
         raise HTTPException(status_code=404, detail="Adicional no encontrado")
     db.delete(additional)
+    db.commit()
+    return {"status": "success"}
+
+@app.get("/api/ingredients-info")
+def get_all_ingredients_info(db: Session = Depends(get_db)):
+    """Fetch all base ingredients info (vitamins and benefits)."""
+    return db.query(models.IngredientInfo).all()
+
+@app.post("/api/ingredients-info")
+def save_ingredient_info(info_data: IngredientInfoCreate, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Create or update base ingredient information."""
+    info_dict = info_data.model_dump()
+    if not info_dict.get("id"):
+        # Generate new ID if not provided
+        import random
+        info_dict["id"] = "ing-" + str(random.randint(10000, 99999))
+        
+        new_info = models.IngredientInfo(**info_dict)
+        db.add(new_info)
+        db.commit()
+        db.refresh(new_info)
+        return {"status": "success", "ingredient_info": new_info}
+    else:
+        # Update existing
+        info = db.query(models.IngredientInfo).filter(models.IngredientInfo.id == info_data.id).first()
+        if not info:
+            new_info = models.IngredientInfo(**info_dict)
+            db.add(new_info)
+            db.commit()
+            db.refresh(new_info)
+            return {"status": "success", "ingredient_info": new_info}
+        for key, value in info_dict.items():
+            setattr(info, key, value)
+        db.commit()
+        db.refresh(info)
+        return {"status": "success", "ingredient_info": info}
+
+@app.delete("/api/ingredients-info/{info_id}")
+def delete_ingredient_info(info_id: str, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Delete a base ingredient info record by ID."""
+    info = db.query(models.IngredientInfo).filter(models.IngredientInfo.id == info_id).first()
+    if not info:
+        raise HTTPException(status_code=404, detail="Información de ingrediente no encontrada")
+    db.delete(info)
     db.commit()
     return {"status": "success"}
 

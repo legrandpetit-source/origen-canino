@@ -62,6 +62,7 @@ class Pet(Base):
     selected_recipe_id = Column(String(50), nullable=True)
     excluded_ingredients = Column(JSON, nullable=True)  # List of strings
     added_superfoods = Column(JSON, nullable=True)  # List of superfood ids
+    added_vegetables_fruits = Column(JSON, nullable=True)  # List of vegetable/fruit ids
     custom_instructions = Column(Text, nullable=True)
     address = Column(Text, nullable=True)
     customer_id = Column(Integer, nullable=True, index=True)

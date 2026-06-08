@@ -15,6 +15,7 @@ function mapPetFromAPI(p) {
     selectedRecipeId: p.selected_recipe_id,
     excludedIngredients: p.excluded_ingredients || [],
     addedSuperfoods: p.added_superfoods || [],
+    addedVegetablesFruits: p.added_vegetables_fruits || [],
     customInstructions: p.custom_instructions || "",
     deliveryPeriod: p.delivery_period || p.deliveryPeriod || 30,
     orderDate: p.order_date || p.orderDate || ""
@@ -53,8 +54,8 @@ const DEFAULT_RECIPES = [
     category: 'barf', 
     price: 4200, 
     icon: '🍗', 
-    ingredients: 'Hueso de pollo triturado, carne magra de pollo, hígado de pollo, vísceras trituradas, espinaca fresca, zanahoria picada.',
-    ingredientsArray: ['Hueso de pollo triturado', 'Carne magra de pollo', 'Hígado de pollo', 'Vísceras trituradas', 'Espinaca fresca', 'Zanahoria picada']
+    ingredients: 'Hueso de pollo triturado, carne magra de pollo, hígado de pollo, vísceras trituradas, espinaca fresca, zanahoria picada, betarraga.',
+    ingredientsArray: ['Hueso de pollo triturado', 'Carne magra de pollo', 'Hígado de pollo', 'Vísceras trituradas', 'Espinaca fresca', 'Zanahoria picada', 'betarraga']
   },
   { 
     id: 'b-vacuno', 
@@ -130,6 +131,15 @@ const SUPERALIMENTOS = [
   { id: 'sup-coco', name: 'Aceite de Coco', icon: '🥥', price: 1500 },
   { id: 'sup-levadura', name: 'Levadura Nutricional', icon: '🌾', price: 1500 },
   { id: 'sup-curcuma', name: 'Cúrcuma & Pimienta', icon: '🟡', price: 1500 }
+];
+
+const VERDURAS_FRUTAS = [
+  { id: 'vf-betarraga', name: 'Betarraga', icon: '🍠', price: 1500 },
+  { id: 'vf-manzana', name: 'Manzana', icon: '🍎', price: 1500 },
+  { id: 'vf-zapallo', name: 'Zapallo Camote', icon: '🎃', price: 1500 },
+  { id: 'vf-arandanos', name: 'Arándanos', icon: '🫐', price: 1500 },
+  { id: 'vf-zanahoria', name: 'Zanahoria', icon: '🥕', price: 1500 },
+  { id: 'vf-espinaca', name: 'Espinaca', icon: '🥬', price: 1500 }
 ];
 
 // Testimonios Iniciales
@@ -722,6 +732,7 @@ window.savePetProfileAndGoToCalculator = async function() {
     selected_recipe_id: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipeId || null) : null,
     excluded_ingredients: petIndex !== -1 ? (appState.pets[petIndex].excludedIngredients || []) : [],
     added_superfoods: petIndex !== -1 ? (appState.pets[petIndex].addedSuperfoods || []) : [],
+    added_vegetables_fruits: petIndex !== -1 ? (appState.pets[petIndex].addedVegetablesFruits || []) : [],
     custom_instructions: petIndex !== -1 ? (appState.pets[petIndex].customInstructions || '') : '',
     delivery_period: petIndex !== -1 ? (appState.pets[petIndex].deliveryPeriod || 30) : 30,
     order_date: petIndex !== -1 ? (appState.pets[petIndex].orderDate || '') : ''
@@ -758,6 +769,7 @@ window.savePetProfileAndGoToCalculator = async function() {
       selectedRecipeId: petData.selected_recipe_id,
       excludedIngredients: petData.excluded_ingredients,
       addedSuperfoods: petData.added_superfoods,
+      addedVegetablesFruits: petData.added_vegetables_fruits,
       customInstructions: petData.custom_instructions,
       deliveryPeriod: petData.delivery_period,
       orderDate: petData.order_date || ''
@@ -859,6 +871,10 @@ function updatePortionCalculatorUI() {
   if (labelEl) {
     labelEl.textContent = deliveryPeriodVal === 15 ? 'Añadir Superalimentos (+$750 c/u por quincena):' : 'Añadir Superalimentos (+$1.500 c/u al mes):';
   }
+  const labelVfEl = document.getElementById('calc-vegfruits-label');
+  if (labelVfEl) {
+    labelVfEl.textContent = deliveryPeriodVal === 15 ? 'Añadir Verduras o Frutas Adicionales (+$750 c/u por quincena):' : 'Añadir Verduras o Frutas Adicionales (+$1.500 c/u al mes):';
+  }
   
   const descActivity = { sedentary: 'sedentario/senior', normal: 'actividad normal', active: 'activo', working: 'muy activo' };
   const descStage = { adult: 'mantenimiento adulto', puppy: 'crecimiento cachorro 2-4 meses', 'puppy-mid': 'crecimiento cachorro 4-6 meses', 'puppy-late': 'crecimiento cachorro 6-12 meses' };
@@ -910,13 +926,20 @@ function updatePortionCalculatorUI() {
 
 function renderInteractiveIngredients(pet, recipe) {
   const ingContainer = document.getElementById('calc-ingredients-container');
+  const vfContainer = document.getElementById('calc-vegfruits-container');
   const supContainer = document.getElementById('calc-superfoods-container');
   if (!ingContainer || !supContainer) return;
 
   ingContainer.innerHTML = '';
+  if (vfContainer) vfContainer.innerHTML = '';
   supContainer.innerHTML = '';
 
-  const ingredients = recipe.ingredientsArray || recipe.ingredients.split(', ');
+  let ingredients = recipe.ingredientsArray || [];
+  if (ingredients.length === 0 && recipe.ingredients) {
+    ingredients = recipe.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+  } else {
+    ingredients = ingredients.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+  }
 
   ingredients.forEach((ing, i) => {
     const isExcluded = pet.excludedIngredients.includes(ing);
@@ -932,6 +955,25 @@ function renderInteractiveIngredients(pet, recipe) {
     ingContainer.appendChild(wrapper.firstElementChild);
     ingContainer.appendChild(wrapper.lastElementChild);
   });
+
+  // Render optional vegetables and fruits
+  if (vfContainer) {
+    const activeVf = pet.addedVegetablesFruits || [];
+    VERDURAS_FRUTAS.forEach((vf) => {
+      const isAdded = activeVf.includes(vf.id);
+      const checkboxId = `vf-${vf.id}`;
+
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${isAdded ? 'checked' : ''} onchange="toggleVegetableFruit('${vf.id}', this.checked)">
+        <label for="${checkboxId}" class="pill-label veg-fruit-ing">
+          <i class="fa-solid fa-plus"></i> ${vf.icon} ${vf.name}
+        </label>
+      `;
+      vfContainer.appendChild(wrapper.firstElementChild);
+      vfContainer.appendChild(wrapper.lastElementChild);
+    });
+  }
 
   SUPERALIMENTOS.forEach((sup) => {
     const isAdded = pet.addedSuperfoods.includes(sup.id);
@@ -988,11 +1030,30 @@ window.toggleSuperfood = function(superfoodId, isChecked) {
   updatePortionCalculatorUI();
 };
 
+window.toggleVegetableFruit = function(vfId, isChecked) {
+  const pet = appState.pets.find(p => p.id === appState.currentPetId);
+  if (!pet) return;
+
+  pet.addedVegetablesFruits = pet.addedVegetablesFruits || [];
+
+  if (isChecked) {
+    if (!pet.addedVegetablesFruits.includes(vfId)) {
+      pet.addedVegetablesFruits.push(vfId);
+    }
+  } else {
+    pet.addedVegetablesFruits = pet.addedVegetablesFruits.filter(id => id !== vfId);
+  }
+
+  saveStateToStorage();
+  updatePortionCalculatorUI();
+};
+
 function calculateSingleDietPrice(pet, recipe) {
   const basePrice = recipe.price;
   const dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
   const superfoodExtra = (pet.addedSuperfoods || []).length * (pet.deliveryPeriod === 15 ? 750 : 1500);
-  pet.totalPrice = dietSubtotal + superfoodExtra;
+  const vegFruitExtra = (pet.addedVegetablesFruits || []).length * (pet.deliveryPeriod === 15 ? 750 : 1500);
+  pet.totalPrice = dietSubtotal + superfoodExtra + vegFruitExtra;
 
   document.getElementById('calc-diet-price').textContent = `$${pet.totalPrice.toLocaleString('es-CL')}`;
 }
@@ -1002,10 +1063,18 @@ function renderPackageLabelPreview(pet, recipe) {
   if (!container) return;
 
   const exList = (pet.excludedIngredients || []).map(i => `<span style="text-decoration:line-through; opacity:0.6;">- ${i}</span>`).join('<br>');
+  
   const superList = (pet.addedSuperfoods || []).map(id => {
     const s = SUPERALIMENTOS.find(item => item.id === id);
     return s ? `+ ${s.icon} ${s.name}` : '';
-  }).filter(Boolean).join('<br>');
+  }).filter(Boolean);
+
+  const vegFruitList = (pet.addedVegetablesFruits || []).map(id => {
+    const vf = VERDURAS_FRUTAS.find(item => item.id === id);
+    return vf ? `+ ${vf.icon} ${vf.name}` : '';
+  }).filter(Boolean);
+
+  const mergedSupplements = [...superList, ...vegFruitList].join('<br>');
 
   container.innerHTML = `
     <div class="label-title">FORMULACIÓN PERSONALIZADA</div>
@@ -1020,8 +1089,8 @@ function renderPackageLabelPreview(pet, recipe) {
       ${exList || '<span style="opacity:0.6;">NINGUNA</span>'}
     </div>
     <div style="border-top:1px dashed rgba(44,26,14,0.15); margin: 0.5rem 0; padding-top: 0.5rem;">
-      <strong>SUPLEMENTOS / SUPERALIMENTOS:</strong><br>
-      ${superList || '<span style="opacity:0.6;">NINGUNO</span>'}
+      <strong>SUPLEMENTOS / ADICIONALES:</strong><br>
+      ${mergedSupplements || '<span style="opacity:0.6;">NINGUNO</span>'}
     </div>
     <div style="font-size:0.6rem; text-align:center; margin-top:0.75rem; font-weight:700;">
       ORIGEN CANINO - COMIDA REAL
@@ -1047,6 +1116,7 @@ window.proceedToSnacks = async function() {
       selected_recipe_id: pet.selectedRecipeId,
       excluded_ingredients: pet.excludedIngredients,
       added_superfoods: pet.addedSuperfoods,
+      added_vegetables_fruits: pet.addedVegetablesFruits || [],
       custom_instructions: pet.customInstructions,
       address: pet.address,
       delivery_period: pet.deliveryPeriod || 30,
@@ -1354,8 +1424,10 @@ window.processSecurePayment = async function() {
 
   const recipeSummary = unpaidPets.map(p => {
     const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
-    const superLabels = (p.addedSuperfoods || []).map(id => SUPERALIMENTOS.find(s => s.id === id)?.name || id).join(', ');
-    const supText = superLabels ? ` [Suplementos: ${superLabels}]` : '';
+    const superLabels = (p.addedSuperfoods || []).map(id => SUPERALIMENTOS.find(s => s.id === id)?.name || id);
+    const vfLabels = (p.addedVegetablesFruits || []).map(id => VERDURAS_FRUTAS.find(vf => vf.id === id)?.name || id);
+    const mergedList = [...superLabels, ...vfLabels].join(', ');
+    const supText = mergedList ? ` [Suplementos: ${mergedList}]` : '';
     return `${p.name}: ${rec?.name || 'Receta'}${supText}`;
   }).join('; ');
 
@@ -1733,6 +1805,7 @@ async function syncCustomerPets() {
           selected_recipe_id: pet.selectedRecipeId,
           excluded_ingredients: pet.excludedIngredients,
           added_superfoods: pet.addedSuperfoods,
+          added_vegetables_fruits: pet.addedVegetablesFruits || [],
           custom_instructions: pet.customInstructions,
           address: pet.address,
           delivery_period: pet.deliveryPeriod || 30,

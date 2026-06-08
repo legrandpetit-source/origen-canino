@@ -88,6 +88,7 @@ class PetCreate(BaseModel):
     selected_recipe_id: Optional[str] = None
     excluded_ingredients: Optional[List[str]] = None
     added_superfoods: Optional[List[str]] = None
+    added_vegetables_fruits: Optional[List[str]] = None
     custom_instructions: Optional[str] = None
     address: Optional[str] = None
     delivery_period: Optional[int] = 30
@@ -769,13 +770,14 @@ def parse_order_pets(order, db: Session):
         custom_instructions = pet.custom_instructions if (pet and pet.custom_instructions) else ""
         notes = pet.notes if (pet and pet.notes) else ""
         
-        recipe_desc = ""
-        if pet and pet.selected_recipe_id:
-            db_recipe = db.query(models.Recipe).filter(models.Recipe.id == pet.selected_recipe_id).first()
-            if db_recipe:
-                recipe_desc = db_recipe.name
+        recipe_desc = recipe_map.get(name)
         if not recipe_desc:
-            recipe_desc = recipe_map.get(name, order.recipe_name or "Fórmula Especial")
+            if pet and pet.selected_recipe_id:
+                db_recipe = db.query(models.Recipe).filter(models.Recipe.id == pet.selected_recipe_id).first()
+                if db_recipe:
+                    recipe_desc = db_recipe.name
+            else:
+                recipe_desc = order.recipe_name or "Fórmula Especial"
             
         daily_grams = 0
         monthly_kg = 0.0

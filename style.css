@@ -1480,14 +1480,16 @@ body {
   visibility: hidden;
 }
 
-/* Estilo para superalimento agregado (activo) */
-.pill-checkbox:checked + .pill-label.super-ing {
+/* Estilo para superalimento/vegetales agregados (activo) */
+.pill-checkbox:checked + .pill-label.super-ing,
+.pill-checkbox:checked + .pill-label.veg-fruit-ing {
   background: var(--primary-green);
   color: var(--bg-white);
   border-color: var(--primary-green);
 }
 
-.pill-checkbox:checked + .pill-label.super-ing i {
+.pill-checkbox:checked + .pill-label.super-ing i,
+.pill-checkbox:checked + .pill-label.veg-fruit-ing i {
   color: var(--bg-white);
 }
 

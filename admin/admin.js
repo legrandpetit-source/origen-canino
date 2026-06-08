@@ -48,7 +48,7 @@ function mapOrderFromAPI(o) {
 
 // Fallback values for development if API is offline
 const DEFAULT_RECIPES = [
-  { id: 'b-pollo', name: 'BARF Pollo Premium', category: 'barf', price: 4200, icon: '🍗', ingredients: 'Hueso de pollo triturado, carne magra de pollo, hígado de pollo, vísceras trituradas, espinaca fresca, zanahoria picada.', ingredientsArray: ['Hueso de pollo triturado', 'Carne magra de pollo', 'Hígado de pollo', 'Vísceras trituradas', 'Espinaca fresca', 'Zanahoria picada'] },
+  { id: 'b-pollo', name: 'BARF Pollo Premium', category: 'barf', price: 4200, icon: '🍗', ingredients: 'Hueso de pollo triturado, carne magra de pollo, hígado de pollo, vísceras trituradas, espinaca fresca, zanahoria picada, betarraga.', ingredientsArray: ['Hueso de pollo triturado', 'Carne magra de pollo', 'Hígado de pollo', 'Vísceras trituradas', 'Espinaca fresca', 'Zanahoria picada', 'betarraga'] },
   { id: 'b-vacuno', name: 'BARF Vacuno Tradicional', category: 'barf', price: 4200, icon: '🥩', ingredients: 'Carne magra de res, hueso blando de vacuno molido, hígado de res, bofe, riñón de res, manzana verde, zanahoria.', ingredientsArray: ['Carne magra de res', 'Hueso de vacuno molido', 'Hígado de res', 'Vísceras (bofe/riñón)', 'Manzana verde', 'Zanahoria'] },
   { id: 'b-salmon', name: 'BARF Pavo & Salmón', category: 'barf', price: 4200, icon: '🐟', ingredients: 'Carne magra de pavo, filete de salmón, hueso de pavo triturado, hígado de pavo, acelga fresca, arándanos silvestres.', ingredientsArray: ['Carne magra de pavo', 'Filete de salmón', 'Hueso de pavo triturado', 'Hígado de pavo', 'Acelga fresca', 'Arándanos silvestres'] },
   { id: 'c-pollo', name: 'Pollo Cocido al Vapor', category: 'cooked', price: 5200, icon: '🍲', ingredients: 'Pechuga de pollo cocida, trutro deshuesado, zapallo camote, zanahoria cocida, arroz integral cocido, aceite de oliva.', ingredientsArray: ['Pechuga de pollo cocida', 'Trutro de pollo cocido', 'Zapallo camote al vapor', 'Zanahoria cocida', 'Arroz integral cocido', 'Aceite de oliva'] },
@@ -315,7 +315,12 @@ window.submitProductForm = async function() {
     return;
   }
 
-  const ingredients_array = ingredients.split(', ');
+  const cleanedIngredientsStr = ingredients.split(',')
+    .map(i => i.trim().replace(/\.$/, ''))
+    .filter(Boolean)
+    .join(', ');
+
+  const ingredients_array = cleanedIngredientsStr.split(', ');
 
   const recipeData = {
     id: id || null,
@@ -323,7 +328,7 @@ window.submitProductForm = async function() {
     category,
     price,
     icon,
-    ingredients,
+    ingredients: cleanedIngredientsStr,
     ingredients_array
   };
 

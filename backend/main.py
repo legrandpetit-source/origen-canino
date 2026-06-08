@@ -148,6 +148,7 @@ class CustomerLogin(BaseModel):
     provider: Optional[str] = "email"
 
 class CustomerProfileUpdate(BaseModel):
+    name: str
     phone: str
     address: str
 
@@ -509,6 +510,7 @@ def update_customer_profile(profile_data: CustomerProfileUpdate, db: Session = D
     cust = db.query(models.Customer).filter(models.Customer.email == customer_email).first()
     if not cust:
         raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    cust.name = profile_data.name
     cust.phone = profile_data.phone
     cust.address = profile_data.address
     db.commit()

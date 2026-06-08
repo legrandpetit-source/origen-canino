@@ -412,6 +412,15 @@ window.changeMobileView = function(viewName) {
       const regEl = document.getElementById('mb-auth-reg-region');
       if (regEl) regEl.value = '';
       toggleMobileAuthView(false);
+    } else if (viewName === 'social-profile-setup') {
+      const nameEl = document.getElementById('mb-social-name');
+      if (nameEl && appState.customerName) {
+        if (!appState.customerName.includes('.google') && !appState.customerName.includes('.apple') && !appState.customerName.includes('@')) {
+          nameEl.value = appState.customerName;
+        } else {
+          nameEl.value = '';
+        }
+      }
     }
   }
 
@@ -2093,13 +2102,14 @@ async function handlePostAuthRedirect() {
 }
 
 window.submitSocialProfileCompletion = async function() {
+  const name = document.getElementById('mb-social-name').value.trim();
   const phone = document.getElementById('mb-social-phone').value.trim();
   const street = document.getElementById('mb-social-street').value.trim();
   const commune = document.getElementById('mb-social-commune').value.trim();
   const region = document.getElementById('mb-social-region').value.trim();
   
-  if (!phone || !street || !commune || !region) {
-    alert('Por favor, ingresa tu teléfono, calle, comuna y región para continuar.');
+  if (!name || !phone || !street || !commune || !region) {
+    alert('Por favor, ingresa tu nombre completo, teléfono, calle, comuna y región para continuar.');
     return;
   }
   
@@ -2112,7 +2122,7 @@ window.submitSocialProfileCompletion = async function() {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${appState.customerToken}`
       },
-      body: JSON.stringify({ phone, address })
+      body: JSON.stringify({ name, phone, address })
     });
     
     if (!res.ok) throw new Error("No se pudo guardar la información de perfil");
@@ -2121,6 +2131,7 @@ window.submitSocialProfileCompletion = async function() {
     setCustomerSession(appState.customerToken, data.name, data.email, data.phone, data.address);
     
     // Reset inputs
+    document.getElementById('mb-social-name').value = '';
     document.getElementById('mb-social-phone').value = '';
     document.getElementById('mb-social-street').value = '';
     document.getElementById('mb-social-commune').value = '';
@@ -2147,8 +2158,9 @@ window.submitSocialProfileCompletion = async function() {
     }
   } catch (err) {
     console.warn("Fallo de guardado en el servidor, usando datos locales:", err);
-    setCustomerSession(appState.customerToken, appState.customerName, appState.customerEmail, phone, address);
+    setCustomerSession(appState.customerToken, name, appState.customerEmail, phone, address);
     
+    document.getElementById('mb-social-name').value = '';
     document.getElementById('mb-social-phone').value = '';
     document.getElementById('mb-social-street').value = '';
     document.getElementById('mb-social-commune').value = '';

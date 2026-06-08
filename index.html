@@ -54,7 +54,7 @@
           <p>Ofrecemos dietas BARF crudas y recetas cocinadas al vapor con ingredientes 100% naturales de grado humano. Diseñamos la porción diaria perfecta según las características únicas de tu perro.</p>
           <div class="hero-actions">
             <button class="btn btn-primary" onclick="startOrderFlow()">
-              <i class="fa-solid fa-dog"></i> Personalizar Comida en la App
+              <i class="fa-solid fa-dog"></i> Personalizar Dieta
             </button>
             <a href="#catalogo-seccion" class="btn btn-secondary">Ver Menú & Snacks</a>
           </div>
@@ -264,6 +264,9 @@
                   <button class="mobile-btn mobile-btn-primary" onclick="initNewPetWizard()">
                     <i class="fa-solid fa-plus"></i> Agregar Mascota
                   </button>
+                  <button class="mobile-btn mobile-btn-secondary" onclick="resetToWelcome()" style="margin-top: 0.5rem; border-color: rgba(44, 26, 14, 0.15); width: 100%;">
+                    <i class="fa-solid fa-house"></i> Volver al Inicio
+                  </button>
                 </div>
               </div>
 
@@ -398,7 +401,7 @@
                         <!-- Ingredientes de la receta activa -->
                       </div>
 
-                      <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Superalimentos (+$1.500 c/u al mes):</span>
+                      <span id="calc-superfoods-label" style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Superalimentos (+$1.500 c/u al mes):</span>
                       <div class="pills-container" id="calc-superfoods-container">
                         <!-- Suplementos opcionales -->
                       </div>
@@ -493,7 +496,7 @@
               <!-- 2.5 PANTALLA: CHECKOUT & PASARELA DE PAGO INTERACTIVA (MULTI-MASCOTA) -->
               <div id="mobile-checkout" class="mobile-view">
                 <div class="mobile-card" style="margin-top: 1rem;">
-                  <h3 class="mobile-title" style="grid-column: 1 / -1;">Suscripción Mensual</h3>
+                  <h3 class="mobile-title" id="checkout-title-text" style="grid-column: 1 / -1;">Suscripción Mensual</h3>
                   <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1rem;">Revisa el detalle de tus mascotas y realiza el pago seguro.</p>
                   
                   <div class="pc-columns-wrapper" style="display: contents;">

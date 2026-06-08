@@ -16,7 +16,8 @@ function mapPetFromAPI(p) {
     excludedIngredients: p.excluded_ingredients || [],
     addedSuperfoods: p.added_superfoods || [],
     customInstructions: p.custom_instructions || "",
-    deliveryPeriod: p.delivery_period || p.deliveryPeriod || 30
+    deliveryPeriod: p.delivery_period || p.deliveryPeriod || 30,
+    orderDate: p.order_date || p.orderDate || ""
   };
 }
 
@@ -322,18 +323,21 @@ updateSimulatedTime();
 window.switchView = function(viewName) {
   appState.activeView = viewName;
   
-  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
   document.querySelectorAll('.view-section').forEach(sec => sec.classList.remove('active'));
   
+  const targetSec = document.getElementById(`view-${viewName}`);
+  if (targetSec) {
+    targetSec.classList.add('active');
+  }
+
+  // Toggle app-header visibility in mobile native mode using class
   if (viewName === 'web') {
-    document.querySelector('.tab-btn[onclick="switchView(\'web\')"]').classList.add('active');
-    document.getElementById('view-web').classList.add('active');
+    document.body.classList.remove('hide-header-on-mobile');
     renderWebProducts();
     renderWebTestimonials();
     renderWebFaqs();
-  } else if (viewName === 'mobile') {
-    document.querySelector('.tab-btn[onclick="switchView(\'mobile\')"]').classList.add('active');
-    document.getElementById('view-mobile').classList.add('active');
+  } else {
+    document.body.classList.add('hide-header-on-mobile');
     renderMobileWelcomeScreen();
   }
 };
@@ -350,6 +354,13 @@ window.changeMobileView = function(viewName) {
     if (viewName === 'welcome') {
       renderMobileWelcomeScreen();
     } else if (viewName === 'calculator') {
+      const pet = appState.pets.find(p => p.id === appState.currentPetId);
+      if (pet) {
+        const selectPeriod = document.getElementById('calc-delivery-period');
+        if (selectPeriod) {
+          selectPeriod.value = pet.deliveryPeriod || 30;
+        }
+      }
       renderMobileRecipeSelector();
       updatePortionCalculatorUI();
     } else if (viewName === 'snacks') {
@@ -493,7 +504,7 @@ function renderWebProducts() {
         <div class="product-footer">
           <span class="product-price">${p.priceLabel}</span>
           <button class="btn btn-secondary" style="padding: 0.5rem 1rem; font-size: 0.85rem;" onclick="startOrderFlow()">
-            Comprar en App
+            Comprar / Personalizar
           </button>
         </div>
       </div>
@@ -712,7 +723,8 @@ window.savePetProfileAndGoToCalculator = async function() {
     excluded_ingredients: petIndex !== -1 ? (appState.pets[petIndex].excludedIngredients || []) : [],
     added_superfoods: petIndex !== -1 ? (appState.pets[petIndex].addedSuperfoods || []) : [],
     custom_instructions: petIndex !== -1 ? (appState.pets[petIndex].customInstructions || '') : '',
-    delivery_period: petIndex !== -1 ? (appState.pets[petIndex].deliveryPeriod || 30) : 30
+    delivery_period: petIndex !== -1 ? (appState.pets[petIndex].deliveryPeriod || 30) : 30,
+    order_date: petIndex !== -1 ? (appState.pets[petIndex].orderDate || '') : ''
   };
 
   try {
@@ -747,7 +759,8 @@ window.savePetProfileAndGoToCalculator = async function() {
       excludedIngredients: petData.excluded_ingredients,
       addedSuperfoods: petData.added_superfoods,
       customInstructions: petData.custom_instructions,
-      deliveryPeriod: petData.delivery_period
+      deliveryPeriod: petData.delivery_period,
+      orderDate: petData.order_date || ''
     };
     if (petIndex !== -1) {
       appState.pets[petIndex] = fallbackPet;
@@ -832,10 +845,7 @@ function updatePortionCalculatorUI() {
   document.getElementById('custom-instructions').value = pet.customInstructions || '';
 
   const selectPeriod = document.getElementById('calc-delivery-period');
-  if (selectPeriod && pet.deliveryPeriod) {
-    selectPeriod.value = pet.deliveryPeriod;
-  }
-  const deliveryPeriodVal = selectPeriod ? parseInt(selectPeriod.value) : 30;
+  const deliveryPeriodVal = selectPeriod ? (parseInt(selectPeriod.value) || 30) : 30;
   pet.deliveryPeriod = deliveryPeriodVal;
 
   const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType, deliveryPeriodVal);
@@ -844,6 +854,11 @@ function updatePortionCalculatorUI() {
   document.getElementById('calc-daily-total').textContent = `${results.dailyGrams}g`;
   document.getElementById('calc-monthly-weight').textContent = results.monthlyKg;
   document.getElementById('calc-delivery-label').textContent = deliveryPeriodVal === 15 ? 'Cada 15 días' : 'Cada 30 días';
+
+  const labelEl = document.getElementById('calc-superfoods-label');
+  if (labelEl) {
+    labelEl.textContent = deliveryPeriodVal === 15 ? 'Añadir Superalimentos (+$750 c/u por quincena):' : 'Añadir Superalimentos (+$1.500 c/u al mes):';
+  }
   
   const descActivity = { sedentary: 'sedentario/senior', normal: 'actividad normal', active: 'activo', working: 'muy activo' };
   const descStage = { adult: 'mantenimiento adulto', puppy: 'crecimiento cachorro 2-4 meses', 'puppy-mid': 'crecimiento cachorro 4-6 meses', 'puppy-late': 'crecimiento cachorro 6-12 meses' };
@@ -976,7 +991,7 @@ window.toggleSuperfood = function(superfoodId, isChecked) {
 function calculateSingleDietPrice(pet, recipe) {
   const basePrice = recipe.price;
   const dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
-  const superfoodExtra = (pet.addedSuperfoods || []).length * 1500;
+  const superfoodExtra = (pet.addedSuperfoods || []).length * (pet.deliveryPeriod === 15 ? 750 : 1500);
   pet.totalPrice = dietSubtotal + superfoodExtra;
 
   document.getElementById('calc-diet-price').textContent = `$${pet.totalPrice.toLocaleString('es-CL')}`;
@@ -1033,7 +1048,9 @@ window.proceedToSnacks = async function() {
       excluded_ingredients: pet.excludedIngredients,
       added_superfoods: pet.addedSuperfoods,
       custom_instructions: pet.customInstructions,
-      address: pet.address
+      address: pet.address,
+      delivery_period: pet.deliveryPeriod || 30,
+      order_date: pet.orderDate || ''
     };
 
     try {
@@ -1146,6 +1163,10 @@ window.proceedToCheckout = function() {
 // ----------------------------------------------------
 
 function setupCheckoutUI() {
+  calculateSubscriptionTotals(); // Reset globalCartTotal to base subtotal first
+  const shippingCost = appState.params.shipping_cost !== undefined ? appState.params.shipping_cost : 5000;
+  globalCartTotal += shippingCost; // Add shipping cost to the overall total
+
   document.getElementById('checkout-total-val').textContent = `$${globalCartTotal.toLocaleString('es-CL')}`;
 
   currentPaymentMethod = 'card';
@@ -1167,6 +1188,20 @@ function setupCheckoutUI() {
     listContainer.innerHTML = '';
     const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
     
+    // Update Checkout Title dynamically
+    const checkoutTitleText = document.getElementById('checkout-title-text');
+    if (checkoutTitleText) {
+      const hasQuincenal = unpaidPets.some(p => p.deliveryPeriod === 15);
+      const hasMensual = unpaidPets.some(p => p.deliveryPeriod !== 15);
+      if (hasQuincenal && hasMensual) {
+        checkoutTitleText.textContent = 'Resumen de Suscripción';
+      } else if (hasQuincenal) {
+        checkoutTitleText.textContent = 'Suscripción Quincenal';
+      } else {
+        checkoutTitleText.textContent = 'Suscripción Mensual';
+      }
+    }
+
     unpaidPets.forEach(p => {
       const rec = appState.recipes.find(r => r.id === p.selectedRecipeId) || appState.recipes[0];
       const row = document.createElement('div');
@@ -1175,12 +1210,24 @@ function setupCheckoutUI() {
       row.innerHTML = `
         <span class="pet-title">
           <img src="${p.photo}" alt="${p.name}">
-          ${p.name} (${rec.icon} Dieta Mensual)
+          ${p.name} (${rec.icon} Dieta ${p.deliveryPeriod === 15 ? 'Quincenal' : 'Mensual'})
         </span>
         <strong>$${p.totalPrice.toLocaleString('es-CL')}</strong>
       `;
       listContainer.appendChild(row);
     });
+
+    // Add shipping cost row to the breakdown
+    const shippingRow = document.createElement('div');
+    shippingRow.className = 'checkout-pet-row';
+    shippingRow.style.borderTop = '1px dashed rgba(44, 26, 14, 0.1)';
+    shippingRow.style.paddingTop = '0.5rem';
+    shippingRow.style.marginTop = '0.5rem';
+    shippingRow.innerHTML = `
+      <span style="opacity: 0.85;">🚚 Costo de Envío / Despacho:</span>
+      <strong>$${shippingCost.toLocaleString('es-CL')}</strong>
+    `;
+    listContainer.appendChild(shippingRow);
 
     for (const snackId in appState.snacksCart) {
       const snack = appState.snacks.find(s => s.id === snackId);
@@ -1351,9 +1398,11 @@ window.processSecurePayment = async function() {
     console.warn("Fallo al guardar orden en el servidor (servidor desconectado), procesando localmente:", err);
   }
   
+  const todayStr = new Date().toLocaleDateString('es-CL');
   unpaidPets.forEach(p => {
     p.subscriptionPaid = true;
     p.address = address;
+    p.orderDate = todayStr;
   });
 
   if (unpaidPets.length > 0) {
@@ -1383,6 +1432,18 @@ function setupReceiptUI() {
     const rec = appState.recipes.find(r => r.id === p.selectedRecipeId) || appState.recipes[0];
     return `<div class="receipt-row"><span>${p.name}:</span><strong>${rec.name} (${p.portionResults?.monthlyKg} kg)</strong></div>`;
   }).join('');
+
+  // Determine delivery frequency dynamically
+  const hasQuincenal = paidPets.some(p => p.deliveryPeriod === 15);
+  const hasMensual = paidPets.some(p => p.deliveryPeriod !== 15);
+  let freqText = 'Mensual (Cada 30 días)';
+  if (hasQuincenal && hasMensual) {
+    freqText = 'Mixta (15 y 30 días)';
+  } else if (hasQuincenal) {
+    freqText = 'Quincenal (Cada 15 días)';
+  }
+
+  const shippingCost = appState.params.shipping_cost !== undefined ? appState.params.shipping_cost : 5000;
 
   const firstPet = paidPets[0];
   let shippingHtml = '';
@@ -1419,7 +1480,11 @@ function setupReceiptUI() {
     ${petRows}
     <div class="receipt-row">
       <span>Frecuencia de Despacho:</span>
-      <span>Mensual (Cada 30 días)</span>
+      <span>${freqText}</span>
+    </div>
+    <div class="receipt-row">
+      <span>Costo de Despacho:</span>
+      <strong>$${shippingCost.toLocaleString('es-CL')}</strong>
     </div>
     ${shippingHtml}
     <div class="receipt-row total-row">
@@ -1482,13 +1547,40 @@ function renderPetDashboard() {
   const deliveryDays = document.getElementById('dash-delivery-days');
   const deliveryEstimate = document.getElementById('dash-delivery-estimate');
   if (deliveryDays && deliveryEstimate) {
-    if (activePet.deliveryPeriod === 15) {
-      deliveryDays.textContent = '05 Días';
-      deliveryEstimate.textContent = 'Entrega estimada: 12 de Junio';
-    } else {
-      deliveryDays.textContent = '08 Días';
-      deliveryEstimate.textContent = 'Entrega estimada: 15 de Junio';
+    function parseChileanDate(dateStr) {
+      if (!dateStr) return new Date();
+      const parts = dateStr.split(/[-/]/);
+      if (parts.length === 3) {
+        const day = parseInt(parts[0], 10);
+        const month = parseInt(parts[1], 10) - 1; // 0-indexed month
+        const year = parseInt(parts[2], 10);
+        return new Date(year, month, day);
+      }
+      return new Date(dateStr);
     }
+
+    const orderDate = activePet.orderDate ? parseChileanDate(activePet.orderDate) : new Date();
+    const periodDays = activePet.deliveryPeriod || 30;
+    
+    const nextDeliveryDate = new Date(orderDate);
+    nextDeliveryDate.setDate(orderDate.getDate() + periodDays);
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const nextDeliveryClear = new Date(nextDeliveryDate);
+    nextDeliveryClear.setHours(0,0,0,0);
+
+    const diffTime = nextDeliveryClear.getTime() - today.getTime();
+    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (diffDays < 0) {
+      diffDays = 0;
+    }
+
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    
+    const formattedDays = diffDays.toString().padStart(2, '0');
+    deliveryDays.textContent = `${formattedDays} Días`;
+    deliveryEstimate.textContent = `Entrega estimada: ${nextDeliveryDate.getDate()} de ${months[nextDeliveryDate.getMonth()]}`;
   }
 
   const guideWrapper = document.getElementById('dash-feeding-guide');
@@ -1642,7 +1734,9 @@ async function syncCustomerPets() {
           excluded_ingredients: pet.excludedIngredients,
           added_superfoods: pet.addedSuperfoods,
           custom_instructions: pet.customInstructions,
-          address: pet.address
+          address: pet.address,
+          delivery_period: pet.deliveryPeriod || 30,
+          order_date: pet.orderDate || ''
         };
         
         try {
@@ -1790,11 +1884,7 @@ window.loginCustomerSocialMobile = async function(provider) {
 };
 
 window.resetToWelcome = function() {
-  if (isMobileDevice()) {
-    changeMobileView('welcome');
-  } else {
-    switchView('web');
-  }
+  switchView('web');
 };
 
 // Detección de Dispositivo y Responsividad
@@ -1807,16 +1897,10 @@ window.isMobileDevice = function() {
 window.configureDeviceMode = function() {
   if (isMobileDevice()) {
     document.body.classList.add('mobile-native-mode');
-    switchView('mobile');
-    changeMobileView('welcome');
   } else {
     document.body.classList.remove('mobile-native-mode');
-    if (appState.activeView === 'mobile') {
-      switchView('mobile');
-    } else {
-      switchView('web');
-    }
   }
+  switchView(appState.activeView);
 };
 
 // ----------------------------------------------------

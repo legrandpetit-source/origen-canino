@@ -2421,31 +2421,44 @@ body {
 /* Modo App Móvil Nativa (Activado en móviles o pantallas angostas) */
 body.mobile-native-mode {
   background: var(--bg-cream);
+}
+
+/* Header visibility and scrolling control on mobile native mode */
+body.mobile-native-mode.hide-header-on-mobile {
   overflow: hidden;
 }
-
-body.mobile-native-mode .app-header {
+body.mobile-native-mode.hide-header-on-mobile .app-header {
   display: none !important;
 }
-
-body.mobile-native-mode .main-viewport {
+body.mobile-native-mode.hide-header-on-mobile .main-viewport {
   padding: 0 !important;
   margin: 0 !important;
   height: 100vh !important;
   width: 100vw !important;
   max-width: 100% !important;
 }
-
-body.mobile-native-mode #view-web {
-  display: none !important;
+body.mobile-native-mode:not(.hide-header-on-mobile) .main-viewport {
+  padding: 0 !important;
+  margin: 0 !important;
+  min-height: 100vh;
 }
 
-body.mobile-native-mode #view-mobile {
+body.mobile-native-mode #view-web.active {
+  display: block !important;
+}
+body.mobile-native-mode #view-web {
+  display: none;
+}
+
+body.mobile-native-mode #view-mobile.active {
   display: block !important;
   width: 100vw !important;
   height: 100vh !important;
   padding: 0 !important;
   margin: 0 !important;
+}
+body.mobile-native-mode #view-mobile {
+  display: none;
 }
 
 body.mobile-native-mode .mobile-simulator-container {
@@ -2486,55 +2499,7 @@ body.mobile-native-mode .phone-header {
   padding-top: 10px !important;
 }
 
-/* Media query automática para pantallas angostas (< 768px) */
-@media (max-width: 768px) {
-  /* Forzar el comportamiento nativo en celulares automáticamente */
-  body {
-    background: var(--bg-cream);
-  }
-  .app-header {
-    display: none !important;
-  }
-  #view-web {
-    display: none !important;
-  }
-  #view-mobile {
-    display: block !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  .mobile-simulator-container {
-    padding: 0 !important;
-    background: none !important;
-    min-height: 100vh !important;
-    width: 100vw !important;
-    height: 100vh !important;
-  }
-  .phone-mockup {
-    width: 100vw !important;
-    height: 100vh !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-    border-radius: 0 !important;
-    padding: 0 !important;
-    box-shadow: none !important;
-    background: none !important;
-  }
-  .phone-notch, .phone-camera {
-    display: none !important;
-  }
-  .phone-screen {
-    border-radius: 0 !important;
-    width: 100vw !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-  }
-  .phone-header {
-    padding-top: 10px !important;
-  }
-}
+
 
 /* Estilos para el Asistente de Compra Desktop (Modal) */
 .desktop-wizard-modal {
@@ -2761,4 +2726,9 @@ body:not(.mobile-native-mode) .phone-content {
   height: auto !important;
   flex: none !important;
   overflow-y: auto !important;
+}
+
+/* Ocultar botones de cambio de vista de entorno */
+.view-tabs button.tab-btn {
+  display: none !important;
 }

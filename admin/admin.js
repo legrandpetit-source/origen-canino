@@ -73,7 +73,8 @@ const DEFAULT_PARAMS = {
   cooked_adult_working: 4.5,
   puppy_early: 8.0,
   puppy_mid: 6.0,
-  puppy_late: 4.0
+  puppy_late: 4.0,
+  shipping_cost: 5000
 };
 
 // Carga de configuración inicial
@@ -115,6 +116,7 @@ async function initAdminPanel() {
   if (appState.params) {
     document.getElementById('cfg-barf-price').value = appState.params.barf_price_per_kg || 4200;
     document.getElementById('cfg-cooked-price').value = appState.params.cooked_price_per_kg || 5200;
+    document.getElementById('cfg-shipping-cost').value = appState.params.shipping_cost || 5000;
     
     document.getElementById('cfg-barf-adult-sedentary').value = appState.params.barf_adult_sedentary || 2.0;
     document.getElementById('cfg-barf-adult-normal').value = appState.params.barf_adult_normal || 2.5;
@@ -178,6 +180,7 @@ window.saveAdminParameters = async function() {
   const updatedParams = {
     barf_price_per_kg: parseInt(document.getElementById('cfg-barf-price').value),
     cooked_price_per_kg: parseInt(document.getElementById('cfg-cooked-price').value),
+    shipping_cost: parseInt(document.getElementById('cfg-shipping-cost').value),
     barf_adult_sedentary: parseFloat(document.getElementById('cfg-barf-adult-sedentary').value),
     barf_adult_normal: parseFloat(document.getElementById('cfg-barf-adult-normal').value),
     barf_adult_active: parseFloat(document.getElementById('cfg-barf-adult-active').value),

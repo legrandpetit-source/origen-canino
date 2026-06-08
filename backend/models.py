@@ -45,6 +45,7 @@ class Parameter(Base):
     puppy_early = Column(Float, default=8.0)
     puppy_mid = Column(Float, default=6.0)
     puppy_late = Column(Float, default=4.0)
+    shipping_cost = Column(Integer, default=5000, nullable=True)
 
 class Pet(Base):
     __tablename__ = "pets"
@@ -65,6 +66,8 @@ class Pet(Base):
     address = Column(Text, nullable=True)
     customer_id = Column(Integer, nullable=True, index=True)
     customer_email = Column(String(100), nullable=True, index=True)
+    delivery_period = Column(Integer, default=30, nullable=True)
+    order_date = Column(String(50), nullable=True)
 
 class Order(Base):
     __tablename__ = "orders"

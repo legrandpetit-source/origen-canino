@@ -51,6 +51,7 @@ class ParametersUpdate(BaseModel):
     puppy_early: float
     puppy_mid: float
     puppy_late: float
+    shipping_cost: int
 
 class RecipeCreate(BaseModel):
     id: Optional[str] = None
@@ -89,6 +90,8 @@ class PetCreate(BaseModel):
     added_superfoods: Optional[List[str]] = None
     custom_instructions: Optional[str] = None
     address: Optional[str] = None
+    delivery_period: Optional[int] = 30
+    order_date: Optional[str] = None
 
 class OrderCreate(BaseModel):
     order_id: str
@@ -221,6 +224,7 @@ def get_config(db: Session = Depends(get_db)):
             "puppy_early": params.puppy_early,
             "puppy_mid": params.puppy_mid,
             "puppy_late": params.puppy_late,
+            "shipping_cost": params.shipping_cost if params.shipping_cost is not None else 5000,
         }
 
     return {
@@ -302,6 +306,7 @@ def create_order(order_data: OrderCreate, db: Session = Depends(get_db), authori
         for pet in pets:
             pet.subscription_paid = True
             pet.address = order_data.address
+            pet.order_date = order_data.date
 
     db.commit()
     return {"status": "success", "order_id": order_data.order_id}

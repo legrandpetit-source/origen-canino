@@ -15,6 +15,7 @@ let appState = {
   testimonials: [],
   faqs: [],
   users: [], // Listado de administradores
+  leads: [],
   adminTab: 'parameters',
   adminToken: localStorage.getItem('oc_admin_token') || null
 };
@@ -141,6 +142,8 @@ async function initAdminPanel() {
   renderAdminFaqsTable();
   await fetchAdminUsers();
   renderAdminUsersTable();
+  await fetchAdminLeads();
+  renderAdminLeadsTable();
 }
 
 window.switchAdminTab = async function(tabName) {
@@ -166,6 +169,9 @@ window.switchAdminTab = async function(tabName) {
     renderAdminTestimonialsTable();
   } else if (tabName === 'faqs') {
     renderAdminFaqsTable();
+  } else if (tabName === 'leads') {
+    await fetchAdminLeads();
+    renderAdminLeadsTable();
   } else if (tabName === 'users') {
     await fetchAdminUsers();
     renderAdminUsersTable();
@@ -920,7 +926,78 @@ window.deleteAdminUser = async function(id, username) {
 };
 
 // ----------------------------------------------------
-// 9. LOGICA DE LOGIN Y LOGOUT
+// 9. GESTIÓN DE MENSAJES Y CONSULTAS (LEADS)
+// ----------------------------------------------------
+
+async function fetchAdminLeads() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/leads`, {
+      headers: {
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+    if (!res.ok) {
+      if (res.status === 401) {
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudieron cargar los mensajes");
+    }
+    appState.leads = await res.json();
+  } catch (err) {
+    console.error("Error al cargar mensajes:", err);
+  }
+}
+
+function renderAdminLeadsTable() {
+  const tbody = document.getElementById('admin-leads-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = '';
+
+  if (!appState.leads || appState.leads.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay mensajes recibidos.</td></tr>`;
+    return;
+  }
+
+  appState.leads.forEach(l => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="color: var(--text-muted); font-size: 0.82rem;">${l.date}</td>
+      <td style="font-weight: 600; color: var(--secondary-brown);">${l.name}</td>
+      <td><a href="mailto:${l.email}" style="color: var(--primary-green); text-decoration: underline;">${l.email}</a></td>
+      <td style="font-weight: 600; color: var(--text-dark);">${l.phone}</td>
+      <td style="color: var(--text-dark); font-size: 0.85rem; max-width: 350px; overflow-wrap: break-word; white-space: normal;">${l.message}</td>
+      <td class="admin-actions-cell">
+        <button class="btn-icon btn-delete" onclick="deleteAdminLead('${l.id}')" title="Eliminar Mensaje"><i class="fa-solid fa-trash"></i></button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+window.deleteAdminLead = async function(id) {
+  if (!confirm("¿Estás seguro de que deseas eliminar este mensaje?")) return;
+  
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/leads/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+    if (!res.ok) throw new Error("No se pudo eliminar el mensaje");
+    
+    // Recargar tabla
+    await fetchAdminLeads();
+    renderAdminLeadsTable();
+  } catch (err) {
+    alert("Error al eliminar mensaje: " + err.message);
+  }
+};
+
+// ----------------------------------------------------
+// 10. LOGICA DE LOGIN Y LOGOUT
 // ----------------------------------------------------
 
 window.loginAdmin = async function() {

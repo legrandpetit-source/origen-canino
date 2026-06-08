@@ -326,6 +326,22 @@ def save_lead(lead_data: LeadCreate, db: Session = Depends(get_db)):
     db.commit()
     return {"status": "success"}
 
+@app.get("/api/admin/leads")
+def get_leads(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Retrieve all user inquiries/leads sorted by date descending."""
+    leads = db.query(models.Lead).order_by(models.Lead.date.desc()).all()
+    return leads
+
+@app.delete("/api/admin/leads/{lead_id}")
+def delete_lead(lead_id: str, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Delete a lead by ID."""
+    lead = db.query(models.Lead).filter(models.Lead.id == lead_id).first()
+    if not lead:
+        raise HTTPException(status_code=404, detail="Mensaje no encontrado")
+    db.delete(lead)
+    db.commit()
+    return {"status": "success"}
+
 # ----------------------------------------------------
 # CUSTOMER AUTHENTICATION & PRIVATE ENDPOINTS
 # ----------------------------------------------------

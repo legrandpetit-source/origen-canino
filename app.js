@@ -2083,28 +2083,9 @@ window.submitPpvForm = async function(event) {
     console.warn("Servidor backend offline o error al guardar lead:", err);
   }
   
-  // Configurar enlace mailto para enviar correo a legrandpetit@gmail.com
-  const subject = encodeURIComponent(`Consulta PPV Soluciones Informáticas - ${name}`);
-  const body = encodeURIComponent(
-    `Hola PPV / Origen Canino,\n\n` +
-    `Has recibido una nueva consulta de desarrollo de software desde el sitio web:\n\n` +
-    `- Nombre Completo: ${name}\n` +
-    `- Teléfono de Contacto: ${phone}\n` +
-    `- Correo Electrónico: ${email}\n\n` +
-    `- Detalle del Proyecto / Consulta:\n${message}\n\n` +
-    `Saludos cordiales.`
-  );
-  
-  const mailtoUrl = `mailto:legrandpetit@gmail.com?subject=${subject}&body=${body}`;
-  
   // Mostrar pantalla de éxito
   const form = document.getElementById('ppv-contact-form');
   const successMsg = document.getElementById('ppv-form-success');
   if (form) form.style.display = 'none';
   if (successMsg) successMsg.style.display = 'block';
-  
-  // Abrir cliente de correo tras un leve retardo para la animación
-  setTimeout(() => {
-    window.location.href = mailtoUrl;
-  }, 300);
 };

@@ -145,6 +145,9 @@
         <button class="admin-menu-btn" id="btn-tab-faqs" onclick="switchAdminTab('faqs')">
           <i class="fa-solid fa-circle-question"></i> Preguntas Frecuentes (FAQs)
         </button>
+        <button class="admin-menu-btn" id="btn-tab-leads" onclick="switchAdminTab('leads')">
+          <i class="fa-solid fa-envelope"></i> Mensajes Recibidos
+        </button>
         <button class="admin-menu-btn" id="btn-tab-users" onclick="switchAdminTab('users')">
           <i class="fa-solid fa-users-gear"></i> Administradores
         </button>
@@ -530,6 +533,33 @@
                 <!-- Carga dinámica -->
               </tbody>
             </table>
+        </div>
+
+        <!-- PANEL G: GESTIÓN DE MENSAJES RECIBIDOS (LEADS) -->
+        <div id="admin-panel-leads" class="admin-view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+              Mensajes y Consultas Recibidas
+            </h2>
+          </div>
+
+          <!-- Tabla de Mensajes -->
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 150px;">Fecha</th>
+                  <th style="width: 150px;">Nombre</th>
+                  <th style="width: 180px;">Correo</th>
+                  <th style="width: 120px;">Teléfono</th>
+                  <th>Consulta o Proyecto</th>
+                  <th style="width: 100px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-leads-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -538,6 +568,6 @@
 
   </main>
 
-  <script src="admin.js?v=3.2"></script>
+  <script src="admin.js?v=3.3"></script>
 </body>
 </html>

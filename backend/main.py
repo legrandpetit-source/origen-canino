@@ -139,11 +139,18 @@ class CustomerRegister(BaseModel):
     password: Optional[str] = None
     name: Optional[str] = None
     provider: Optional[str] = "email"
+    phone: Optional[str] = None
+    address: Optional[str] = None
 
 class CustomerLogin(BaseModel):
     email: str
     password: Optional[str] = None
     provider: Optional[str] = "email"
+
+class CustomerProfileUpdate(BaseModel):
+    phone: str
+    address: str
+
 
 # ----------------------------------------------------
 # AUTHENTICATION DEPENDENCY
@@ -450,7 +457,9 @@ def register_customer(data: CustomerRegister, db: Session = Depends(get_db)):
         email=data.email,
         password_hash=hashed_pass,
         name=data.name or data.email.split("@")[0],
-        provider=data.provider or "email"
+        provider=data.provider or "email",
+        phone=data.phone,
+        address=data.address
     )
     db.add(new_cust)
     db.commit()
@@ -462,7 +471,7 @@ def register_customer(data: CustomerRegister, db: Session = Depends(get_db)):
         "exp": datetime.utcnow().timestamp() + 86400 * 30 # 30 days
     }
     token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-    return {"token": token, "email": new_cust.email, "name": new_cust.name}
+    return {"token": token, "email": new_cust.email, "name": new_cust.name, "phone": new_cust.phone, "address": new_cust.address}
 
 @app.post("/api/customer/login")
 def login_customer(data: CustomerLogin, db: Session = Depends(get_db)):
@@ -491,7 +500,21 @@ def login_customer(data: CustomerLogin, db: Session = Depends(get_db)):
         "exp": datetime.utcnow().timestamp() + 86400 * 30 # 30 days
     }
     token = jwt.encode(token_payload, JWT_SECRET, algorithm=JWT_ALGORITHM)
-    return {"token": token, "email": cust.email, "name": cust.name}
+    return {"token": token, "email": cust.email, "name": cust.name, "phone": cust.phone, "address": cust.address}
+
+
+@app.post("/api/customer/profile")
+def update_customer_profile(profile_data: CustomerProfileUpdate, db: Session = Depends(get_db), customer_email: str = Depends(get_current_customer)):
+    """Update customer contact phone and delivery address."""
+    cust = db.query(models.Customer).filter(models.Customer.email == customer_email).first()
+    if not cust:
+        raise HTTPException(status_code=404, detail="Cliente no encontrado")
+    cust.phone = profile_data.phone
+    cust.address = profile_data.address
+    db.commit()
+    db.refresh(cust)
+    return {"status": "success", "email": cust.email, "name": cust.name, "phone": cust.phone, "address": cust.address}
+
 
 @app.get("/api/customer/pets")
 def get_customer_pets(db: Session = Depends(get_db), customer_email: str = Depends(get_current_customer)):

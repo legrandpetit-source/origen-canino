@@ -275,6 +275,10 @@ async function loadInitialDataFromAPI() {
     if (token) {
       appState.customerToken = token;
       const name = localStorage.getItem('oc_customer_name') || 'Cliente';
+      appState.customerName = name;
+      appState.customerEmail = localStorage.getItem('oc_customer_email') || '';
+      appState.customerPhone = localStorage.getItem('oc_customer_phone') || '';
+      appState.customerAddress = localStorage.getItem('oc_customer_address') || '';
       
       const badge = document.getElementById('customer-header-badge');
       const badgeName = document.getElementById('customer-header-name');
@@ -688,6 +692,18 @@ function renderMobileWelcomeScreen() {
 }
 
 window.initNewPetWizard = function() {
+  if (!appState.customerToken) {
+    appState.pendingWizardInit = true;
+    changeMobileView('auth');
+    return;
+  }
+  
+  if (!appState.customerPhone || !appState.customerAddress) {
+    appState.pendingWizardInit = true;
+    changeMobileView('social-profile-setup');
+    return;
+  }
+
   appState.currentPetId = 'pet_' + Date.now();
   
   document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
@@ -1273,6 +1289,19 @@ function setupCheckoutUI() {
 
   document.getElementById('checkout-total-val').textContent = `$${globalCartTotal.toLocaleString('es-CL')}`;
 
+  if (appState.customerName) {
+    const el = document.getElementById('pay-recipient-name');
+    if (el) el.value = appState.customerName;
+  }
+  if (appState.customerPhone) {
+    const el = document.getElementById('pay-phone');
+    if (el) el.value = appState.customerPhone;
+  }
+  if (appState.customerAddress) {
+    const el = document.getElementById('pay-address');
+    if (el) el.value = appState.customerAddress;
+  }
+
   currentPaymentMethod = 'card';
   transferFileBase64 = null;
   transferFileName = '';
@@ -1780,9 +1809,16 @@ window.startOrderFlow = function() {
 window.logoutCustomer = function() {
   if (confirm('¿Deseas cerrar sesión?')) {
     appState.customerToken = null;
+    appState.customerName = null;
+    appState.customerEmail = null;
+    appState.customerPhone = null;
+    appState.customerAddress = null;
+    
     localStorage.removeItem('oc_customer_token');
     localStorage.removeItem('oc_customer_name');
     localStorage.removeItem('oc_customer_email');
+    localStorage.removeItem('oc_customer_phone');
+    localStorage.removeItem('oc_customer_address');
     
     const badge = document.getElementById('customer-header-badge');
     if (badge) badge.style.display = 'none';
@@ -1797,11 +1833,18 @@ window.logoutCustomer = function() {
   }
 };
 
-function setCustomerSession(token, name, email) {
+function setCustomerSession(token, name, email, phone, address) {
   appState.customerToken = token;
+  appState.customerName = name;
+  appState.customerEmail = email;
+  appState.customerPhone = phone || '';
+  appState.customerAddress = address || '';
+  
   localStorage.setItem('oc_customer_token', token);
   localStorage.setItem('oc_customer_name', name);
   localStorage.setItem('oc_customer_email', email);
+  localStorage.setItem('oc_customer_phone', phone || '');
+  localStorage.setItem('oc_customer_address', address || '');
   
   const badge = document.getElementById('customer-header-badge');
   const badgeName = document.getElementById('customer-header-name');
@@ -1915,13 +1958,15 @@ window.submitCustomerAuthMobile = async function(type) {
   } else {
     const name = document.getElementById('mb-auth-reg-name').value.trim();
     const email = document.getElementById('mb-auth-reg-email').value.trim();
+    const phone = document.getElementById('mb-auth-reg-phone').value.trim();
+    const address = document.getElementById('mb-auth-reg-address').value.trim();
     const password = document.getElementById('mb-auth-reg-pass').value;
-    if (!name || !email || !password) {
-      alert('Por favor, ingresa tu nombre, correo y contraseña.');
+    if (!name || !email || !password || !phone || !address) {
+      alert('Por favor, ingresa tu nombre, correo, teléfono, dirección y contraseña.');
       return;
     }
     url = `${API_BASE_URL}/api/customer/register`;
-    payload = { name, email, password, provider: 'email' };
+    payload = { name, email, password, provider: 'email', phone, address };
   }
   
   try {
@@ -1937,10 +1982,9 @@ window.submitCustomerAuthMobile = async function(type) {
     }
     
     const data = await res.json();
-    setCustomerSession(data.token, data.name, data.email);
+    setCustomerSession(data.token, data.name, data.email, data.phone, data.address);
     
-    await syncCustomerPets();
-    changeMobileView('checkout');
+    await handlePostAuthRedirect();
   } catch (err) {
     console.warn("Fallo de autenticación en el servidor, usando inicio de sesión local de prueba:", err);
     const email = type === 'login' 
@@ -1949,9 +1993,11 @@ window.submitCustomerAuthMobile = async function(type) {
     const name = type === 'login' 
       ? email.split('@')[0] 
       : document.getElementById('mb-auth-reg-name').value.trim();
+    const phone = type === 'login' ? '' : document.getElementById('mb-auth-reg-phone').value.trim();
+    const address = type === 'login' ? '' : document.getElementById('mb-auth-reg-address').value.trim();
       
-    setCustomerSession("mock_token_email", name, email);
-    changeMobileView('checkout');
+    setCustomerSession("mock_token_email", name, email, phone, address);
+    await handlePostAuthRedirect();
   }
 };
 
@@ -1979,14 +2025,126 @@ window.loginCustomerSocialMobile = async function(provider) {
     }
     
     const data = await res.json();
-    setCustomerSession(data.token, data.name, data.email);
+    setCustomerSession(data.token, data.name, data.email, data.phone, data.address);
     
-    await syncCustomerPets();
-    changeMobileView('checkout');
+    await handlePostAuthRedirect();
   } catch (err) {
     console.warn("Fallo de inicio social en el servidor, usando inicio de sesión mock local:", err);
-    setCustomerSession("mock_token_social", name, email);
+    setCustomerSession("mock_token_social", name, email, "", "");
+    await handlePostAuthRedirect();
+  }
+};
+
+async function handlePostAuthRedirect() {
+  await syncCustomerPets();
+  
+  // If the profile is incomplete (missing phone or address), show the setup form
+  if (!appState.customerPhone || !appState.customerAddress) {
+    changeMobileView('social-profile-setup');
+    return;
+  }
+  
+  if (appState.pendingWizardInit) {
+    appState.pendingWizardInit = false;
+    
+    appState.currentPetId = 'pet_' + Date.now();
+    document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
+    document.getElementById('pet-name').value = '';
+    document.getElementById('pet-breed').value = '';
+    document.getElementById('pet-weight').value = '';
+    document.getElementById('pet-age').value = 'adult';
+    document.getElementById('pet-activity').value = 'normal';
+    document.getElementById('pet-notes').value = '';
+    petPhotoBase64 = null;
+    document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
+    
+    changeMobileView('profile-setup');
+  } else {
     changeMobileView('checkout');
+  }
+}
+
+window.submitSocialProfileCompletion = async function() {
+  const phone = document.getElementById('mb-social-phone').value.trim();
+  const address = document.getElementById('mb-social-address').value.trim();
+  
+  if (!phone || !address) {
+    alert('Por favor, ingresa tu teléfono y dirección para continuar.');
+    return;
+  }
+  
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/customer/profile`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.customerToken}`
+      },
+      body: JSON.stringify({ phone, address })
+    });
+    
+    if (!res.ok) throw new Error("No se pudo guardar la información de perfil");
+    
+    const data = await res.json();
+    setCustomerSession(appState.customerToken, data.name, data.email, data.phone, data.address);
+    
+    // Reset inputs
+    document.getElementById('mb-social-phone').value = '';
+    document.getElementById('mb-social-address').value = '';
+    
+    // Continue
+    if (appState.pendingWizardInit) {
+      appState.pendingWizardInit = false;
+      
+      appState.currentPetId = 'pet_' + Date.now();
+      document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
+      document.getElementById('pet-name').value = '';
+      document.getElementById('pet-breed').value = '';
+      document.getElementById('pet-weight').value = '';
+      document.getElementById('pet-age').value = 'adult';
+      document.getElementById('pet-activity').value = 'normal';
+      document.getElementById('pet-notes').value = '';
+      petPhotoBase64 = null;
+      document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
+      
+      changeMobileView('profile-setup');
+    } else {
+      changeMobileView('checkout');
+    }
+  } catch (err) {
+    console.warn("Fallo de guardado en el servidor, usando datos locales:", err);
+    setCustomerSession(appState.customerToken, appState.customerName, appState.customerEmail, phone, address);
+    
+    document.getElementById('mb-social-phone').value = '';
+    document.getElementById('mb-social-address').value = '';
+    
+    if (appState.pendingWizardInit) {
+      appState.pendingWizardInit = false;
+      
+      appState.currentPetId = 'pet_' + Date.now();
+      document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
+      document.getElementById('pet-name').value = '';
+      document.getElementById('pet-breed').value = '';
+      document.getElementById('pet-weight').value = '';
+      document.getElementById('pet-age').value = 'adult';
+      document.getElementById('pet-activity').value = 'normal';
+      document.getElementById('pet-notes').value = '';
+      petPhotoBase64 = null;
+      document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
+      
+      changeMobileView('profile-setup');
+    } else {
+      changeMobileView('checkout');
+    }
+  }
+};
+
+window.authGoBackMobile = function() {
+  if (appState.pendingWizardInit) {
+    appState.pendingWizardInit = false;
+    changeMobileView('welcome');
+  } else {
+    changeMobileView('snacks');
   }
 };
 

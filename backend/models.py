@@ -133,6 +133,9 @@ class Customer(Base):
     password_hash = Column(String(255), nullable=True)
     name = Column(String(100), nullable=True)
     provider = Column(String(50), default="email")  # email, google, apple
+    phone = Column(String(50), nullable=True)
+    address = Column(Text, nullable=True)
+
 
 class Additional(Base):
     __tablename__ = "additionals"

@@ -133,3 +133,12 @@ class Customer(Base):
     password_hash = Column(String(255), nullable=True)
     name = Column(String(100), nullable=True)
     provider = Column(String(50), default="email")  # email, google, apple
+
+class Additional(Base):
+    __tablename__ = "additionals"
+
+    id = Column(String(50), primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    category = Column(String(50), nullable=False)  # superfood, vegfruit
+    icon = Column(String(20), nullable=False)
+    price = Column(Integer, default=1500)

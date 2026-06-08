@@ -113,6 +113,13 @@ class OrderCreate(BaseModel):
 class OrderStatusUpdate(BaseModel):
     production_status: str
 
+class AdditionalCreate(BaseModel):
+    id: Optional[str] = None
+    name: str
+    category: str
+    icon: str
+    price: int
+
 class LeadCreate(BaseModel):
     name: str
     email: str
@@ -197,6 +204,28 @@ def startup_populate():
         admin = models.Admin(username="admin", password_hash=hashed)
         db.add(admin)
         db.commit()
+
+    # 3. Seed default additionals if table is empty
+    count = db.query(models.Additional).count()
+    if count == 0:
+        defaults = [
+            # Superfoods
+            models.Additional(id='sup-chia', name='Semillas de Chía', icon='🌱', price=1500, category='superfood'),
+            models.Additional(id='sup-coco', name='Aceite de Coco', icon='🥥', price=1500, category='superfood'),
+            models.Additional(id='sup-levadura', name='Levadura Nutricional', icon='🌾', price=1500, category='superfood'),
+            models.Additional(id='sup-curcuma', name='Cúrcuma & Pimienta', icon='🟡', price=1500, category='superfood'),
+            # Veg & Fruits
+            models.Additional(id='vf-betarraga', name='Betarraga', icon='🍠', price=1500, category='vegfruit'),
+            models.Additional(id='vf-manzana', name='Manzana', icon='🍎', price=1500, category='vegfruit'),
+            models.Additional(id='vf-zapallo', name='Zapallo Camote', icon='🎃', price=1500, category='vegfruit'),
+            models.Additional(id='vf-arandanos', name='Arándanos', icon='🫐', price=1500, category='vegfruit'),
+            models.Additional(id='vf-zanahoria', name='Zanahoria', icon='🥕', price=1500, category='vegfruit'),
+            models.Additional(id='vf-espinaca', name='Espinaca', icon='🥬', price=1500, category='vegfruit'),
+        ]
+        for d in defaults:
+            db.add(d)
+        db.commit()
+
     db.close()
 
 # ----------------------------------------------------
@@ -211,6 +240,7 @@ def get_config(db: Session = Depends(get_db)):
     params = db.query(models.Parameter).filter(models.Parameter.id == "default").first()
     testimonials = db.query(models.Testimonial).all()
     faqs = db.query(models.Faq).all()
+    additionals = db.query(models.Additional).all()
 
     # If parameters somehow don't exist, use default values
     params_dict = {}
@@ -237,7 +267,8 @@ def get_config(db: Session = Depends(get_db)):
         "snacks": snacks,
         "params": params_dict,
         "testimonials": testimonials,
-        "faqs": faqs
+        "faqs": faqs,
+        "additionals": additionals
     }
 
 @app.get("/api/pets/{pet_id}")
@@ -581,6 +612,52 @@ def delete_faq(faq_id: str, db: Session = Depends(get_db), admin: str = Depends(
     if not faq:
         raise HTTPException(status_code=404, detail="FAQ no encontrada")
     db.delete(faq)
+    db.commit()
+    return {"status": "success"}
+
+@app.get("/api/additionals")
+def get_additionals(db: Session = Depends(get_db)):
+    """Fetch all superfoods and vegetables/fruits."""
+    return db.query(models.Additional).all()
+
+@app.post("/api/additionals")
+def save_additional(additional_data: AdditionalCreate, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Create or update a superfood or vegetable/fruit addition."""
+    add_dict = additional_data.model_dump()
+    if not add_dict.get("id"):
+        # Generate new ID if not provided
+        prefix = "sup-" if additional_data.category == "superfood" else "vf-"
+        import random
+        add_dict["id"] = prefix + str(random.randint(10000, 99999))
+        
+        new_add = models.Additional(**add_dict)
+        db.add(new_add)
+        db.commit()
+        db.refresh(new_add)
+        return {"status": "success", "additional": new_add}
+    else:
+        # Update existing
+        additional = db.query(models.Additional).filter(models.Additional.id == additional_data.id).first()
+        if not additional:
+            # If id was provided but does not exist, let's create it as a new one
+            new_add = models.Additional(**add_dict)
+            db.add(new_add)
+            db.commit()
+            db.refresh(new_add)
+            return {"status": "success", "additional": new_add}
+        for key, value in add_dict.items():
+            setattr(additional, key, value)
+        db.commit()
+        db.refresh(additional)
+        return {"status": "success", "additional": additional}
+
+@app.delete("/api/additionals/{additional_id}")
+def delete_additional(additional_id: str, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Delete an additional by ID."""
+    additional = db.query(models.Additional).filter(models.Additional.id == additional_id).first()
+    if not additional:
+        raise HTTPException(status_code=404, detail="Adicional no encontrado")
+    db.delete(additional)
     db.commit()
     return {"status": "success"}
 

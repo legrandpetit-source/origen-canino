@@ -378,6 +378,9 @@
         <button class="admin-menu-btn" id="btn-tab-recipes" onclick="switchAdminTab('recipes')">
           <i class="fa-solid fa-utensils"></i> Menús & Recetas
         </button>
+        <button class="admin-menu-btn" id="btn-tab-additionals" onclick="switchAdminTab('additionals')">
+          <i class="fa-solid fa-seedling"></i> Suplementos y Adicionales
+        </button>
         <button class="admin-menu-btn" id="btn-tab-orders" onclick="switchAdminTab('orders')">
           <i class="fa-solid fa-receipt"></i> Suscripciones Activas
         </button>
@@ -808,6 +811,97 @@
           </div>
         </div>
 
+        <!-- PANEL H: GESTIÓN DE SUPLEMENTOS Y ADICIONALES (additionals) -->
+        <div id="admin-panel-additionals" class="admin-view-panel">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+            <h2 style="font-family: var(--font-serif); color: var(--secondary-brown);">
+              Gestión de Suplementos y Adicionales
+            </h2>
+            <button class="btn btn-primary" onclick="showAddAdditionalForm()">
+              <i class="fa-solid fa-plus"></i> Nuevo Adicional
+            </button>
+          </div>
+
+          <!-- Formulario de agregar/editar adicional -->
+          <div id="add-additional-form-container" style="display: none; background: var(--bg-cream); padding: 1.5rem; border-radius: var(--radius-md); border: 1px solid rgba(44, 26, 14, 0.08); margin-bottom: 2rem;">
+            <h3 id="form-additional-title" style="margin-bottom: 1rem; font-size: 1.1rem; color: var(--secondary-brown);">Agregar Nuevo Adicional</h3>
+            <input type="hidden" id="form-additional-id">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+              <div class="form-group">
+                <label for="form-additional-name" style="color: var(--text-dark);">Nombre del Adicional</label>
+                <input type="text" id="form-additional-name" class="form-input" required placeholder="Ej: Plátano o Levadura Nutricional">
+              </div>
+              <div class="form-group">
+                <label for="form-additional-category" style="color: var(--text-dark);">Categoría</label>
+                <select id="form-additional-category" class="form-input">
+                  <option value="superfood">Superalimento / Suplemento</option>
+                  <option value="vegfruit">Verdura / Fruta Extra</option>
+                </select>
+              </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+              <div class="form-group">
+                <label for="form-additional-price" style="color: var(--text-dark);">Precio ($)</label>
+                <input type="number" id="form-additional-price" class="form-input" required placeholder="Ej: 1500">
+              </div>
+              <div class="form-group">
+                <label for="form-additional-icon" style="color: var(--text-dark);">Emoji / Icono representativo</label>
+                <input type="text" id="form-additional-icon" class="form-input" placeholder="Ej: 🌱 o 🍌">
+              </div>
+            </div>
+
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-primary" onclick="submitAdditionalForm()">
+                Guardar Adicional
+              </button>
+              <button class="btn btn-secondary" onclick="hideAdditionalForm()">
+                Cancelar
+              </button>
+            </div>
+          </div>
+
+          <!-- Tablas de Listado de Adicionales -->
+          <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+            Superalimentos y Suplementos
+          </h3>
+          <div class="admin-table-wrapper" style="margin-bottom: 2rem;">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Icono</th>
+                  <th>Nombre</th>
+                  <th>Precio</th>
+                  <th style="width: 150px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-superfoods-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+
+          <h3 style="font-size: 1.1rem; color: var(--secondary-brown); margin: 1.5rem 0 1rem; border-bottom: 1px solid rgba(44, 26, 14, 0.08); padding-bottom: 0.5rem;">
+            Verduras y Frutas Adicionales
+          </h3>
+          <div class="admin-table-wrapper">
+            <table class="admin-table">
+              <thead>
+                <tr>
+                  <th style="width: 80px;">Icono</th>
+                  <th>Nombre</th>
+                  <th>Precio</th>
+                  <th style="width: 150px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-vegfruits-tbody">
+                <!-- Carga dinámica -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
       </main>
     </div>
 
@@ -833,6 +927,6 @@
     </div>
   </div>
 
-  <script src="admin.js?v=3.4"></script>
+  <script src="admin.js?v=3.5"></script>
 </body>
 </html>

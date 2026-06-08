@@ -233,6 +233,8 @@ let appState = {
   pets: [],
   testimonials: [],
   faqs: [],
+  superfoods: SUPERALIMENTOS,
+  vegetablesFruits: VERDURAS_FRUTAS,
   
   currentPetId: null,
   activePetIdDashboard: null,
@@ -260,6 +262,11 @@ async function loadInitialDataFromAPI() {
     appState.params = data.params;
     appState.testimonials = data.testimonials;
     appState.faqs = data.faqs;
+    
+    if (data.additionals) {
+      appState.superfoods = data.additionals.filter(a => a.category === 'superfood');
+      appState.vegetablesFruits = data.additionals.filter(a => a.category === 'vegfruit');
+    }
     
     // CHECK FOR CUSTOMER TOKEN
     const token = localStorage.getItem('oc_customer_token');
@@ -306,6 +313,8 @@ async function loadInitialDataFromAPI() {
     appState.params = DEFAULT_PARAMS;
     appState.testimonials = DEFAULT_TESTIMONIALS;
     appState.faqs = DEFAULT_FAQS;
+    appState.superfoods = SUPERALIMENTOS;
+    appState.vegetablesFruits = VERDURAS_FRUTAS;
     
     renderWebProducts();
     renderWebTestimonials();
@@ -959,7 +968,7 @@ function renderInteractiveIngredients(pet, recipe) {
   // Render optional vegetables and fruits
   if (vfContainer) {
     const activeVf = pet.addedVegetablesFruits || [];
-    VERDURAS_FRUTAS.forEach((vf) => {
+    (appState.vegetablesFruits || VERDURAS_FRUTAS).forEach((vf) => {
       const isAdded = activeVf.includes(vf.id);
       const checkboxId = `vf-${vf.id}`;
 
@@ -975,8 +984,8 @@ function renderInteractiveIngredients(pet, recipe) {
     });
   }
 
-  SUPERALIMENTOS.forEach((sup) => {
-    const isAdded = pet.addedSuperfoods.includes(sup.id);
+  (appState.superfoods || SUPERALIMENTOS).forEach((sup) => {
+    const isAdded = (pet.addedSuperfoods || []).includes(sup.id);
     const checkboxId = `sup-${sup.id}`;
 
     const wrapper = document.createElement('div');
@@ -1051,8 +1060,21 @@ window.toggleVegetableFruit = function(vfId, isChecked) {
 function calculateSingleDietPrice(pet, recipe) {
   const basePrice = recipe.price;
   const dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
-  const superfoodExtra = (pet.addedSuperfoods || []).length * (pet.deliveryPeriod === 15 ? 750 : 1500);
-  const vegFruitExtra = (pet.addedVegetablesFruits || []).length * (pet.deliveryPeriod === 15 ? 750 : 1500);
+  
+  let superfoodExtra = 0;
+  (pet.addedSuperfoods || []).forEach(id => {
+    const s = (appState.superfoods || SUPERALIMENTOS).find(item => item.id === id);
+    const itemPrice = s ? s.price : 1500;
+    superfoodExtra += (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+  });
+
+  let vegFruitExtra = 0;
+  (pet.addedVegetablesFruits || []).forEach(id => {
+    const vf = (appState.vegetablesFruits || VERDURAS_FRUTAS).find(item => item.id === id);
+    const itemPrice = vf ? vf.price : 1500;
+    vegFruitExtra += (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+  });
+
   pet.totalPrice = dietSubtotal + superfoodExtra + vegFruitExtra;
 
   document.getElementById('calc-diet-price').textContent = `$${pet.totalPrice.toLocaleString('es-CL')}`;
@@ -1065,12 +1087,12 @@ function renderPackageLabelPreview(pet, recipe) {
   const exList = (pet.excludedIngredients || []).map(i => `<span style="text-decoration:line-through; opacity:0.6;">- ${i}</span>`).join('<br>');
   
   const superList = (pet.addedSuperfoods || []).map(id => {
-    const s = SUPERALIMENTOS.find(item => item.id === id);
+    const s = (appState.superfoods || SUPERALIMENTOS).find(item => item.id === id);
     return s ? `+ ${s.icon} ${s.name}` : '';
   }).filter(Boolean);
 
   const vegFruitList = (pet.addedVegetablesFruits || []).map(id => {
-    const vf = VERDURAS_FRUTAS.find(item => item.id === id);
+    const vf = (appState.vegetablesFruits || VERDURAS_FRUTAS).find(item => item.id === id);
     return vf ? `+ ${vf.icon} ${vf.name}` : '';
   }).filter(Boolean);
 
@@ -1424,8 +1446,8 @@ window.processSecurePayment = async function() {
 
   const recipeSummary = unpaidPets.map(p => {
     const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
-    const superLabels = (p.addedSuperfoods || []).map(id => SUPERALIMENTOS.find(s => s.id === id)?.name || id);
-    const vfLabels = (p.addedVegetablesFruits || []).map(id => VERDURAS_FRUTAS.find(vf => vf.id === id)?.name || id);
+    const superLabels = (p.addedSuperfoods || []).map(id => (appState.superfoods || SUPERALIMENTOS).find(s => s.id === id)?.name || id);
+    const vfLabels = (p.addedVegetablesFruits || []).map(id => (appState.vegetablesFruits || VERDURAS_FRUTAS).find(vf => vf.id === id)?.name || id);
     const mergedList = [...superLabels, ...vfLabels].join(', ');
     const supText = mergedList ? ` [Suplementos: ${mergedList}]` : '';
     return `${p.name}: ${rec?.name || 'Receta'}${supText}`;

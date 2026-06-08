@@ -14,6 +14,7 @@ let appState = {
   orders: [],
   testimonials: [],
   faqs: [],
+  additionals: [],
   users: [], // Listado de administradores
   leads: [],
   adminTab: 'parameters',
@@ -91,6 +92,7 @@ async function loadInitialDataFromAPI() {
     appState.params = data.params;
     appState.testimonials = data.testimonials;
     appState.faqs = data.faqs;
+    appState.additionals = data.additionals || [];
     
     if (appState.adminToken) {
       initAdminPanel();
@@ -102,6 +104,7 @@ async function loadInitialDataFromAPI() {
     appState.params = DEFAULT_PARAMS;
     appState.testimonials = [];
     appState.faqs = [];
+    appState.additionals = [];
     
     if (appState.adminToken) {
       initAdminPanel();
@@ -141,6 +144,8 @@ async function initAdminPanel() {
   renderAdminOrdersTable();
   renderAdminTestimonialsTable();
   renderAdminFaqsTable();
+  await fetchAdminAdditionals();
+  renderAdminAdditionalsTables();
   await fetchAdminUsers();
   renderAdminUsersTable();
   await fetchAdminLeads();
@@ -170,6 +175,9 @@ window.switchAdminTab = async function(tabName) {
     renderAdminTestimonialsTable();
   } else if (tabName === 'faqs') {
     renderAdminFaqsTable();
+  } else if (tabName === 'additionals') {
+    await fetchAdminAdditionals();
+    renderAdminAdditionalsTables();
   } else if (tabName === 'leads') {
     await fetchAdminLeads();
     renderAdminLeadsTable();
@@ -1206,4 +1214,178 @@ window.closeLabelsModal = function() {
 
 window.printLabels = function() {
   window.print();
+};
+
+// ----------------------------------------------------
+// 12. CRUD DE SUPLEMENTOS Y ADICIONALES (additionals)
+// ----------------------------------------------------
+
+async function fetchAdminAdditionals() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/additionals`);
+    if (!res.ok) throw new Error("No se pudieron cargar los adicionales");
+    appState.additionals = await res.json();
+  } catch (err) {
+    console.error("Error al cargar adicionales:", err);
+  }
+}
+
+function renderAdminAdditionalsTables() {
+  const superfoodsTbody = document.getElementById('admin-superfoods-tbody');
+  const vegfruitsTbody = document.getElementById('admin-vegfruits-tbody');
+  if (!superfoodsTbody || !vegfruitsTbody) return;
+
+  superfoodsTbody.innerHTML = '';
+  vegfruitsTbody.innerHTML = '';
+
+  const superfoods = appState.additionals.filter(a => a.category === 'superfood');
+  const vegfruits = appState.additionals.filter(a => a.category === 'vegfruit');
+
+  if (superfoods.length === 0) {
+    superfoodsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay suplementos o superalimentos registrados.</td></tr>`;
+  } else {
+    superfoods.forEach(a => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-size: 1.3rem; text-align: center;">${a.icon}</td>
+        <td style="font-weight: 700; color: var(--secondary-brown);">${a.name}</td>
+        <td style="font-weight: 700; color: var(--primary-green);">$${a.price.toLocaleString('es-CL')}</td>
+        <td class="admin-actions-cell">
+          <button class="btn-icon btn-edit" onclick="editAdditionalInAdmin('${a.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn-icon btn-delete" onclick="deleteAdditionalInAdmin('${a.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      `;
+      superfoodsTbody.appendChild(tr);
+    });
+  }
+
+  if (vegfruits.length === 0) {
+    vegfruitsTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay verduras o frutas adicionales registradas.</td></tr>`;
+  } else {
+    vegfruits.forEach(a => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td style="font-size: 1.3rem; text-align: center;">${a.icon}</td>
+        <td style="font-weight: 700; color: var(--secondary-brown);">${a.name}</td>
+        <td style="font-weight: 700; color: var(--primary-green);">$${a.price.toLocaleString('es-CL')}</td>
+        <td class="admin-actions-cell">
+          <button class="btn-icon btn-edit" onclick="editAdditionalInAdmin('${a.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
+          <button class="btn-icon btn-delete" onclick="deleteAdditionalInAdmin('${a.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
+        </td>
+      `;
+      vegfruitsTbody.appendChild(tr);
+    });
+  }
+}
+
+window.showAddAdditionalForm = function() {
+  document.getElementById('add-additional-form-container').style.display = 'block';
+  document.getElementById('form-additional-title').textContent = 'Agregar Nuevo Adicional';
+  document.getElementById('form-additional-id').value = '';
+  document.getElementById('form-additional-name').value = '';
+  document.getElementById('form-additional-category').value = 'superfood';
+  document.getElementById('form-additional-price').value = '1500';
+  document.getElementById('form-additional-icon').value = '';
+};
+
+window.hideAdditionalForm = function() {
+  document.getElementById('add-additional-form-container').style.display = 'none';
+};
+
+window.editAdditionalInAdmin = function(id) {
+  const a = appState.additionals.find(item => item.id === id);
+  if (!a) return;
+
+  document.getElementById('add-additional-form-container').style.display = 'block';
+  document.getElementById('form-additional-title').textContent = `Editar Adicional: ${a.name}`;
+  document.getElementById('form-additional-id').value = a.id;
+  document.getElementById('form-additional-name').value = a.name;
+  document.getElementById('form-additional-category').value = a.category;
+  document.getElementById('form-additional-price').value = a.price;
+  document.getElementById('form-additional-icon').value = a.icon;
+};
+
+window.submitAdditionalForm = async function() {
+  const id = document.getElementById('form-additional-id').value;
+  const name = document.getElementById('form-additional-name').value.trim();
+  const category = document.getElementById('form-additional-category').value;
+  const price = parseInt(document.getElementById('form-additional-price').value);
+  const icon = document.getElementById('form-additional-icon').value.trim() || '🌱';
+
+  if (!name || isNaN(price) || price <= 0) {
+    alert('Ingresa el nombre y un precio válido.');
+    return;
+  }
+
+  const additionalData = {
+    id: id || null,
+    name,
+    category,
+    price,
+    icon
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/additionals`, {
+      method: "POST",
+      headers: { 
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify(additionalData)
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudo guardar el adicional");
+    }
+
+    const data = await res.json();
+    const savedAdd = data.additional;
+
+    if (id) {
+      const idx = appState.additionals.findIndex(item => item.id === id);
+      if (idx !== -1) appState.additionals[idx] = savedAdd;
+    } else {
+      appState.additionals.push(savedAdd);
+    }
+
+    hideAdditionalForm();
+    renderAdminAdditionalsTables();
+    alert('¡Adicional guardado exitosamente!');
+  } catch (err) {
+    alert("Error al guardar adicional: " + err.message);
+  }
+};
+
+window.deleteAdditionalInAdmin = async function(id) {
+  if (confirm('¿Seguro que deseas eliminar este adicional?')) {
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/additionals/${id}`, {
+        method: "DELETE",
+        headers: { 
+          "Authorization": `Bearer ${appState.adminToken}`
+        }
+      });
+
+      if (!res.ok) {
+        if (res.status === 401) {
+          alert("Sesión expirada. Por favor inicia sesión.");
+          logoutAdmin();
+          return;
+        }
+        throw new Error("No se pudo eliminar el adicional");
+      }
+
+      appState.additionals = appState.additionals.filter(item => item.id !== id);
+      renderAdminAdditionalsTables();
+      alert('¡Adicional eliminado!');
+    } catch (err) {
+      alert("Error al eliminar adicional: " + err.message);
+    }
+  }
 };

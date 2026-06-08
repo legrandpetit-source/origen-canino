@@ -88,6 +88,7 @@ class Order(Base):
     paid_status = Column(String(50), default="Verificado")
     customer_id = Column(Integer, nullable=True, index=True)
     customer_email = Column(String(100), nullable=True, index=True)
+    production_status = Column(String(50), default="Pendiente", nullable=False)
 
 class Testimonial(Base):
     __tablename__ = "testimonials"

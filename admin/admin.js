@@ -41,7 +41,8 @@ function mapOrderFromAPI(o) {
     dailyGrams: o.daily_grams,
     monthlyKg: o.monthly_kg,
     totalPrice: o.total_price,
-    paidStatus: o.paid_status
+    paidStatus: o.paid_status,
+    productionStatus: o.production_status || 'Pendiente'
   };
 }
 
@@ -435,7 +436,7 @@ function renderAdminOrdersTable() {
   tbody.innerHTML = '';
   
   if (appState.orders.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay suscripciones activas registradas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay suscripciones activas registradas.</td></tr>`;
     return;
   }
 
@@ -465,6 +466,22 @@ function renderAdminOrdersTable() {
       </td>
       <td>
         <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> ${o.paidStatus}</span>
+      </td>
+      <td>
+        <select class="form-input" style="font-size: 0.78rem; padding: 0.25rem 0.5rem; width: auto; font-weight: 600; background: var(--bg-cream);" onchange="updateProductionStatus(${o.id}, this.value)">
+          <option value="Pendiente" ${o.productionStatus === 'Pendiente' ? 'selected' : ''}>Pendiente</option>
+          <option value="En Preparación" ${o.productionStatus === 'En Preparación' ? 'selected' : ''}>En Preparación</option>
+          <option value="Porcionado y Empacado" ${o.productionStatus === 'Porcionado y Empacado' ? 'selected' : ''}>Porcionado y Empacado</option>
+          <option value="Congelación" ${o.productionStatus === 'Congelación' ? 'selected' : ''}>Congelación</option>
+          <option value="Listo para Despacho" ${o.productionStatus === 'Listo para Despacho' ? 'selected' : ''}>Listo para Despacho</option>
+          <option value="En Camino" ${o.productionStatus === 'En Camino' ? 'selected' : ''}>En Camino</option>
+          <option value="Entregado" ${o.productionStatus === 'Entregado' ? 'selected' : ''}>Entregado</option>
+        </select>
+      </td>
+      <td class="admin-actions-cell" style="text-align: center;">
+        <button class="btn btn-secondary" style="font-size: 0.75rem; padding: 0.25rem 0.5rem; display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap;" onclick="showOrderLabelsModal(${o.id})" title="Ver e Imprimir Etiquetas de Porción">
+          <i class="fa-solid fa-print"></i> Etiquetas
+        </button>
       </td>
     `;
     tbody.appendChild(tr);
@@ -1059,3 +1076,129 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('admin-dashboard-wrapper').style.display = 'none';
   }
 });
+
+// ----------------------------------------------------
+// 11. PROCESO PRODUCTIVO Y ETIQUETADO DE PORCIONES
+// ----------------------------------------------------
+
+window.updateProductionStatus = async function(orderId, newStatus) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/orders/${orderId}/status`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${appState.adminToken}`
+      },
+      body: JSON.stringify({ production_status: newStatus })
+    });
+
+    if (!res.ok) {
+      throw new Error("No se pudo actualizar el estado de producción");
+    }
+
+    // Actualizar en el estado local
+    const order = appState.orders.find(o => o.id === orderId);
+    if (order) {
+      order.productionStatus = newStatus;
+    }
+    
+    // Feedback visual breve
+    console.log(`Estado de orden ${orderId} actualizado a: ${newStatus}`);
+  } catch (err) {
+    console.error("Error al actualizar estado de producción:", err);
+    alert("Error al actualizar estado de producción: " + err.message);
+  }
+};
+
+window.showOrderLabelsModal = async function(orderId) {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/orders/${orderId}/labels`, {
+      headers: {
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+
+    if (!res.ok) {
+      throw new Error("No se pudieron obtener las etiquetas de porciones");
+    }
+
+    const data = await res.json();
+    const container = document.getElementById('ppv-labels-container');
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    if (!data.labels || data.labels.length === 0) {
+      container.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-muted);">No se encontraron etiquetas para esta orden.</div>`;
+    } else {
+      data.labels.forEach(lbl => {
+        const div = document.createElement('div');
+        div.className = 'label-sticker';
+        
+        // Formatear ingredientes excluidos
+        const exclusionsText = (lbl.excluded_ingredients && lbl.excluded_ingredients.length > 0)
+          ? lbl.excluded_ingredients.join(', ')
+          : 'Ninguno';
+          
+        div.innerHTML = `
+          <div class="label-sticker-header">
+            <h4 class="label-sticker-logo">Origen Canino</h4>
+            <p class="label-sticker-tagline">Alimentación Natural Premium</p>
+            <div class="label-sticker-title">Porción Mensual Personalizada</div>
+          </div>
+          
+          <div class="label-sticker-section">
+            <div class="label-sticker-field"><span>Mascota:</span> <strong>${lbl.pet_name}</strong></div>
+            <div class="label-sticker-field"><span>Raza/Peso:</span> <strong>${lbl.breed} (${lbl.weight} kg)</strong></div>
+            <div class="label-sticker-field"><span>Cliente:</span> <strong>${lbl.customer_name}</strong></div>
+            <div class="label-sticker-field"><span>Fecha Pedido:</span> <strong>${lbl.date}</strong></div>
+          </div>
+          
+          <div class="label-sticker-section" style="border-top: 1px solid #000000; padding-top: 0.4rem;">
+            <div class="label-sticker-field"><span>Fórmula BARF/Cocido:</span> <strong>${lbl.recipe}</strong></div>
+            <div class="label-sticker-field"><span>Ración Diaria:</span> <strong>${lbl.daily_grams} g / día</strong></div>
+            <div class="label-sticker-field"><span>Bolsa:</span> <strong>${lbl.bag_index} de ${lbl.total_bags}</strong></div>
+            <div class="label-sticker-field"><span>Peso Bolsa:</span> <strong>${lbl.bag_weight} kg</strong></div>
+          </div>
+          
+          <div class="label-sticker-box">
+            <div class="label-sticker-box-title">Ingredientes Excluidos</div>
+            <div>${exclusionsText}</div>
+          </div>
+          
+          ${lbl.custom_instructions ? `
+            <div class="label-sticker-box">
+              <div class="label-sticker-box-title">Instrucciones Especiales</div>
+              <div>${lbl.custom_instructions}</div>
+            </div>
+          ` : ''}
+
+          ${lbl.notes ? `
+            <div class="label-sticker-box">
+              <div class="label-sticker-box-title">Notas adicionales</div>
+              <div>${lbl.notes}</div>
+            </div>
+          ` : ''}
+          
+          <div class="label-sticker-footer">
+            MANTENER CONGELADO • www.origencanino.cl
+          </div>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    document.getElementById('ppv-labels-modal').style.display = 'flex';
+  } catch (err) {
+    console.error("Error al cargar etiquetas de porciones:", err);
+    alert("Error al cargar etiquetas de porciones: " + err.message);
+  }
+};
+
+window.closeLabelsModal = function() {
+  document.getElementById('ppv-labels-modal').style.display = 'none';
+};
+
+window.printLabels = function() {
+  window.print();
+};

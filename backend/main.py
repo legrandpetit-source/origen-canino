@@ -107,6 +107,10 @@ class OrderCreate(BaseModel):
     total_price: int
     address: str
     paid_status: Optional[str] = "Verificado"
+    production_status: Optional[str] = "Pendiente"
+
+class OrderStatusUpdate(BaseModel):
+    production_status: str
 
 class LeadCreate(BaseModel):
     name: str
@@ -658,3 +662,256 @@ def get_orders(db: Session = Depends(get_db), admin: str = Depends(get_current_a
     """Retrieve all sales and subscription requests."""
     orders = db.query(models.Order).order_by(models.Order.id.desc()).all()
     return orders
+
+def calculate_pet_portion(db: Session, weight: float, age: str, activity: str, diet_type: str, days: int = 30):
+    import math
+    params = db.query(models.Parameter).filter(models.Parameter.id == "default").first()
+    if not params:
+        # Fallback values
+        barf_adult_sedentary = 2.0
+        barf_adult_normal = 2.5
+        barf_adult_active = 3.0
+        barf_adult_working = 3.5
+        cooked_adult_sedentary = 3.0
+        cooked_adult_normal = 3.5
+        cooked_adult_active = 4.0
+        cooked_adult_working = 4.5
+        puppy_early = 8.0
+        puppy_mid = 6.0
+        puppy_late = 4.0
+    else:
+        barf_adult_sedentary = params.barf_adult_sedentary
+        barf_adult_normal = params.barf_adult_normal
+        barf_adult_active = params.barf_adult_active
+        barf_adult_working = params.barf_adult_working
+        cooked_adult_sedentary = params.cooked_adult_sedentary
+        cooked_adult_normal = params.cooked_adult_normal
+        cooked_adult_active = params.cooked_adult_active
+        cooked_adult_working = params.cooked_adult_working
+        puppy_early = params.puppy_early
+        puppy_mid = params.puppy_mid
+        puppy_late = params.puppy_late
+
+    percentage = 2.5
+    if age == 'adult':
+        key = f"{diet_type}_adult_{activity}"
+        if params and hasattr(params, key):
+            percentage = getattr(params, key)
+        else:
+            if diet_type == 'barf':
+                percentages = {'sedentary': barf_adult_sedentary, 'normal': barf_adult_normal, 'active': barf_adult_active, 'working': barf_adult_working}
+            else:
+                percentages = {'sedentary': cooked_adult_sedentary, 'normal': cooked_adult_normal, 'active': cooked_adult_active, 'working': cooked_adult_working}
+            percentage = percentages.get(activity, 2.5)
+    else:
+        if age == 'puppy':
+            percentage = puppy_early
+        elif age == 'puppy-mid':
+            percentage = puppy_mid
+        elif age == 'puppy-late':
+            percentage = puppy_late
+
+    daily_grams = round(weight * (percentage / 100.0) * 1000)
+    monthly_kg = math.ceil((daily_grams * days) / 1000.0)
+    return daily_grams, monthly_kg
+
+def parse_order_pets(order, db: Session):
+    import re
+    import math
+    pet_names = [name.strip() for name in order.pet_name.split(",")]
+    parsed_pets = []
+    
+    # Try to parse from order.pet_breed
+    # Example: "Canelo (10kg, Poodle) | Morocha (15kg, Labrador)"
+    breed_map = {}
+    weight_map = {}
+    if order.pet_breed:
+        segments = order.pet_breed.split("|")
+        for seg in segments:
+            match = re.match(r"\s*([^(]+)\s*\(([\d.]+)\s*kg,\s*([^)]+)\)", seg)
+            if match:
+                p_name = match.group(1).strip()
+                p_weight = float(match.group(2))
+                p_breed = match.group(3).strip()
+                breed_map[p_name] = p_breed
+                weight_map[p_name] = p_weight
+            else:
+                match_w = re.search(r"\(([\d.]+)\s*kg", seg)
+                match_n = re.match(r"\s*([^(]+)", seg)
+                if match_n and match_w:
+                    p_name = match_n.group(1).strip()
+                    weight_map[p_name] = float(match_w.group(1))
+
+    # Try to parse from order.recipe_name
+    # Example: "Canelo: BARF Pollo Premium [Suplementos: Coco]; Morocha: Vacuno Cocido"
+    recipe_map = {}
+    if order.recipe_name:
+        segments = order.recipe_name.split(";")
+        for seg in segments:
+            if ":" in seg:
+                parts = seg.split(":", 1)
+                p_name = parts[0].strip()
+                p_recipe = parts[1].strip()
+                recipe_map[p_name] = p_recipe
+
+    total_parsed_weight = sum(weight_map.values()) if weight_map else 0
+
+    for name in pet_names:
+        # Find in DB
+        pet_query = db.query(models.Pet).filter(models.Pet.name == name)
+        if order.customer_email:
+            pet_query = pet_query.filter(models.Pet.customer_email == order.customer_email)
+        pet = pet_query.first()
+        
+        breed = pet.breed if pet else breed_map.get(name, order.pet_breed or "Mestizo")
+        weight = pet.weight if pet else weight_map.get(name, order.pet_weight or 10.0)
+        excluded_ingredients = pet.excluded_ingredients if (pet and pet.excluded_ingredients) else []
+        custom_instructions = pet.custom_instructions if (pet and pet.custom_instructions) else ""
+        notes = pet.notes if (pet and pet.notes) else ""
+        
+        recipe_desc = ""
+        if pet and pet.selected_recipe_id:
+            db_recipe = db.query(models.Recipe).filter(models.Recipe.id == pet.selected_recipe_id).first()
+            if db_recipe:
+                recipe_desc = db_recipe.name
+        if not recipe_desc:
+            recipe_desc = recipe_map.get(name, order.recipe_name or "Fórmula Especial")
+            
+        daily_grams = 0
+        monthly_kg = 0.0
+        
+        if pet:
+            diet_type = "barf"
+            if pet.selected_recipe_id:
+                db_recipe = db.query(models.Recipe).filter(models.Recipe.id == pet.selected_recipe_id).first()
+                if db_recipe and db_recipe.category in ["barf", "cooked"]:
+                    diet_type = db_recipe.category
+            
+            days = pet.delivery_period if pet.delivery_period else 30
+            try:
+                dg, mkg = calculate_pet_portion(db, pet.weight, pet.age, pet.activity, diet_type, days)
+                daily_grams = dg
+                monthly_kg = float(mkg)
+            except Exception:
+                pass
+                
+        if daily_grams == 0 or monthly_kg == 0.0:
+            if len(pet_names) == 1:
+                daily_grams = order.daily_grams
+                monthly_kg = order.monthly_kg
+            else:
+                pet_weight = weight
+                total_w = total_parsed_weight if total_parsed_weight > 0 else (order.pet_weight or (10.0 * len(pet_names)))
+                ratio = pet_weight / total_w if total_w > 0 else (1.0 / len(pet_names))
+                
+                daily_grams = round(order.daily_grams * ratio)
+                monthly_kg = round(order.monthly_kg * ratio, 1)
+                if monthly_kg == 0.0:
+                    monthly_kg = 1.0
+
+        parsed_pets.append({
+            "name": name,
+            "breed": breed,
+            "weight": weight,
+            "recipe": recipe_desc,
+            "daily_grams": daily_grams,
+            "monthly_kg": monthly_kg,
+            "excluded_ingredients": excluded_ingredients,
+            "custom_instructions": custom_instructions,
+            "notes": notes
+        })
+        
+    return parsed_pets
+
+@app.put("/api/admin/orders/{order_id}/status")
+def update_order_status(
+    order_id: int, 
+    status_data: OrderStatusUpdate, 
+    db: Session = Depends(get_db), 
+    admin: str = Depends(get_current_admin)
+):
+    """Update production status of an order."""
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+    
+    valid_statuses = [
+        "Pendiente", 
+        "En Preparación", 
+        "Porcionado y Empacado", 
+        "Congelación", 
+        "Listo para Despacho", 
+        "En Camino", 
+        "Entregado"
+    ]
+    if status_data.production_status not in valid_statuses:
+        raise HTTPException(status_code=400, detail="Estado de producción inválido")
+        
+    order.production_status = status_data.production_status
+    db.commit()
+    db.refresh(order)
+    return {"status": "success", "production_status": order.production_status}
+
+@app.get("/api/admin/orders/{order_id}/labels")
+def get_order_labels(
+    order_id: int, 
+    db: Session = Depends(get_db), 
+    admin: str = Depends(get_current_admin)
+):
+    """Retrieve portion labels for a specific order, calculated into 1kg bags."""
+    import math
+    order = db.query(models.Order).filter(models.Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        
+    customer_name = ""
+    if order.customer_email:
+        cust = db.query(models.Customer).filter(models.Customer.email == order.customer_email).first()
+        if cust and cust.name:
+            customer_name = cust.name
+            
+    try:
+        pets_data = parse_order_pets(order, db)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al procesar mascotas del pedido: {str(e)}")
+        
+    all_labels = []
+    for pet in pets_data:
+        monthly_kg = pet["monthly_kg"]
+        num_bags = int(math.ceil(monthly_kg))
+        if num_bags <= 0:
+            num_bags = 1
+            
+        for bag_idx in range(1, num_bags + 1):
+            if bag_idx == num_bags:
+                bag_weight = round(monthly_kg - (num_bags - 1), 2)
+                if bag_weight <= 0:
+                    bag_weight = 1.0
+            else:
+                bag_weight = 1.0
+                
+            all_labels.append({
+                "pet_name": pet["name"],
+                "breed": pet["breed"],
+                "weight": pet["weight"],
+                "recipe": pet["recipe"],
+                "daily_grams": pet["daily_grams"],
+                "bag_index": bag_idx,
+                "total_bags": num_bags,
+                "bag_weight": bag_weight,
+                "excluded_ingredients": pet["excluded_ingredients"],
+                "custom_instructions": pet["custom_instructions"],
+                "notes": pet["notes"],
+                "customer_name": customer_name or order.customer_email or "Cliente Origen Canino",
+                "order_display_id": order.order_id,
+                "date": order.date
+            })
+            
+    return {
+        "order_id": order.id,
+        "order_display_id": order.order_id,
+        "date": order.date,
+        "customer_email": order.customer_email,
+        "customer_name": customer_name,
+        "labels": all_labels
+    }

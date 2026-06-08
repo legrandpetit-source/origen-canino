@@ -85,6 +85,248 @@
       box-sizing: border-box;
       margin: 0 auto;
     }
+
+    /* Modal de Etiquetas de Porciones */
+    .ppv-modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+    }
+
+    .ppv-modal-content {
+      background: var(--bg-cream);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-lg);
+      width: 100%;
+      max-width: 850px;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid rgba(44, 26, 14, 0.1);
+      animation: ppvModalFadeIn 0.3s ease;
+    }
+
+    @keyframes ppvModalFadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .ppv-modal-header {
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid rgba(44, 26, 14, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .ppv-modal-header h3 {
+      margin: 0;
+      font-family: var(--font-serif);
+      color: var(--secondary-brown);
+      font-size: 1.3rem;
+    }
+
+    .ppv-modal-close-btn {
+      background: none;
+      border: none;
+      font-size: 1.75rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      line-height: 1;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .ppv-modal-close-btn:hover {
+      color: var(--accent-red);
+    }
+
+    .ppv-modal-body {
+      padding: 1.5rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .ppv-modal-tip {
+      background: rgba(138, 141, 107, 0.15);
+      border-left: 4px solid var(--primary-green);
+      padding: 0.75rem 1rem;
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+      font-size: 0.85rem;
+      color: var(--text-dark);
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+    }
+
+    .ppv-labels-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .ppv-modal-footer {
+      padding: 1.25rem 1.5rem;
+      border-top: 1px solid rgba(44, 26, 14, 0.08);
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.75rem;
+    }
+
+    /* Sticker de Etiquetas */
+    .label-sticker {
+      background: #ffffff;
+      border: 2px dashed var(--secondary-brown);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      color: #000000;
+      font-family: var(--font-sans);
+      box-shadow: var(--shadow-sm);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .label-sticker-header {
+      border-bottom: 1.5px solid #000000;
+      padding-bottom: 0.4rem;
+      margin-bottom: 0.4rem;
+      text-align: center;
+    }
+
+    .label-sticker-logo {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: var(--secondary-brown);
+      margin: 0;
+      letter-spacing: 0.5px;
+    }
+
+    .label-sticker-tagline {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 0;
+    }
+
+    .label-sticker-title {
+      font-weight: 700;
+      font-size: 0.85rem;
+      background: #f4ece1;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      margin-top: 0.25rem;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .label-sticker-section {
+      font-size: 0.8rem;
+      line-height: 1.35;
+    }
+
+    .label-sticker-field {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dotted #ccc;
+      padding: 0.15rem 0;
+    }
+
+    .label-sticker-field span {
+      font-weight: 600;
+    }
+
+    .label-sticker-field strong {
+      font-weight: 700;
+    }
+
+    .label-sticker-box {
+      border: 1px solid #000000;
+      border-radius: 4px;
+      padding: 0.5rem;
+      background: #fafafa;
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+
+    .label-sticker-box-title {
+      font-weight: 700;
+      margin-bottom: 0.15rem;
+      text-transform: uppercase;
+      font-size: 0.7rem;
+    }
+
+    .label-sticker-footer {
+      border-top: 1.5px solid #000000;
+      padding-top: 0.4rem;
+      margin-top: auto;
+      text-align: center;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      body > * {
+        display: none !important;
+      }
+      body > #ppv-labels-modal {
+        display: block !important;
+        position: absolute !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        background: white !important;
+        z-index: 99999 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .ppv-modal-content {
+        border: none !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .ppv-modal-header,
+      .ppv-modal-footer,
+      .ppv-modal-tip {
+        display: none !important;
+      }
+      .ppv-labels-grid {
+        display: block !important;
+        gap: 0 !important;
+      }
+      .label-sticker {
+        page-break-after: always !important;
+        break-after: page !important;
+        border: 1.5px solid #000000 !important;
+        margin: 1cm auto !important;
+        box-shadow: none !important;
+        width: 100% !important;
+        max-width: 10cm !important;
+        height: auto !important;
+        box-sizing: border-box !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -347,6 +589,8 @@
                   <th>Porción Diaria</th>
                   <th>Total Mensual</th>
                   <th>Estado de Pago</th>
+                  <th>Proceso Productivo</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody id="admin-orders-tbody">
@@ -567,8 +811,28 @@
       </main>
     </div>
 
-  </main>
+  <!-- Modal de Previsualización e Impresión de Etiquetas -->
+  <div id="ppv-labels-modal" class="ppv-modal-overlay" style="display: none;">
+    <div class="ppv-modal-content">
+      <div class="ppv-modal-header">
+        <h3>Etiquetas de Porciones (1kg)</h3>
+        <button class="ppv-modal-close-btn" onclick="closeLabelsModal()">&times;</button>
+      </div>
+      <div class="ppv-modal-body">
+        <p class="ppv-modal-tip"><i class="fa-solid fa-circle-info"></i> Estas etiquetas se imprimirán en formato de corte individual. Haz clic en <strong>Imprimir Etiquetas</strong> para abrir la ventana de impresión del navegador.</p>
+        <div id="ppv-labels-container" class="ppv-labels-grid">
+          <!-- Se cargan dinámicamente desde la API -->
+        </div>
+      </div>
+      <div class="ppv-modal-footer">
+        <button class="btn btn-primary" onclick="printLabels()">
+          <i class="fa-solid fa-print"></i> Imprimir Etiquetas
+        </button>
+        <button class="btn btn-secondary" onclick="closeLabelsModal()">Cerrar</button>
+      </div>
+    </div>
+  </div>
 
-  <script src="admin.js?v=3.3"></script>
+  <script src="admin.js?v=3.4"></script>
 </body>
 </html>

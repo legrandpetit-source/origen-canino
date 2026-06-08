@@ -3071,7 +3071,8 @@ body:not(.mobile-native-mode) .package-label-mockup {
   margin-top: 0.5rem !important;
 }
 
-/* Ocultar botones de cambio de vista de entorno */
-.view-tabs button.tab-btn {
+/* Ocultar botones de cambio de vista de entorno y navbar móvil en desktop */
+.view-tabs button.tab-btn,
+body:not(.mobile-native-mode) .phone-navbar {
   display: none !important;
 }

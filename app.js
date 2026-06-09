@@ -13,6 +13,7 @@ function mapPetFromAPI(p) {
     ...p,
     subscriptionPaid: p.subscription_paid,
     selectedRecipeId: p.selected_recipe_id,
+    selectedRecipes: p.selected_recipes || {},
     excludedIngredients: p.excluded_ingredients || [],
     addedSuperfoods: p.added_superfoods || [],
     addedVegetablesFruits: p.added_vegetables_fruits || [],
@@ -830,6 +831,7 @@ window.savePetProfileAndGoToCalculator = async function() {
     photo,
     subscription_paid: petIndex !== -1 ? (appState.pets[petIndex].subscriptionPaid || false) : false,
     selected_recipe_id: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipeId || null) : null,
+    selected_recipes: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipes || {}) : {},
     excluded_ingredients: petIndex !== -1 ? (appState.pets[petIndex].excludedIngredients || []) : [],
     added_superfoods: petIndex !== -1 ? (appState.pets[petIndex].addedSuperfoods || []) : [],
     added_vegetables_fruits: petIndex !== -1 ? (appState.pets[petIndex].addedVegetablesFruits || []) : [],
@@ -867,6 +869,7 @@ window.savePetProfileAndGoToCalculator = async function() {
       photo: petData.photo,
       subscriptionPaid: petData.subscription_paid,
       selectedRecipeId: petData.selected_recipe_id,
+      selectedRecipes: petData.selected_recipes,
       excludedIngredients: petData.excluded_ingredients,
       addedSuperfoods: petData.added_superfoods,
       addedVegetablesFruits: petData.added_vegetables_fruits,
@@ -914,41 +917,131 @@ function renderMobileRecipeSelector() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
   
+  pet.selectedRecipes = pet.selectedRecipes || {};
+  let totalSelected = 0;
+  for (const rid in pet.selectedRecipes) {
+    totalSelected += pet.selectedRecipes[rid] || 0;
+  }
+
+  const results = pet.portionResults || { monthlyKg: 0 };
+  const totalRequired = results.monthlyKg;
+
+  const progressPercent = totalRequired > 0 ? Math.min(100, (totalSelected / totalRequired) * 100) : 0;
+  const progressFill = document.getElementById('weight-progress-bar');
+  const progressLabel = document.getElementById('weight-progress-label');
+  
+  if (progressFill) {
+    progressFill.style.width = `${progressPercent}%`;
+    progressFill.className = 'weight-progress-bar-fill';
+    if (totalSelected === totalRequired) {
+      progressFill.classList.add('completed');
+    } else if (totalSelected > totalRequired) {
+      progressFill.classList.add('exceeded');
+    }
+  }
+  if (progressLabel) {
+    if (totalSelected === totalRequired) {
+      progressLabel.innerHTML = `${totalSelected} / ${totalRequired} kg <span style="color:#55722e; margin-left: 5px; font-weight:700;"><i class="fa-solid fa-circle-check"></i> ¡Completado!</span>`;
+    } else if (totalSelected > totalRequired) {
+      progressLabel.innerHTML = `${totalSelected} / ${totalRequired} kg <span style="color:var(--accent-red); margin-left: 5px; font-weight:700;"><i class="fa-solid fa-triangle-exclamation"></i> Exceso</span>`;
+    } else {
+      progressLabel.textContent = `${totalSelected} / ${totalRequired} kg`;
+    }
+  }
+
+  const confirmBtn = document.querySelector('#calc-checkout-card button.mobile-btn-primary');
+  if (confirmBtn) {
+    if (totalSelected !== totalRequired) {
+      confirmBtn.disabled = true;
+      confirmBtn.style.opacity = '0.5';
+      confirmBtn.style.cursor = 'not-allowed';
+      confirmBtn.title = 'Debes completar exactamente el total de kilos requeridos.';
+    } else {
+      confirmBtn.disabled = false;
+      confirmBtn.style.opacity = '1';
+      confirmBtn.style.cursor = 'pointer';
+      confirmBtn.title = '';
+    }
+  }
+
   appState.recipes.forEach(r => {
+    const qty = pet.selectedRecipes[r.id] || 0;
     const card = document.createElement('div');
-    card.className = `recipe-select-card ${pet.selectedRecipeId === r.id ? 'selected' : ''}`;
-    card.onclick = () => selectRecipeMobile(r.id);
+    card.className = `recipe-select-card ${qty > 0 ? 'selected' : ''}`;
     
     card.innerHTML = `
       <div style="font-size: 1.4rem; margin-bottom: 2px;">${r.icon}</div>
       <h4>${r.name}</h4>
-      <span>$${r.price.toLocaleString('es-CL')}/kg</span>
+      <span style="display:block; margin-bottom: 0.4rem;">$${r.price.toLocaleString('es-CL')}/kg</span>
+      <div class="recipe-qty-selector" onclick="event.stopPropagation()">
+        <button class="recipe-qty-btn" onclick="updateRecipeQty('${r.id}', -1)" ${qty <= 0 ? 'disabled' : ''}>-</button>
+        <span class="recipe-qty-val">${qty} kg</span>
+        <button class="recipe-qty-btn" onclick="updateRecipeQty('${r.id}', 1)" ${totalSelected >= totalRequired ? 'disabled' : ''}>+</button>
+      </div>
     `;
     container.appendChild(card);
   });
 }
 
-function selectRecipeMobile(recipeId) {
+window.updateRecipeQty = function(recipeId, change) {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
 
-  pet.selectedRecipeId = recipeId;
-  pet.excludedIngredients = [];
+  pet.selectedRecipes = pet.selectedRecipes || {};
+  const currentQty = pet.selectedRecipes[recipeId] || 0;
+  let newQty = currentQty + change;
+  if (newQty < 0) newQty = 0;
+
+  let totalSelected = 0;
+  for (const rid in pet.selectedRecipes) {
+    if (rid !== recipeId) {
+      totalSelected += pet.selectedRecipes[rid] || 0;
+    }
+  }
   
+  const results = pet.portionResults || { monthlyKg: 0 };
+  const totalRequired = results.monthlyKg;
+
+  if (change > 0 && totalSelected + newQty > totalRequired) {
+    newQty = totalRequired - totalSelected;
+  }
+
+  if (newQty === 0) {
+    delete pet.selectedRecipes[recipeId];
+  } else {
+    pet.selectedRecipes[recipeId] = newQty;
+  }
+
+  const activeRecipes = Object.keys(pet.selectedRecipes).filter(rid => pet.selectedRecipes[rid] > 0);
+  if (activeRecipes.length > 0) {
+    pet.selectedRecipeId = activeRecipes[0];
+  } else {
+    pet.selectedRecipeId = null;
+  }
+
   saveStateToStorage();
   renderMobileRecipeSelector();
   updatePortionCalculatorUI();
-}
+};
 
 function updatePortionCalculatorUI() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
 
-  if (!pet.selectedRecipeId && appState.recipes.length > 0) {
-    pet.selectedRecipeId = appState.recipes[0].id;
-  }
+  pet.selectedRecipes = pet.selectedRecipes || {};
 
-  const selectedRecipe = appState.recipes.find(r => r.id === pet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+  const selectPeriod = document.getElementById('calc-delivery-period');
+  const deliveryPeriodVal = selectPeriod ? (parseInt(selectPeriod.value) || 30) : 30;
+  pet.deliveryPeriod = deliveryPeriodVal;
+
+  let selectedRecipe = null;
+  const activeRecipeIds = Object.keys(pet.selectedRecipes).filter(rid => pet.selectedRecipes[rid] > 0);
+  if (activeRecipeIds.length > 0) {
+    selectedRecipe = appState.recipes.find(r => r.id === activeRecipeIds[0]);
+  }
+  if (!selectedRecipe && appState.recipes.length > 0) {
+    selectedRecipe = appState.recipes[0];
+  }
   const dietType = selectedRecipe ? selectedRecipe.category : 'barf';
 
   document.getElementById('calc-pet-avatar').src = pet.photo;
@@ -956,16 +1049,23 @@ function updatePortionCalculatorUI() {
   document.getElementById('calc-pet-details').textContent = `${pet.breed} • ${pet.weight} kg`;
   document.getElementById('custom-instructions').value = pet.customInstructions || '';
 
-  const selectPeriod = document.getElementById('calc-delivery-period');
-  const deliveryPeriodVal = selectPeriod ? (parseInt(selectPeriod.value) || 30) : 30;
-  pet.deliveryPeriod = deliveryPeriodVal;
-
   const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType, deliveryPeriodVal);
   pet.portionResults = results;
 
   document.getElementById('calc-daily-total').textContent = `${results.dailyGrams}g`;
   document.getElementById('calc-monthly-weight').textContent = results.monthlyKg;
   document.getElementById('calc-delivery-label').textContent = deliveryPeriodVal === 15 ? 'Cada 15 días' : 'Cada 30 días';
+
+  let totalSelected = 0;
+  for (const rid in pet.selectedRecipes) {
+    totalSelected += pet.selectedRecipes[rid] || 0;
+  }
+  if (totalSelected !== results.monthlyKg) {
+    pet.selectedRecipes = {};
+    const firstRecipeId = selectedRecipe ? selectedRecipe.id : (appState.recipes[0]?.id || 'b-pollo');
+    pet.selectedRecipes[firstRecipeId] = results.monthlyKg;
+    pet.selectedRecipeId = firstRecipeId;
+  }
 
   const labelEl = document.getElementById('calc-superfoods-label');
   if (labelEl) {
@@ -1021,7 +1121,7 @@ function updatePortionCalculatorUI() {
     `;
   }
 
-  renderInteractiveIngredients(pet, selectedRecipe);
+  renderInteractiveIngredients(pet, selectedRecipe || DEFAULT_RECIPES[0]);
 }
 
 function renderInteractiveIngredients(pet, recipe) {
@@ -1034,11 +1134,31 @@ function renderInteractiveIngredients(pet, recipe) {
   if (vfContainer) vfContainer.innerHTML = '';
   supContainer.innerHTML = '';
 
-  let ingredients = recipe.ingredientsArray || [];
-  if (ingredients.length === 0 && recipe.ingredients) {
-    ingredients = recipe.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
-  } else {
-    ingredients = ingredients.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+  let ingredients = [];
+  const activeRecipeIds = Object.keys(pet.selectedRecipes || {}).filter(rid => pet.selectedRecipes[rid] > 0);
+  activeRecipeIds.forEach(rid => {
+    const r = appState.recipes.find(rec => rec.id === rid);
+    if (r) {
+      let rIngs = r.ingredientsArray || [];
+      if (rIngs.length === 0 && r.ingredients) {
+        rIngs = r.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+      } else {
+        rIngs = rIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+      }
+      rIngs.forEach(ing => {
+        if (!ingredients.includes(ing)) {
+          ingredients.push(ing);
+        }
+      });
+    }
+  });
+
+  if (ingredients.length === 0) {
+    let fallbackIngs = recipe.ingredientsArray || [];
+    if (fallbackIngs.length === 0 && recipe.ingredients) {
+      fallbackIngs = recipe.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+    }
+    ingredients = fallbackIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
   }
 
   ingredients.forEach((ing, i) => {
@@ -1158,8 +1278,25 @@ window.toggleVegetableFruit = function(vfId, isChecked) {
 };
 
 function calculateSingleDietPrice(pet, recipe) {
-  const basePrice = recipe.price;
-  const dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
+  let dietSubtotal = 0;
+  const activeRecipes = pet.selectedRecipes || {};
+  let hasActiveSelection = false;
+  
+  for (const rid in activeRecipes) {
+    const kgs = activeRecipes[rid];
+    if (kgs > 0) {
+      hasActiveSelection = true;
+      const r = appState.recipes.find(rec => rec.id === rid);
+      if (r) {
+        dietSubtotal += kgs * r.price;
+      }
+    }
+  }
+
+  if (!hasActiveSelection) {
+    const basePrice = recipe.price;
+    dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
+  }
   
   let superfoodExtra = 0;
   (pet.addedSuperfoods || []).forEach(id => {
@@ -1198,12 +1335,28 @@ function renderPackageLabelPreview(pet, recipe) {
 
   const mergedSupplements = [...superList, ...vegFruitList].join('<br>');
 
+  let recipeLabel = recipe.name.toUpperCase();
+  const activeRecipes = pet.selectedRecipes || {};
+  const activeRecipeParts = [];
+  for (const rid in activeRecipes) {
+    const kgs = activeRecipes[rid];
+    if (kgs > 0) {
+      const r = appState.recipes.find(rec => rec.id === rid);
+      if (r) {
+        activeRecipeParts.push(`${r.name.toUpperCase()} (${kgs} KG)`);
+      }
+    }
+  }
+  if (activeRecipeParts.length > 0) {
+    recipeLabel = activeRecipeParts.join(', ');
+  }
+
   container.innerHTML = `
     <div class="label-title">FORMULACIÓN PERSONALIZADA</div>
     <div class="label-row"><span>PACIENTE:</span><strong>${pet.name.toUpperCase()}</strong></div>
     <div class="label-row"><span>RAZA:</span><span>${pet.breed.toUpperCase()}</span></div>
     <div class="label-row"><span>PESO:</span><span>${pet.weight} KG</span></div>
-    <div class="label-row"><span>TIPO DE DIETA:</span><span>${recipe.name.toUpperCase()}</span></div>
+    <div class="label-row"><span>TIPO DE DIETA:</span><span>${recipeLabel}</span></div>
     <div class="label-row"><span>DOSIS DIARIA:</span><strong>${pet.portionResults.dailyGrams} G</strong></div>
     <div class="label-row"><span>FORMATO ENVÍO:</span><strong>PORCIONES DE 1 KG</strong></div>
     <div style="border-top:1px dashed rgba(44,26,14,0.15); margin: 0.5rem 0; padding-top: 0.5rem;">
@@ -1236,6 +1389,7 @@ window.proceedToSnacks = async function() {
       photo: pet.photo,
       subscription_paid: pet.subscriptionPaid,
       selected_recipe_id: pet.selectedRecipeId,
+      selected_recipes: pet.selectedRecipes || {},
       excluded_ingredients: pet.excludedIngredients,
       added_superfoods: pet.addedSuperfoods,
       added_vegetables_fruits: pet.addedVegetablesFruits || [],
@@ -1572,12 +1726,30 @@ window.processSecurePayment = async function() {
   const petDetails = unpaidPets.map(p => `${p.name} (${p.weight}kg, ${p.breed})`).join(' | ');
 
   const recipeSummary = unpaidPets.map(p => {
-    const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
+    let recipeDetailsStr = '';
+    const activeRecipes = p.selectedRecipes || {};
+    const activeRecipeParts = [];
+    for (const rid in activeRecipes) {
+      const kgs = activeRecipes[rid];
+      if (kgs > 0) {
+        const r = appState.recipes.find(rec => rec.id === rid);
+        if (r) {
+          activeRecipeParts.push(`${r.name} (${kgs}kg)`);
+        }
+      }
+    }
+    if (activeRecipeParts.length > 0) {
+      recipeDetailsStr = activeRecipeParts.join(', ');
+    } else {
+      const rec = appState.recipes.find(r => r.id === p.selectedRecipeId);
+      recipeDetailsStr = rec?.name || 'Receta';
+    }
+
     const superLabels = (p.addedSuperfoods || []).map(id => (appState.superfoods || SUPERALIMENTOS).find(s => s.id === id)?.name || id);
     const vfLabels = (p.addedVegetablesFruits || []).map(id => (appState.vegetablesFruits || VERDURAS_FRUTAS).find(vf => vf.id === id)?.name || id);
     const mergedList = [...superLabels, ...vfLabels].join(', ');
     const supText = mergedList ? ` [Suplementos: ${mergedList}]` : '';
-    return `${p.name}: ${rec?.name || 'Receta'}${supText}`;
+    return `${p.name}: ${recipeDetailsStr}${supText}`;
   }).join('; ');
 
   const snacksArr = [];
@@ -1651,8 +1823,25 @@ function setupReceiptUI() {
   const paidPets = appState.pets.filter(p => p.subscriptionPaid);
   
   let petRows = paidPets.map(p => {
-    const rec = appState.recipes.find(r => r.id === p.selectedRecipeId) || appState.recipes[0];
-    return `<div class="receipt-row"><span>${p.name}:</span><strong>${rec.name} (${p.portionResults?.monthlyKg} kg)</strong></div>`;
+    let recipeDetailsStr = '';
+    const activeRecipes = p.selectedRecipes || {};
+    const activeRecipeParts = [];
+    for (const rid in activeRecipes) {
+      const kgs = activeRecipes[rid];
+      if (kgs > 0) {
+        const r = appState.recipes.find(rec => rec.id === rid);
+        if (r) {
+          activeRecipeParts.push(`${r.name} (${kgs}kg)`);
+        }
+      }
+    }
+    if (activeRecipeParts.length > 0) {
+      recipeDetailsStr = activeRecipeParts.join(', ');
+    } else {
+      const rec = appState.recipes.find(r => r.id === p.selectedRecipeId) || appState.recipes[0];
+      recipeDetailsStr = `${rec.name} (${p.portionResults?.monthlyKg} kg)`;
+    }
+    return `<div class="receipt-row"><span>${p.name}:</span><strong>${recipeDetailsStr}</strong></div>`;
   }).join('');
 
   // Determine delivery frequency dynamically
@@ -1759,8 +1948,25 @@ function renderPetDashboard() {
   document.getElementById('dash-pet-name').textContent = activePet.name;
   document.getElementById('dash-pet-details').textContent = `${activePet.breed} • ${activePet.weight} kg`;
   
-  const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
-  document.getElementById('dash-diet-recipe').textContent = rec.name;
+  let recipeDisplay = '';
+  const activeRecipes = activePet.selectedRecipes || {};
+  const activeParts = [];
+  for (const rid in activeRecipes) {
+    const kgs = activeRecipes[rid];
+    if (kgs > 0) {
+      const r = appState.recipes.find(rec => rec.id === rid);
+      if (r) {
+        activeParts.push(`${r.name} (${kgs}kg)`);
+      }
+    }
+  }
+  if (activeParts.length > 0) {
+    recipeDisplay = activeParts.join(', ');
+  } else {
+    const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+    recipeDisplay = rec.name;
+  }
+  document.getElementById('dash-diet-recipe').textContent = recipeDisplay;
   document.getElementById('dash-daily-portion').textContent = `${activePet.portionResults.dailyGrams} g / día`;
   
   const periodText = activePet.deliveryPeriod === 15 ? 'Cada 15 días' : 'Cada 30 días';

@@ -86,6 +86,7 @@ class PetCreate(BaseModel):
     photo: Optional[str] = None
     subscription_paid: Optional[bool] = False
     selected_recipe_id: Optional[str] = None
+    selected_recipes: Optional[Dict[str, float]] = None
     excluded_ingredients: Optional[List[str]] = None
     added_superfoods: Optional[List[str]] = None
     added_vegetables_fruits: Optional[List[str]] = None
@@ -207,6 +208,20 @@ def get_current_customer(authorization: Optional[str] = Header(None)):
 @app.on_event("startup")
 def startup_populate():
     db = next(get_db())
+    # 0. Migrate DB schema (Add selected_recipes column to pets table if missing)
+    from sqlalchemy import text
+    try:
+        db.execute(text("ALTER TABLE pets ADD COLUMN selected_recipes JSON"))
+        db.commit()
+        print("Column 'selected_recipes' added successfully to 'pets' table.")
+    except Exception as e:
+        db.rollback()
+        err_msg = str(e).lower()
+        if "duplicate column name" in err_msg or "already exists" in err_msg or "duplicate column" in err_msg:
+            print("Column 'selected_recipes' already exists in 'pets' table.")
+        else:
+            print(f"Operational warning during migration of 'selected_recipes': {e}")
+
     # 1. Create default parameters if not exist
     params = db.query(models.Parameter).filter(models.Parameter.id == "default").first()
     if not params:
@@ -980,7 +995,18 @@ def parse_order_pets(order, db: Session):
         
         recipe_desc = recipe_map.get(name)
         if not recipe_desc:
-            if pet and pet.selected_recipe_id:
+            if pet and pet.selected_recipes:
+                recipe_parts = []
+                for rid, kgs in pet.selected_recipes.items():
+                    if kgs > 0:
+                        db_recipe = db.query(models.Recipe).filter(models.Recipe.id == rid).first()
+                        if db_recipe:
+                            recipe_parts.append(f"{db_recipe.name} ({kgs}kg)")
+                if recipe_parts:
+                    recipe_desc = ", ".join(recipe_parts)
+                else:
+                    recipe_desc = "Fórmula Especial"
+            elif pet and pet.selected_recipe_id:
                 db_recipe = db.query(models.Recipe).filter(models.Recipe.id == pet.selected_recipe_id).first()
                 if db_recipe:
                     recipe_desc = db_recipe.name
@@ -992,7 +1018,18 @@ def parse_order_pets(order, db: Session):
         
         if pet:
             diet_type = "barf"
-            if pet.selected_recipe_id:
+            if pet.selected_recipes:
+                categories = []
+                for rid, kgs in pet.selected_recipes.items():
+                    if kgs > 0:
+                        db_recipe = db.query(models.Recipe).filter(models.Recipe.id == rid).first()
+                        if db_recipe:
+                            categories.append(db_recipe.category)
+                if "cooked" in categories and categories.count("cooked") >= categories.count("barf"):
+                    diet_type = "cooked"
+                else:
+                    diet_type = "barf"
+            elif pet.selected_recipe_id:
                 db_recipe = db.query(models.Recipe).filter(models.Recipe.id == pet.selected_recipe_id).first()
                 if db_recipe and db_recipe.category in ["barf", "cooked"]:
                     diet_type = db_recipe.category
@@ -1087,35 +1124,68 @@ def get_order_labels(
         
     all_labels = []
     for pet in pets_data:
-        monthly_kg = pet["monthly_kg"]
-        num_bags = int(math.ceil(monthly_kg))
-        if num_bags <= 0:
-            num_bags = 1
+        recipe_desc = pet["recipe"]
+        # Try to parse multiple recipes and their weights from recipe_desc
+        # e.g., "BARF Pollo Premium (3kg), BARF Vacuno Tradicional (3kg)"
+        import re
+        matches = re.findall(r"([^,(\n]+)(?:\(([\d.]+)\s*kg\))?", recipe_desc)
+        
+        recipes_list = []
+        for r_name, r_kg in matches:
+            r_name = r_name.strip()
+            if not r_name:
+                continue
+            try:
+                kg_val = float(r_kg) if r_kg else None
+            except ValueError:
+                kg_val = None
+            recipes_list.append((r_name, kg_val))
             
-        for bag_idx in range(1, num_bags + 1):
-            if bag_idx == num_bags:
-                bag_weight = round(monthly_kg - (num_bags - 1), 2)
-                if bag_weight <= 0:
-                    bag_weight = 1.0
-            else:
-                bag_weight = 1.0
+        if not recipes_list:
+            recipes_list = [(recipe_desc, None)]
+            
+        has_weights = any(kg is not None for _, kg in recipes_list)
+        if not has_weights:
+            pkg = pet["monthly_kg"] / len(recipes_list)
+            recipes_list = [(name, pkg) for name, _ in recipes_list]
+        else:
+            total_explicit = sum(kg for _, kg in recipes_list if kg is not None)
+            remaining = max(0.0, pet["monthly_kg"] - total_explicit)
+            none_count = sum(1 for _, kg in recipes_list if kg is None)
+            pkg = remaining / none_count if none_count > 0 else 0
+            recipes_list = [(name, kg if kg is not None else pkg) for name, kg in recipes_list]
+
+        for r_name, r_kg in recipes_list:
+            if r_kg <= 0:
+                continue
+            num_bags = int(math.ceil(r_kg))
+            if num_bags <= 0:
+                num_bags = 1
                 
-            all_labels.append({
-                "pet_name": pet["name"],
-                "breed": pet["breed"],
-                "weight": pet["weight"],
-                "recipe": pet["recipe"],
-                "daily_grams": pet["daily_grams"],
-                "bag_index": bag_idx,
-                "total_bags": num_bags,
-                "bag_weight": bag_weight,
-                "excluded_ingredients": pet["excluded_ingredients"],
-                "custom_instructions": pet["custom_instructions"],
-                "notes": pet["notes"],
-                "customer_name": customer_name or order.customer_email or "Cliente Origen Canino",
-                "order_display_id": order.order_id,
-                "date": order.date
-            })
+            for bag_idx in range(1, num_bags + 1):
+                if bag_idx == num_bags:
+                    bag_weight = round(r_kg - (num_bags - 1), 2)
+                    if bag_weight <= 0:
+                        bag_weight = 1.0
+                else:
+                    bag_weight = 1.0
+                    
+                all_labels.append({
+                    "pet_name": pet["name"],
+                    "breed": pet["breed"],
+                    "weight": pet["weight"],
+                    "recipe": r_name,
+                    "daily_grams": pet["daily_grams"],
+                    "bag_index": bag_idx,
+                    "total_bags": num_bags,
+                    "bag_weight": bag_weight,
+                    "excluded_ingredients": pet["excluded_ingredients"],
+                    "custom_instructions": pet["custom_instructions"],
+                    "notes": pet["notes"],
+                    "customer_name": customer_name or order.customer_email or "Cliente Origen Canino",
+                    "order_display_id": order.order_id,
+                    "date": order.date
+                })
             
     return {
         "order_id": order.id,

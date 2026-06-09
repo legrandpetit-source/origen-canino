@@ -1436,6 +1436,92 @@ body {
   color: var(--text-muted);
 }
 
+/* Selector de cantidad por receta */
+.recipe-qty-selector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  border-top: 1px dashed rgba(44, 26, 14, 0.1);
+  padding-top: 0.5rem;
+}
+
+.recipe-qty-btn {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid rgba(44, 26, 14, 0.15);
+  background: var(--bg-white);
+  color: var(--secondary-brown);
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  transition: var(--transition);
+}
+
+.recipe-qty-btn:hover:not(:disabled) {
+  background: var(--primary-green);
+  color: var(--bg-white);
+  border-color: var(--primary-green);
+}
+
+.recipe-qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.recipe-qty-val {
+  font-weight: 700;
+  font-size: 0.8rem;
+  color: var(--secondary-brown);
+  min-width: 30px;
+  text-align: center;
+}
+
+/* Barra de progreso de kilos seleccionados */
+.weight-progress-wrapper {
+  background: hsla(24, 25%, 30%, 0.03);
+  border: 1px solid rgba(44, 26, 14, 0.06);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+}
+
+.weight-progress-text {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--secondary-brown);
+  margin-bottom: 0.35rem;
+}
+
+.weight-progress-bar-bg {
+  height: 6px;
+  background: rgba(44, 26, 14, 0.06);
+  border-radius: 50px;
+  overflow: hidden;
+}
+
+.weight-progress-bar-fill {
+  height: 100%;
+  background: var(--primary-green);
+  width: 0%;
+  transition: width 0.3s ease;
+}
+
+.weight-progress-bar-fill.completed {
+  background: #55722e; /* green matching theme */
+}
+
+.weight-progress-bar-fill.exceeded {
+  background: var(--accent-red);
+}
+
 /* Ingredientes Personalizables e Interactivos */
 .pills-container {
   display: flex;

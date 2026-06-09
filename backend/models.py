@@ -60,6 +60,7 @@ class Pet(Base):
     photo = Column(Text, nullable=True)  # Base64 image
     subscription_paid = Column(Boolean, default=False)
     selected_recipe_id = Column(String(50), nullable=True)
+    selected_recipes = Column(JSON, nullable=True)  # Dict of recipe_id -> kilos (float)
     excluded_ingredients = Column(JSON, nullable=True)  # List of strings
     added_superfoods = Column(JSON, nullable=True)  # List of superfood ids
     added_vegetables_fruits = Column(JSON, nullable=True)  # List of vegetable/fruit ids

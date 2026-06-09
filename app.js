@@ -1030,6 +1030,7 @@ function updatePortionCalculatorUI() {
 
   const selectPeriod = document.getElementById('calc-delivery-period');
   const deliveryPeriodVal = selectPeriod ? (parseInt(selectPeriod.value) || 30) : 30;
+  const periodChanged = pet.deliveryPeriod && pet.deliveryPeriod !== deliveryPeriodVal;
   pet.deliveryPeriod = deliveryPeriodVal;
 
   let selectedRecipe = null;
@@ -1058,7 +1059,7 @@ function updatePortionCalculatorUI() {
   for (const rid in pet.selectedRecipes) {
     totalSelected += pet.selectedRecipes[rid] || 0;
   }
-  if (totalSelected !== results.monthlyKg) {
+  if (totalSelected === 0 || periodChanged) {
     pet.selectedRecipes = {};
     const firstRecipeId = selectedRecipe ? selectedRecipe.id : (appState.recipes[0]?.id || 'b-pollo');
     pet.selectedRecipes[firstRecipeId] = results.monthlyKg;

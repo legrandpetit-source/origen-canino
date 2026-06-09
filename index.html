@@ -264,6 +264,9 @@
                   <button class="mobile-btn mobile-btn-primary" onclick="initNewPetWizard()">
                     <i class="fa-solid fa-plus"></i> Agregar Mascota
                   </button>
+                  <button id="mb-welcome-edit-profile-btn" class="mobile-btn mobile-btn-secondary" onclick="openUserProfileEdit()" style="margin-top: 0.5rem; width: 100%; display: none;">
+                    <i class="fa-solid fa-user-gear"></i> Editar Datos de Cuenta
+                  </button>
                   <button class="mobile-btn mobile-btn-secondary" onclick="resetToWelcome()" style="margin-top: 0.5rem; border-color: rgba(44, 26, 14, 0.15); width: 100%;">
                     <i class="fa-solid fa-house"></i> Volver al Inicio
                   </button>
@@ -674,26 +677,14 @@
                 </div>
               </div>
 
-              <!-- 2.4.5 PANTALLA: AUTENTICACIÓN MÓVIL (LOGIN/REGISTRO) -->
+              <!-- 2.6 PANTALLA: AUTENTICACIÓN / REGISTRO CLIENTE MÓVIL -->
               <div id="mobile-auth" class="mobile-view">
-                <div class="mobile-card" style="margin-top: 1rem;">
-                  <h3 class="mobile-title" id="mobile-auth-title" style="grid-column: 1 / -1;">Inicia Sesión</h3>
-                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1.5rem;">Identifícate para poder procesar tu pago y sincronizar tus mascotas.</p>
+                <div class="mobile-card" style="margin-top: 1rem; max-width: 450px; margin-left: auto; margin-right: auto; padding: 2rem;">
+                  <h3 class="mobile-title" id="mobile-auth-title" style="text-align: center; font-family: var(--font-serif); color: var(--secondary-brown); font-size: 1.35rem; margin-bottom: 0.5rem;">Inicia Sesión</h3>
+                  <p class="mobile-subtitle" style="text-align: center; color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1.5rem;">Identifícate para poder procesar tu pago y sincronizar tus mascotas.</p>
                   
-                  <div class="pc-columns-wrapper" style="display: contents;">
-                    <div class="pc-column" style="justify-content: center; padding-right: 1.5rem; border-right: 1px solid rgba(44, 26, 14, 0.08);">
-                      <!-- Login Social Móvil -->
-                      <div style="margin-bottom: 1.5rem; width: 100%;">
-                        <button class="social-login-btn google-btn" onclick="loginCustomerSocialMobile('google')" style="padding: 0.6rem; font-size: 0.8rem; margin-bottom: 0.5rem; width: 100%;">
-                          <i class="fa-brands fa-google"></i> Continuar con Google
-                        </button>
-                        <button class="social-login-btn apple-btn" onclick="loginCustomerSocialMobile('apple')" style="padding: 0.6rem; font-size: 0.8rem; width: 100%;">
-                          <i class="fa-brands fa-apple"></i> Continuar con Apple
-                        </button>
-                      </div>
-                    </div>
-
-                    <div class="pc-column" style="padding-left: 0.5rem;">
+                  <div style="width: 100%;">
+                    <div style="width: 100%;">
                       <!-- Formulario Correo -->
                       <div id="mobile-login-fields" style="width: 100%;">
                         <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
@@ -702,7 +693,12 @@
                         </div>
                         <div class="mobile-input-group" style="margin-bottom: 1rem;">
                           <label for="mb-auth-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
-                          <input type="password" id="mb-auth-pass" class="mobile-input" placeholder="••••••••">
+                          <div style="position: relative;">
+                            <input type="password" id="mb-auth-pass" class="mobile-input" placeholder="••••••••" style="padding-right: 2.5rem;">
+                            <button type="button" onclick="togglePasswordVisibility('mb-auth-pass', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 0;">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
                         </div>
                         <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('login')">Ingresar</button>
                         <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
@@ -739,7 +735,12 @@
                         </div>
                         <div class="mobile-input-group" style="margin-bottom: 1rem;">
                           <label for="mb-auth-reg-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
-                          <input type="password" id="mb-auth-reg-pass" class="mobile-input" placeholder="••••••••">
+                          <div style="position: relative;">
+                            <input type="password" id="mb-auth-reg-pass" class="mobile-input" placeholder="••••••••" style="padding-right: 2.5rem;">
+                            <button type="button" onclick="togglePasswordVisibility('mb-auth-reg-pass', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 0;">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
                         </div>
                         <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('register')">Registrarse</button>
                         <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
@@ -785,6 +786,7 @@
                   </div>
                   
                   <button class="mobile-btn mobile-btn-primary" style="width: 100%;" onclick="submitSocialProfileCompletion()">Continuar</button>
+                  <button id="mb-social-back-btn" class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; width: 100%; display: none;" onclick="cancelSocialProfileEdit()">Cancelar</button>
                 </div>
               </div>
 
@@ -850,6 +852,9 @@
 
                     <button class="mobile-btn mobile-btn-secondary" onclick="editCurrentPlanFromDashboard()" style="margin-top: 1rem; width: 100%;">
                       <i class="fa-solid fa-pen-to-square"></i> Modificar Plan Mascota
+                    </button>
+                    <button class="mobile-btn mobile-btn-secondary" onclick="openUserProfileEdit()" style="margin-top: 0.5rem; width: 100%;">
+                      <i class="fa-solid fa-user-gear"></i> Editar Datos de Cuenta
                     </button>
                     <button class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2); width: 100%;" onclick="logoutApp()">
                       <i class="fa-solid fa-power-off"></i> Cerrar Sesión

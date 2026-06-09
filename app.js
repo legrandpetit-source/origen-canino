@@ -414,11 +414,51 @@ window.changeMobileView = function(viewName) {
       toggleMobileAuthView(false);
     } else if (viewName === 'social-profile-setup') {
       const nameEl = document.getElementById('mb-social-name');
-      if (nameEl && appState.customerName) {
-        if (!appState.customerName.includes('.google') && !appState.customerName.includes('.apple') && !appState.customerName.includes('@')) {
-          nameEl.value = appState.customerName;
+      const phoneEl = document.getElementById('mb-social-phone');
+      const streetEl = document.getElementById('mb-social-street');
+      const communeEl = document.getElementById('mb-social-commune');
+      const regionEl = document.getElementById('mb-social-region');
+      const cancelBtn = document.getElementById('mb-social-back-btn');
+      const submitBtn = document.querySelector('#mobile-social-profile-setup button.mobile-btn-primary');
+      const titleEl = document.querySelector('#mobile-social-profile-setup .mobile-title');
+      const subtitleEl = document.querySelector('#mobile-social-profile-setup .mobile-subtitle');
+
+      if (!appState.editingProfileFromDashboard) {
+        if (titleEl) titleEl.textContent = 'Datos de Despacho';
+        if (subtitleEl) subtitleEl.textContent = 'Por favor, completa tus datos de contacto y entrega para continuar.';
+        if (submitBtn) submitBtn.textContent = 'Continuar';
+        if (cancelBtn) cancelBtn.style.display = 'none';
+
+        if (nameEl && appState.customerName) {
+          if (!appState.customerName.includes('.google') && !appState.customerName.includes('.apple') && !appState.customerName.includes('@')) {
+            nameEl.value = appState.customerName;
+          } else {
+            nameEl.value = '';
+          }
+        }
+        if (phoneEl) phoneEl.value = '';
+        if (streetEl) streetEl.value = '';
+        if (communeEl) communeEl.value = '';
+        if (regionEl) regionEl.value = '';
+      } else {
+        if (titleEl) titleEl.textContent = 'Editar Datos de Cuenta';
+        if (subtitleEl) subtitleEl.textContent = 'Modifica tu nombre, teléfono y dirección de despacho.';
+        if (submitBtn) submitBtn.textContent = 'Guardar Cambios';
+        if (cancelBtn) cancelBtn.style.display = 'block';
+
+        if (nameEl) nameEl.value = appState.customerName || '';
+        if (phoneEl) phoneEl.value = appState.customerPhone || '';
+
+        const fullAddress = appState.customerAddress || '';
+        const parts = fullAddress.split(',').map(p => p.trim());
+        if (parts.length >= 3) {
+          if (streetEl) streetEl.value = parts[0];
+          if (communeEl) communeEl.value = parts[1];
+          if (regionEl) regionEl.value = parts[2];
         } else {
-          nameEl.value = '';
+          if (streetEl) streetEl.value = fullAddress;
+          if (communeEl) communeEl.value = '';
+          if (regionEl) regionEl.value = '';
         }
       }
     }
@@ -666,6 +706,11 @@ function renderMobileWelcomeScreen() {
   const container = document.getElementById('welcome-pets-container');
   const title = document.getElementById('welcome-pets-title');
   if (!container) return;
+
+  const editProfileBtn = document.getElementById('mb-welcome-edit-profile-btn');
+  if (editProfileBtn) {
+    editProfileBtn.style.display = appState.customerToken ? 'block' : 'none';
+  }
 
   container.innerHTML = '';
 
@@ -1968,6 +2013,25 @@ async function syncCustomerPets() {
   }
 }
 
+window.togglePasswordVisibility = function(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btnEl.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    }
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+};
+
 // Controladores Mobile Auth
 window.toggleMobileAuthView = function(isRegister) {
   const loginFields = document.getElementById('mobile-login-fields');
@@ -2148,6 +2212,13 @@ window.submitSocialProfileCompletion = async function() {
     document.getElementById('mb-social-commune').value = '';
     document.getElementById('mb-social-region').value = '';
     
+    if (appState.editingProfileFromDashboard) {
+      appState.editingProfileFromDashboard = false;
+      alert('¡Tus datos de cuenta se actualizaron con éxito!');
+      changeMobileView(appState.profileEditReturnView || 'pet-dashboard');
+      return;
+    }
+    
     // Continue
     if (appState.pendingWizardInit) {
       appState.pendingWizardInit = false;
@@ -2177,6 +2248,13 @@ window.submitSocialProfileCompletion = async function() {
     document.getElementById('mb-social-commune').value = '';
     document.getElementById('mb-social-region').value = '';
     
+    if (appState.editingProfileFromDashboard) {
+      appState.editingProfileFromDashboard = false;
+      alert('¡Tus datos de cuenta se actualizaron con éxito (Modo Local)!');
+      changeMobileView(appState.profileEditReturnView || 'pet-dashboard');
+      return;
+    }
+    
     if (appState.pendingWizardInit) {
       appState.pendingWizardInit = false;
       
@@ -2196,6 +2274,17 @@ window.submitSocialProfileCompletion = async function() {
       changeMobileView('checkout');
     }
   }
+};
+
+window.openUserProfileEdit = function() {
+  appState.editingProfileFromDashboard = true;
+  appState.profileEditReturnView = appState.mobileView || 'pet-dashboard';
+  changeMobileView('social-profile-setup');
+};
+
+window.cancelSocialProfileEdit = function() {
+  appState.editingProfileFromDashboard = false;
+  changeMobileView(appState.profileEditReturnView || 'pet-dashboard');
 };
 
 window.authGoBackMobile = function() {

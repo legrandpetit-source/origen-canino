@@ -388,7 +388,6 @@ window.changeMobileView = function(viewName) {
           selectPeriod.value = pet.deliveryPeriod || 30;
         }
       }
-      renderMobileRecipeSelector();
       updatePortionCalculatorUI();
     } else if (viewName === 'snacks') {
       renderMobileSnacksList();
@@ -1020,7 +1019,6 @@ window.updateRecipeQty = function(recipeId, change) {
   }
 
   saveStateToStorage();
-  renderMobileRecipeSelector();
   updatePortionCalculatorUI();
 };
 
@@ -1122,6 +1120,7 @@ function updatePortionCalculatorUI() {
   }
 
   renderInteractiveIngredients(pet, selectedRecipe || DEFAULT_RECIPES[0]);
+  renderMobileRecipeSelector();
 }
 
 function renderInteractiveIngredients(pet, recipe) {

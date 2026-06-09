@@ -90,6 +90,7 @@ class Order(Base):
     customer_id = Column(Integer, nullable=True, index=True)
     customer_email = Column(String(100), nullable=True, index=True)
     production_status = Column(String(50), default="Pendiente", nullable=False)
+    delivery_period = Column(String(50), nullable=True)
 
 class Testimonial(Base):
     __tablename__ = "testimonials"

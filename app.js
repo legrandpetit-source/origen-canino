@@ -1559,7 +1559,8 @@ window.processSecurePayment = async function() {
     snacks: snacksArr.join(', ') || 'Ninguno',
     total_price: globalCartTotal,
     address: address,
-    paid_status: paidStatus
+    paid_status: paidStatus,
+    delivery_period: unpaidPets.map(p => p.deliveryPeriod || 30).join(', ')
   };
 
   try {

@@ -109,6 +109,7 @@ class OrderCreate(BaseModel):
     address: str
     paid_status: Optional[str] = "Verificado"
     production_status: Optional[str] = "Pendiente"
+    delivery_period: Optional[str] = "30"
 
 class OrderStatusUpdate(BaseModel):
     production_status: str

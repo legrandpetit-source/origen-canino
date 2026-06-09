@@ -44,7 +44,8 @@ function mapOrderFromAPI(o) {
     monthlyKg: o.monthly_kg,
     totalPrice: o.total_price,
     paidStatus: o.paid_status,
-    productionStatus: o.production_status || 'Pendiente'
+    productionStatus: o.production_status || 'Pendiente',
+    deliveryPeriod: o.delivery_period || o.deliveryPeriod || '30'
   };
 }
 
@@ -456,11 +457,73 @@ function renderAdminOrdersTable() {
   tbody.innerHTML = '';
   
   if (appState.orders.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay suscripciones activas registradas.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay suscripciones activas registradas.</td></tr>`;
     return;
   }
 
+  // Helper date parsing/formatting functions
+  function parseChileanDate(dateStr) {
+    if (!dateStr) return new Date();
+    const parts = dateStr.split(/[-/]/);
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1; // 0-indexed month
+      const year = parseInt(parts[2], 10);
+      return new Date(year, month, day);
+    }
+    return new Date(dateStr);
+  }
+
+  function formatDateChilean(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
   appState.orders.forEach(o => {
+    const orderDate = parseChileanDate(o.date);
+    const periodStr = o.deliveryPeriod || "30";
+    
+    // Split periods by comma to handle multiple pets
+    const periods = periodStr.split(',').map(p => parseInt(p.trim(), 10) || 30);
+    
+    // Format periods and calculate dispatch dates
+    const dispatchDetails = periods.map(p => {
+      const nextDate = new Date(orderDate);
+      nextDate.setDate(orderDate.getDate() + p);
+      return {
+        days: p,
+        formattedDate: formatDateChilean(nextDate)
+      };
+    });
+
+    // Generate output HTML for the period & dispatch column
+    let periodHtml = '';
+    if (dispatchDetails.length === 1) {
+      const detail = dispatchDetails[0];
+      periodHtml = `
+        <span style="font-weight: 600; color: var(--secondary-brown); font-size: 0.82rem;">${detail.days} Días</span>
+        <div style="font-size: 0.72rem; color: var(--primary-green); font-weight: 700; margin-top: 0.2rem;" title="Fecha estimada de despacho">
+          <i class="fa-regular fa-calendar-days"></i> ${detail.formattedDate}
+        </div>
+      `;
+    } else {
+      // Multiple pets, e.g., Toby: 15 days, Mateo: 30 days
+      const petNames = o.petName.split(',').map(n => n.trim());
+      periodHtml = '<div style="display: flex; flex-direction: column; gap: 0.25rem;">';
+      dispatchDetails.forEach((detail, index) => {
+        const name = petNames[index] || `Mascota ${index + 1}`;
+        periodHtml += `
+          <div style="font-size: 0.7rem; line-height: 1.15; color: var(--text-dark);">
+            <strong style="color: var(--secondary-brown);">${name}:</strong> ${detail.days}d 
+            <span style="color: var(--primary-green); font-weight: 600;">(${detail.formattedDate})</span>
+          </div>
+        `;
+      });
+      periodHtml += '</div>';
+    }
+
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="text-align: center;">
@@ -483,6 +546,9 @@ function renderAdminOrdersTable() {
       </td>
       <td style="font-weight: 700; color: var(--primary-green); font-size: 0.9rem;">
         $${o.totalPrice.toLocaleString('es-CL')}
+      </td>
+      <td>
+        ${periodHtml}
       </td>
       <td>
         <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> ${o.paidStatus}</span>

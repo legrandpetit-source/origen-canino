@@ -17,16 +17,28 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Origen Canino API", version="1.0.0")
 
 # CORS setup to allow frontend access (development & production)
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "https://legrandpetit-source.github.io",  # GitHub Pages (production)
+]
+# Allow any additional origin from environment variable (e.g. custom domain)
+extra_origin = os.getenv("ALLOWED_ORIGIN")
+if extra_origin:
+    ALLOWED_ORIGINS.append(extra_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.onrender\.com",  # All Render subdomains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# JWT Secret & Algorithm
-JWT_SECRET = os.getenv("JWT_SECRET", "origen_canino_super_secret_key_12345")
+# JWT Secret & Algorithm — set JWT_SECRET as env var in production!
+JWT_SECRET = os.getenv("JWT_SECRET", "origen_canino_super_secret_key_dev_only")
 JWT_ALGORITHM = "HS256"
 
 # ----------------------------------------------------

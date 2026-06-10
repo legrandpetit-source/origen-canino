@@ -10,3 +10,11 @@ backend/origen_canino.db-journal
 backend/venv/
 venv/
 .venv/
+
+# Ignorar archivos de entorno con secretos
+.env
+backend/.env
+**/.env
+
+# Ignorar carpeta scratch local
+scratch/

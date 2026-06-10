@@ -2,17 +2,20 @@ import os
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 
-# Get database URL from environment variables, fallback to local SQLite for easy development
+# Get database URL from environment variable.
+# Render provides DATABASE_URL starting with "postgres://" (legacy format),
+# but SQLAlchemy 2.x requires "postgresql://". We fix that here.
 DATABASE_URL = os.getenv("DATABASE_URL")
 
-if not DATABASE_URL:
+if DATABASE_URL:
+    # Fix Render's legacy "postgres://" prefix
+    if DATABASE_URL.startswith("postgres://"):
+        DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    connect_args = {}
+else:
+    # Fallback to local SQLite for development
     DB_DIR = os.path.dirname(os.path.abspath(__file__))
     DATABASE_URL = f"sqlite:///{os.path.join(DB_DIR, 'origen_canino.db')}"
-
-# SQLAlchemy engine setup
-# If SQLite is used, check_same_thread=False is required for FastAPI multithreading
-connect_args = {}
-if DATABASE_URL.startswith("sqlite"):
     connect_args = {"check_same_thread": False}
 
 engine = create_engine(
@@ -20,13 +23,9 @@ engine = create_engine(
     connect_args=connect_args
 )
 
-# Create session maker
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for SQLAlchemy declarative models
 Base = declarative_base()
 
-# Dependency to yield database sessions in FastAPI routes
 def get_db():
     db = SessionLocal()
     try:

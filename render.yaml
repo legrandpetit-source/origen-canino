@@ -1,0 +1,20 @@
+# render.yaml — Configuración de despliegue automático en Render
+# Documentación: https://render.com/docs/render-yaml-spec
+
+services:
+  - type: web
+    name: origen-canino-api
+    runtime: python
+    region: oregon          # Puedes cambiar a "frankfurt" si prefieres Europa
+    plan: starter           # $7 USD/mes (o "free" con limitaciones de inactividad)
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/config
+    envVars:
+      - key: DATABASE_URL
+        sync: false         # Se configura manualmente en el dashboard de Render
+      - key: JWT_SECRET
+        generateValue: true # Render genera un secreto aleatorio automáticamente
+      - key: ALLOWED_ORIGIN
+        value: https://legrandpetit-source.github.io

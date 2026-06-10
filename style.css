@@ -1523,6 +1523,98 @@ body {
 }
 
 /* Ingredientes Personalizables e Interactivos */
+.ingredient-recipe-group {
+  border: 1.5px solid rgba(44, 26, 14, 0.08);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.85rem 0.85rem;
+  margin-bottom: 0.75rem;
+  background: var(--bg-white);
+  transition: var(--transition);
+}
+
+.ingredient-recipe-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--secondary-brown);
+  margin-bottom: 0.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.recipe-title-icon {
+  font-size: 0.95rem;
+}
+
+/* Colores sobrios para las agrupaciones por receta */
+.ingredient-recipe-group.recipe-color-b-pollo {
+  border-color: rgba(208, 124, 60, 0.25);
+  background: rgba(208, 124, 60, 0.015);
+}
+.ingredient-recipe-group.recipe-color-b-pollo .ingredient-recipe-title {
+  color: #a05a20;
+}
+.ingredient-recipe-group.recipe-color-b-pollo .pill-label.base-ing {
+  border-color: rgba(208, 124, 60, 0.15);
+}
+
+.ingredient-recipe-group.recipe-color-b-vacuno {
+  border-color: rgba(192, 57, 43, 0.25);
+  background: rgba(192, 57, 43, 0.015);
+}
+.ingredient-recipe-group.recipe-color-b-vacuno .ingredient-recipe-title {
+  color: #922b21;
+}
+.ingredient-recipe-group.recipe-color-b-vacuno .pill-label.base-ing {
+  border-color: rgba(192, 57, 43, 0.15);
+}
+
+.ingredient-recipe-group.recipe-color-b-salmon {
+  border-color: rgba(41, 128, 185, 0.25);
+  background: rgba(41, 128, 185, 0.015);
+}
+.ingredient-recipe-group.recipe-color-b-salmon .ingredient-recipe-title {
+  color: #1f618d;
+}
+.ingredient-recipe-group.recipe-color-b-salmon .pill-label.base-ing {
+  border-color: rgba(41, 128, 185, 0.15);
+}
+
+.ingredient-recipe-group.recipe-color-c-pollo {
+  border-color: rgba(212, 172, 13, 0.25);
+  background: rgba(212, 172, 13, 0.015);
+}
+.ingredient-recipe-group.recipe-color-c-pollo .ingredient-recipe-title {
+  color: #9a7d0a;
+}
+.ingredient-recipe-group.recipe-color-c-pollo .pill-label.base-ing {
+  border-color: rgba(212, 172, 13, 0.15);
+}
+
+.ingredient-recipe-group.recipe-color-c-vacuno {
+  border-color: rgba(142, 68, 173, 0.25);
+  background: rgba(142, 68, 173, 0.015);
+}
+.ingredient-recipe-group.recipe-color-c-vacuno .ingredient-recipe-title {
+  color: #6c3483;
+}
+.ingredient-recipe-group.recipe-color-c-vacuno .pill-label.base-ing {
+  border-color: rgba(142, 68, 173, 0.15);
+}
+
+.ingredient-recipe-group.recipe-color-c-cerdo {
+  border-color: rgba(39, 174, 96, 0.25);
+  background: rgba(39, 174, 96, 0.015);
+}
+.ingredient-recipe-group.recipe-color-c-cerdo .ingredient-recipe-title {
+  color: #1e8449;
+}
+.ingredient-recipe-group.recipe-color-c-cerdo .pill-label.base-ing {
+  border-color: rgba(39, 174, 96, 0.15);
+}
+
 .pills-container {
   display: flex;
   flex-wrap: wrap;

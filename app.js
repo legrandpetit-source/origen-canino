@@ -1134,50 +1134,83 @@ function renderInteractiveIngredients(pet, recipe) {
   if (vfContainer) vfContainer.innerHTML = '';
   supContainer.innerHTML = '';
 
-  let ingredients = [];
   const activeRecipeIds = Object.keys(pet.selectedRecipes || {}).filter(rid => pet.selectedRecipes[rid] > 0);
-  activeRecipeIds.forEach(rid => {
-    const r = appState.recipes.find(rec => rec.id === rid);
-    if (r) {
-      let rIngs = r.ingredientsArray || [];
-      if (rIngs.length === 0 && r.ingredients) {
-        rIngs = r.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
-      } else {
-        rIngs = rIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
-      }
-      rIngs.forEach(ing => {
-        if (!ingredients.includes(ing)) {
-          ingredients.push(ing);
+  
+  if (activeRecipeIds.length > 0) {
+    activeRecipeIds.forEach((rid, groupIndex) => {
+      const r = appState.recipes.find(rec => rec.id === rid);
+      if (r) {
+        let rIngs = r.ingredientsArray || [];
+        if (rIngs.length === 0 && r.ingredients) {
+          rIngs = r.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
+        } else {
+          rIngs = rIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
         }
-      });
-    }
-  });
-
-  if (ingredients.length === 0) {
+        
+        if (rIngs.length > 0) {
+          const groupDiv = document.createElement('div');
+          groupDiv.className = `ingredient-recipe-group recipe-color-${rid}`;
+          
+          const titleEl = document.createElement('div');
+          titleEl.className = 'ingredient-recipe-title';
+          titleEl.innerHTML = `<span class="recipe-title-icon">${r.icon}</span> ${r.name}`;
+          groupDiv.appendChild(titleEl);
+          
+          const pillsWrapper = document.createElement('div');
+          pillsWrapper.className = 'pills-container';
+          
+          rIngs.forEach((ing, i) => {
+            const isExcluded = pet.excludedIngredients.includes(ing);
+            const checkboxId = `ing-${rid}-${i}`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.innerHTML = `
+              <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleIngredient('${ing}', this.checked)">
+              <label for="${checkboxId}" class="pill-label base-ing"
+                     onmouseenter="showIngredientTooltip(event, 'base', '${ing}')"
+                     onmousemove="moveIngredientTooltip(event)"
+                     onmouseleave="hideIngredientTooltip()">
+                <i class="fa-solid fa-check"></i> ${ing}
+              </label>
+            `;
+            pillsWrapper.appendChild(wrapper.firstElementChild);
+            pillsWrapper.appendChild(wrapper.lastElementChild);
+          });
+          
+          groupDiv.appendChild(pillsWrapper);
+          ingContainer.appendChild(groupDiv);
+        }
+      }
+    });
+  } else {
     let fallbackIngs = recipe.ingredientsArray || [];
     if (fallbackIngs.length === 0 && recipe.ingredients) {
       fallbackIngs = recipe.ingredients.split(',').map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
     }
-    ingredients = fallbackIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
-  }
+    const ingredients = fallbackIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
 
-  ingredients.forEach((ing, i) => {
-    const isExcluded = pet.excludedIngredients.includes(ing);
-    const checkboxId = `ing-${i}`;
+    const pillsWrapper = document.createElement('div');
+    pillsWrapper.className = 'pills-container';
     
-    const wrapper = document.createElement('div');
-    wrapper.innerHTML = `
-      <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleIngredient('${ing}', this.checked)">
-      <label for="${checkboxId}" class="pill-label base-ing"
-             onmouseenter="showIngredientTooltip(event, 'base', '${ing}')"
-             onmousemove="moveIngredientTooltip(event)"
-             onmouseleave="hideIngredientTooltip()">
-        <i class="fa-solid fa-check"></i> ${ing}
-      </label>
-    `;
-    ingContainer.appendChild(wrapper.firstElementChild);
-    ingContainer.appendChild(wrapper.lastElementChild);
-  });
+    ingredients.forEach((ing, i) => {
+      const isExcluded = pet.excludedIngredients.includes(ing);
+      const checkboxId = `ing-fallback-${i}`;
+      
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = `
+        <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleIngredient('${ing}', this.checked)">
+        <label for="${checkboxId}" class="pill-label base-ing"
+               onmouseenter="showIngredientTooltip(event, 'base', '${ing}')"
+               onmousemove="moveIngredientTooltip(event)"
+               onmouseleave="hideIngredientTooltip()">
+          <i class="fa-solid fa-check"></i> ${ing}
+        </label>
+      `;
+      pillsWrapper.appendChild(wrapper.firstElementChild);
+      pillsWrapper.appendChild(wrapper.lastElementChild);
+    });
+    ingContainer.appendChild(pillsWrapper);
+  }
 
   // Render optional vegetables and fruits
   if (vfContainer) {
@@ -1281,11 +1314,13 @@ function calculateSingleDietPrice(pet, recipe) {
   let dietSubtotal = 0;
   const activeRecipes = pet.selectedRecipes || {};
   let hasActiveSelection = false;
+  let activeRecipesCount = 0;
   
   for (const rid in activeRecipes) {
     const kgs = activeRecipes[rid];
     if (kgs > 0) {
       hasActiveSelection = true;
+      activeRecipesCount++;
       const r = appState.recipes.find(rec => rec.id === rid);
       if (r) {
         dietSubtotal += kgs * r.price;
@@ -1296,20 +1331,23 @@ function calculateSingleDietPrice(pet, recipe) {
   if (!hasActiveSelection) {
     const basePrice = recipe.price;
     dietSubtotal = Math.round(pet.portionResults.monthlyKg * basePrice);
+    activeRecipesCount = 1;
   }
   
   let superfoodExtra = 0;
   (pet.addedSuperfoods || []).forEach(id => {
     const s = (appState.superfoods || SUPERALIMENTOS).find(item => item.id === id);
     const itemPrice = s ? s.price : 1500;
-    superfoodExtra += (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+    const baseExtra = (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+    superfoodExtra += baseExtra * activeRecipesCount;
   });
 
   let vegFruitExtra = 0;
   (pet.addedVegetablesFruits || []).forEach(id => {
     const vf = (appState.vegetablesFruits || VERDURAS_FRUTAS).find(item => item.id === id);
     const itemPrice = vf ? vf.price : 1500;
-    vegFruitExtra += (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+    const baseExtra = (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+    vegFruitExtra += baseExtra * activeRecipesCount;
   });
 
   pet.totalPrice = dietSubtotal + superfoodExtra + vegFruitExtra;
@@ -2173,6 +2211,7 @@ async function syncCustomerPets() {
           photo: pet.photo,
           subscription_paid: pet.subscriptionPaid,
           selected_recipe_id: pet.selectedRecipeId,
+          selected_recipes: pet.selectedRecipes || {},
           excluded_ingredients: pet.excludedIngredients,
           added_superfoods: pet.addedSuperfoods,
           added_vegetables_fruits: pet.addedVegetablesFruits || [],

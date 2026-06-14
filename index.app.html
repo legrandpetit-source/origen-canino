@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Origen Canino - Comida Real, Vida Saludable | Alimentación BARF y Natural Cocinada</title>
+  <meta name="description" content="Alimentación natural personalizada para tu mascota. Calculadora de porciones BARF y cocinada, snacks deshidratados, caldo de hueso y suscripción mensual con entrega segura.">
+  
+  <!-- Estilos CSS y Fuentes -->
+  <link rel="stylesheet" href="style.css?v=5.7">
+  <!-- Iconos de Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <!-- Encabezado Principal de la Suite -->
+  <header class="app-header">
+    <div class="logo-container" onclick="resetToWelcome()" style="cursor: pointer;">
+      <img src="assets/logo.jpg" alt="Logo Origen Canino" class="logo-img">
+      <div class="logo-text">
+        <div class="logo-brand-wrapper">
+          <span class="logo-brand-origen">Origen</span>
+          <span class="logo-brand-canino"><i class="fa-solid fa-paw logo-paw"></i>CANINO</span>
+        </div>
+        <span class="logo-brand-sub">Comida Real, Vida Saludable</span>
+      </div>
+    </div>
+    
+    <!-- Pestañas de Navegación del Entorno -->
+    <nav class="view-tabs" style="display: flex; align-items: center; gap: 1rem;">
+      <button class="tab-btn active" onclick="switchView('web')">
+        <i class="fa-solid fa-globe"></i> Sitio Web Desktop
+      </button>
+      <button class="tab-btn" onclick="switchView('mobile')">
+        <i class="fa-solid fa-mobile-screen-button"></i> App Móvil
+      </button>
+      <div id="customer-header-badge" class="customer-profile-badge" style="display: none; cursor: pointer;" onclick="logoutCustomer()">
+        <i class="fa-solid fa-user-check"></i> <span id="customer-header-name">Cliente</span> (Salir)
+      </div>
+    </nav>
+  </header>
+
+  <!-- Área de Contenido Principal -->
+  <main class="main-viewport">
+
+    <!-- ==========================================
+         VISTA 1: SITIO WEB DESKTOP
+         ========================================== -->
+    <section id="view-web" class="view-section active">
+      <!-- Hero Section -->
+      <section class="web-hero">
+        <div class="hero-content">
+          <h1><span>Alimentación Natural Premium</span>Nutrición Evolutiva para su Bienestar</h1>
+          <p>Ofrecemos dietas BARF crudas y recetas cocinadas al vapor con ingredientes 100% naturales de grado humano. Diseñamos la porción diaria perfecta según las características únicas de tu perro.</p>
+          <div class="hero-actions" style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+            <button class="btn btn-primary" onclick="startOrderFlow('personalizar')" title="Calcula la porción diaria recomendada según el peso de tu mascota, permitiendo excluir ingredientes específicos.">
+              <i class="fa-solid fa-dog"></i> Personalizar Dieta
+            </button>
+            <button class="btn btn-primary" onclick="startOrderFlow('kilos')" style="background-color: var(--primary-green); border-color: var(--primary-green);" title="Compra directa de alimento por kilos preestablecidos (mínimo 7 kg) con suplementos y snacks integrados directamente, sin exclusión de ingredientes.">
+              <i class="fa-solid fa-weight-scale"></i> Comprar dieta por kilo
+            </button>
+            <a href="#catalogo-seccion" class="btn btn-secondary">Ver Menú & Snacks</a>
+          </div>
+        </div>
+        <div class="hero-image-wrapper">
+          <div class="hero-badge badge-1">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <div class="hero-badge-info">
+              <h4>100% Digestible</h4>
+              <p>Adiós a las alergias de piel</p>
+            </div>
+          </div>
+          <div class="hero-badge badge-2">
+            <i class="fa-solid fa-bone"></i>
+            <div class="hero-badge-info">
+              <h4>Dientes Sanos</h4>
+              <p>Adiós al sarro canino</p>
+            </div>
+          </div>
+          <img src="assets/logo.jpg" alt="Mascota Feliz" class="hero-main-img">
+        </div>
+      </section>
+
+      <!-- Tipos de Alimentación -->
+      <section class="web-diets">
+        <div class="section-title">
+          <span>Nuestras Especialidades</span>
+          <h2>Dos Formas de Nutrir con Amor</h2>
+        </div>
+        <div class="diets-grid">
+          <div class="diet-card barf">
+            <span class="diet-icon">🥩</span>
+            <h3>Dieta BARF (Cruda)</h3>
+            <p>Alimentación biológicamente apropiada basada en ingredientes crudos. Respeta el diseño biológico del perro, aportando vitalidad máxima y enzimas digestivas intactas.</p>
+            <ul class="diet-benefits-list">
+              <li><i class="fa-solid fa-circle-check"></i> 60% Huesos carnosos triturados</li>
+              <li><i class="fa-solid fa-circle-check"></i> 30% Carne magra de primera calidad</li>
+              <li><i class="fa-solid fa-circle-check"></i> 10% Vísceras y órganos ricos en hierro</li>
+              <li><i class="fa-solid fa-circle-check"></i> Suplementos verdes y frutas</li>
+            </ul>
+          </div>
+          <div class="diet-card cooked">
+            <span class="diet-icon">🍲</span>
+            <h3>Comida Cocinada al Vapor</h3>
+            <p>Elaborada a baja temperatura para conservar nutrientes. Ideal para perros con digestión sensible, de edad avanzada o cuyos dueños prefieren no ofrecer alimentos crudos.</p>
+            <ul class="diet-benefits-list">
+              <li><i class="fa-solid fa-circle-check"></i> Proteínas cocinadas (Pollo, Vacuno, Cerdo)</li>
+              <li><i class="fa-solid fa-circle-check"></i> Verduras picadas ricas en fibra</li>
+              <li><i class="fa-solid fa-circle-check"></i> Carbohidratos saludables seleccionados</li>
+              <li><i class="fa-solid fa-circle-check"></i> Suplementos de calcio y vitaminas</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Catálogo de Productos -->
+      <section id="catalogo-seccion" class="web-catalog">
+        <div class="section-title">
+          <span>Nuestros Productos</span>
+          <h2>Explora el Menú del Origen</h2>
+        </div>
+        <div class="catalog-filters">
+          <button class="filter-btn active" onclick="filterCatalog('todos', this)">Todos</button>
+          <button class="filter-btn" onclick="filterCatalog('barf', this)">Dieta BARF</button>
+          <button class="filter-btn" onclick="filterCatalog('cooked', this)">Comida Cocinada</button>
+          <button class="filter-btn" onclick="filterCatalog('snack', this)">Snacks & Caldo</button>
+        </div>
+        <div class="products-grid" id="web-products-container">
+          <!-- Carga dinámica mediante JS -->
+        </div>
+      </section>
+
+      <!-- Testimonios de Familias (Estilo Legrand Petit) -->
+      <section class="web-testimonials">
+        <div class="section-title">
+          <span>Testimonios</span>
+          <h2>Familias Origen Canino</h2>
+        </div>
+        <div class="testimonials-grid" id="web-testimonials-container">
+          <!-- Carga dinámica mediante JS -->
+        </div>
+        <div style="text-align: center; margin-top: 2rem;">
+          <button class="btn btn-secondary" onclick="openPublicTestimonialModal()">
+            <i class="fa-solid fa-pen-to-square"></i> Dejar un Testimonio
+          </button>
+        </div>
+      </section>
+
+      <!-- Preguntas Frecuentes (FAQs) -->
+      <section class="web-faqs">
+        <div class="section-title">
+          <span>Preguntas Frecuentes</span>
+          <h2>Dudas sobre Alimentación Natural</h2>
+        </div>
+        <div class="faq-accordion" id="web-faqs-container">
+          <!-- Carga dinámica mediante JS -->
+        </div>
+      </section>
+
+      <!-- Calculadora Rápida Informativa -->
+      <section class="web-calculator-section">
+        <div class="web-calc-container">
+          <div class="web-calc-text">
+            <h2>Calcula la Ración Diaria de tu Mascota</h2>
+            <p>Ingresa los datos básicos para conocer los gramos recomendados que necesita al día. Si deseas guardar su perfil, añadir su foto, recibir entregas mensuales automáticas y pagar con tarjeta, utiliza nuestra <strong>App Móvil</strong> interactiva en la pestaña superior.</p>
+            <button class="btn btn-primary" onclick="window.scrollTo({ top: 0, behavior: 'smooth' })">
+              <i class="fa-solid fa-cart-shopping"></i> ¡Compra tu dieta!
+            </button>
+          </div>
+          <div class="web-calc-box">
+            <div class="form-group">
+              <label for="web-calc-diet">Tipo de Alimentación</label>
+              <select id="web-calc-diet" class="form-input">
+                <option value="barf">Dieta BARF (Cruda)</option>
+                <option value="cooked">Comida Cocinada al Vapor</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="web-calc-weight">Peso de la Mascota (kg)</label>
+              <input type="number" id="web-calc-weight" class="form-input" placeholder="Ej: 15" min="1" step="0.5">
+            </div>
+            <div class="form-group">
+              <label for="web-calc-age">Etapa de Vida</label>
+              <select id="web-calc-age" class="form-input">
+                <option value="adult">Adulto (Más de 12 meses)</option>
+                <option value="puppy">Cachorro (Menos de 12 meses)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="web-calc-activity">Nivel de Actividad / Estado</label>
+              <select id="web-calc-activity" class="form-input">
+                <option value="sedentary">Bajo / Sedentario o Senior</option>
+                <option value="normal" selected>Normal / Paseos diarios</option>
+                <option value="active">Activo / Deporte moderado</option>
+                <option value="working">Muy Activo / Trabajo o Lactancia</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" style="width: 100%;" onclick="calculateWebPortion()">
+              <i class="fa-solid fa-calculator"></i> Calcular Ración
+            </button>
+            
+            <div class="calc-result-overlay" id="web-calc-result">
+              <div class="result-grid">
+                <div class="result-item">
+                  <span>Ración Diaria</span>
+                  <strong id="web-res-daily">0 g</strong>
+                </div>
+                <div class="result-item">
+                  <span>Suscripción Mensual</span>
+                  <strong id="web-res-monthly">0 kg</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <footer class="web-footer">
+        <div class="web-footer-logo">
+          <img src="assets/logo.jpg" alt="Logo Origen Canino" style="height: 44px; border-radius: 50%;">
+          <div class="logo-text" style="text-align: left;">
+            <div class="logo-brand-wrapper">
+              <span class="logo-brand-origen" style="font-size: 1.6rem; margin-right: 0.15rem;">Origen</span>
+              <span class="logo-brand-canino" style="font-size: 1.25rem;"><i class="fa-solid fa-paw logo-paw" style="font-size:0.8rem;"></i>CANINO</span>
+            </div>
+            <span class="logo-brand-sub" style="font-size: 0.52rem; letter-spacing: 1px;">Comida Real, Vida Saludable</span>
+          </div>
+        </div>
+        <p>Alimentación natural biológicamente apropiada. Hecho con amor en Chile para el bienestar integral de tu fiel compañero.<br>Contacto: <a href="mailto:hola@origencanino.cl" style="color: var(--primary-green); text-decoration: none; font-weight: 600;">hola@origencanino.cl</a></p>
+        <div class="web-footer-copyright" style="display: flex; flex-direction: column; gap: 0.4rem; align-items: center;">
+          <span>&copy; 2026 Origen Canino. Comida Real, Vida Saludable. Todos los derechos reservados.</span>
+          <span class="ppv-credit">Sitio desarrollado por <a href="#" onclick="openPpvModal(event)" class="ppv-link">PPV Soluciones Informáticas</a></span>
+        </div>
+      </footer>
+    </section>
+
+    <!-- ==========================================
+         VISTA 2: SIMULADOR DE APP MÓVIL
+         ========================================== -->
+    <section id="view-mobile" class="view-section">
+      <div class="mobile-simulator-container">
+        
+        <!-- Carcasa de Teléfono Físico -->
+        <div class="phone-mockup">
+          <div class="phone-notch">
+            <div class="phone-camera"></div>
+            <div class="phone-speaker"></div>
+          </div>
+          
+          <div class="phone-screen">
+            <!-- Barra de estado del móvil removida -->
+            
+            <!-- Contenido de las pantallas de la App -->
+            <div class="phone-content" id="mobile-app-content">
+              
+              <!-- 2.1 PANTALLA: BIENVENIDA / SELECCIÓN DE MASCOTAS -->
+              <div id="mobile-welcome" class="mobile-view active">
+                <div class="mobile-welcome-screen">
+                  <img src="assets/logo.jpg" alt="Origen Canino Logo" class="welcome-logo" onclick="resetToWelcome()" style="cursor: pointer;">
+                  <h2 onclick="resetToWelcome()" style="cursor: pointer;">Origen Canino</h2>
+                  <p>Nutrición natural premium formulada a medida para tus mascotas.</p>
+                  
+                  <!-- Listado de mascotas existentes -->
+                  <div id="welcome-pets-title" style="display:none; width: 100%; text-align: left; font-weight:700; margin-bottom: 0.5rem; font-size:0.85rem; color:var(--secondary-brown);">
+                    Tus Mascotas Registradas:
+                  </div>
+                  <div id="welcome-pets-container" class="welcome-pets-list">
+                    <!-- Se carga dinámicamente -->
+                  </div>
+
+                  <button class="mobile-btn mobile-btn-primary" onclick="initNewPetWizard('personalizar')" title="Flujo tradicional: Calculamos la porción diaria recomendada según el peso de tu mascota y te permitimos excluir alérgenos o ingredientes específicos de su receta.">
+                    <i class="fa-solid fa-dog"></i> Personalizar Dieta
+                  </button>
+                  <button class="mobile-btn mobile-btn-primary" onclick="initNewPetWizard('kilos')" style="margin-top: 0.5rem; background-color: var(--primary-green); border-color: var(--primary-green);" title="Compra directa de alimento por kilos preestablecidos (mínimo 7 kg) con suplementos y snacks integrados directamente, sin exclusión de ingredientes.">
+                    <i class="fa-solid fa-weight-scale"></i> Comprar dieta por kilo
+                  </button>
+                  <button id="mb-welcome-edit-profile-btn" class="mobile-btn mobile-btn-secondary" onclick="openUserProfileEdit()" style="margin-top: 0.5rem; width: 100%; display: none;">
+                    <i class="fa-solid fa-user-gear"></i> Editar Datos de Cuenta
+                  </button>
+                  <button class="mobile-btn mobile-btn-secondary" onclick="resetToWelcome()" style="margin-top: 0.5rem; border-color: rgba(44, 26, 14, 0.15); width: 100%;">
+                    <i class="fa-solid fa-house"></i> Volver al Inicio
+                  </button>
+                </div>
+              </div>
+
+              <!-- 2.2 PANTALLA: FORMULARIO PERFIL MASCOTA -->
+              <div id="mobile-profile-setup" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title" id="profile-wizard-title" style="grid-column: 1 / -1;">Perfil de tu Mascota</h3>
+                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1rem;">Configura los datos clave para armar la receta ideal.</p>
+                  
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column">
+                      <div class="photo-uploader">
+                        <div class="photo-preview-box" onclick="triggerPhotoUpload()" id="pet-photo-preview">
+                          <i class="fa-solid fa-camera"></i>
+                          <span>Subir Foto</span>
+                        </div>
+                        <input type="file" id="pet-photo-input" accept="image/*" onchange="previewPetPhoto(event)">
+                      </div>
+
+                      <div class="mobile-input-group">
+                        <label for="pet-name">Nombre de la Mascota</label>
+                        <input type="text" id="pet-name" class="mobile-input" placeholder="Ej: Toby">
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pet-breed">Raza</label>
+                        <input type="text" id="pet-breed" class="mobile-input" placeholder="Ej: Border Collie">
+                      </div>
+                      <div class="mobile-input-group" id="pet-weight-group">
+                        <label for="pet-weight">Peso Corporal (kg)</label>
+                        <input type="number" id="pet-weight" class="mobile-input" placeholder="Ej: 15" min="0.5" step="0.1">
+                      </div>
+                    </div>
+
+                    <div class="pc-column">
+                      <div class="mobile-input-group" id="pet-age-group">
+                        <label for="pet-age">Etapa de Vida</label>
+                        <select id="pet-age" class="mobile-select">
+                          <option value="adult">Adulto (Mayor a 1 año)</option>
+                          <option value="puppy">Cachorro (2 a 4 meses)</option>
+                          <option value="puppy-mid">Cachorro (4 a 6 meses)</option>
+                          <option value="puppy-late">Cachorro (6 a 12 meses)</option>
+                        </select>
+                      </div>
+                      <div class="mobile-input-group" id="pet-activity-group">
+                        <label for="pet-activity">Nivel de Actividad</label>
+                        <select id="pet-activity" class="mobile-select">
+                          <option value="sedentary">Bajo (Sedentario / Senior)</option>
+                          <option value="normal" selected>Normal (Paseo diario)</option>
+                          <option value="active">Activo (Deporte recreativo)</option>
+                          <option value="working">Muy Activo (Trabajo / Canicross)</option>
+                        </select>
+                      </div>
+                      <div class="mobile-input-group" id="pet-notes-group" style="margin-bottom: 1.5rem;">
+                        <label for="pet-notes">Observaciones / Alergias</label>
+                        <input type="text" id="pet-notes" class="mobile-input" placeholder="Ej: Alérgico al pollo, piel sensible">
+                      </div>
+                      <div class="mobile-input-group" id="pet-kilos-needed-group" style="margin-bottom: 1.5rem; display: none;">
+                        <label for="pet-kilos-needed">Kilos que necesita (mínimo 7 kg)</label>
+                        <input type="number" id="pet-kilos-needed" class="mobile-input" min="7" placeholder="Ej: 10">
+                      </div>
+                      
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="cancelPetWizard()" style="flex:1;">
+                          <i class="fa-solid fa-arrow-left"></i> Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="savePetProfileAndGoToCalculator()" style="flex:2;" id="profile-submit-btn">
+                          <span id="profile-submit-btn-text">Calcular Ración <i class="fa-solid fa-arrow-right"></i></span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.3 PANTALLA: CALCULADORA Y PERSONALIZACIÓN INTERACTIVA DE RECETA -->
+              <div id="mobile-calculator" class="mobile-view">
+                <div class="pc-columns-wrapper" style="display: contents;">
+                  
+                  <!-- COLUMNA 1: PERFIL, PORCIÓN Y DIETA BASE -->
+                  <div class="pc-column">
+                    <div class="mobile-card" style="margin-top: 1rem; margin-bottom: 0.5rem;">
+                      <div class="pet-profile-summary">
+                        <img id="calc-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
+                        <div class="pet-meta-text">
+                          <h3 id="calc-pet-name">Toby</h3>
+                          <p id="calc-pet-details">Border Collie • 15 kg</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Desglose de gramos diario -->
+                    <div class="portion-breakdown-card" id="calc-portion-card">
+                      <div class="portion-header">
+                        <span>Porción Diaria:</span>
+                        <span class="portion-total" id="calc-daily-total">375g</span>
+                      </div>
+                      <p style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;" id="calc-explanation">
+                        Calculado al 2.5% del peso corporal para mantenimiento adulto normal.
+                      </p>
+                      
+                      <!-- Desglose de barras -->
+                      <div class="breakdown-bars" id="calc-breakdown-bars">
+                        <div class="bar-part bar-bones" style="width: 50%"></div>
+                        <div class="bar-part bar-meat" style="width: 30%"></div>
+                        <div class="bar-part bar-organs" style="width: 10%"></div>
+                        <div class="bar-part bar-veggies" style="width: 10%"></div>
+                      </div>
+
+                      <!-- Leyenda -->
+                      <div class="breakdown-legend" id="calc-breakdown-legend">
+                        <!-- Dinámico -->
+                      </div>
+                    </div>
+
+                    <!-- Selección de Receta Base -->
+                    <div class="mobile-card">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.65rem; color: var(--secondary-brown);">
+                        1. Elige su Receta Base
+                      </h4>
+                      <!-- Barra de Progreso de Kilos -->
+                      <div class="weight-progress-wrapper" id="weight-progress-container">
+                        <div class="weight-progress-text">
+                          <span>Distribución de Kilos:</span>
+                          <strong id="weight-progress-label">0 / 0 kg</strong>
+                        </div>
+                        <div class="weight-progress-bar-bg">
+                          <div class="weight-progress-bar-fill" id="weight-progress-bar"></div>
+                        </div>
+                      </div>
+                      <div class="recipe-selector-grid" id="mobile-recipe-selector">
+                        <!-- Rellenado dinámicamente -->
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- COLUMNA 2: SUPLEMENTOS Y SNACKS / PERSONALIZAR -->
+                  <div class="pc-column">
+                    <div class="mobile-card" style="margin-top: 1rem;">
+                      <h4 id="calc-column-2-heading" style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
+                        2. Personaliza la Comida
+                      </h4>
+                      <p id="calc-column-2-desc" style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.75rem;">
+                        Desmarca ingredientes para excluirlos de su porción mensual (se tacharán en la etiqueta).
+                      </p>
+
+                      <!-- Sección Exclusiones (sólo para flow de Personalizar) -->
+                      <div id="calc-personalization-section">
+                        <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Ingredientes de Receta:</span>
+                        <div class="pills-container" id="calc-ingredients-container" style="margin-bottom: 1rem;">
+                          <!-- Ingredientes de la receta activa -->
+                        </div>
+                      </div>
+
+                      <span id="calc-vegfruits-label" style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Verduras o Frutas Adicionales (+$1.500 c/u al mes):</span>
+                      <div class="pills-container" id="calc-vegfruits-container" style="margin-bottom: 1rem;">
+                        <!-- Verduras o frutas opcionales -->
+                      </div>
+
+                      <span id="calc-superfoods-label" style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Superalimentos (+$1.500 c/u al mes):</span>
+                      <div class="pills-container" id="calc-superfoods-container" style="margin-bottom: 1rem;">
+                        <!-- Suplementos opcionales -->
+                      </div>
+
+                      <!-- Sección Snacks (sólo para flow de Kilos) -->
+                      <div id="calc-snacks-section" style="display: none;">
+                        <span style="font-size: 0.72rem; font-weight:700; color: var(--secondary-brown-light);">Añadir Snack y Caldo:</span>
+                        <div class="mobile-snacks-list" id="calc-snacks-container" style="margin-top: 0.5rem; max-height: 250px; overflow-y: auto;">
+                          <!-- Snacks cargados dinámicamente -->
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- COLUMNA 3: ETIQUETA Y CONFIRMACIÓN DE DIETA -->
+                  <div class="pc-column">
+                    <!-- Etiqueta de empaque final -->
+                    <div class="mobile-card" style="margin-top: 1rem;">
+                      <h4 style="font-size: 0.9rem; font-weight: 700; color: var(--secondary-brown); margin-bottom: 0.25rem;">
+                        3. Vista Previa de Etiqueta
+                      </h4>
+                      <div class="package-label-mockup" id="calc-package-label">
+                        <!-- Generado dinámicamente -->
+                      </div>
+                    </div>
+
+                    <!-- Envío e instrucciones -->
+                    <div class="mobile-card" id="calc-checkout-card">
+                      <div class="mobile-input-group" style="display: none;">
+                        <label for="custom-instructions">Instrucciones Especiales de Empaque</label>
+                        <input type="text" id="custom-instructions" class="mobile-input" value="Empaquetado en porciones de 1kg">
+                      </div>
+                      <!-- Periodo de Entrega (15 o 30 días) -->
+                      <div class="mobile-input-group" id="calc-delivery-period-group" style="margin-bottom: 0.75rem;">
+                        <label for="calc-delivery-period" style="font-weight: 700; color: var(--secondary-brown);">Periodo de Entrega</label>
+                        <select id="calc-delivery-period" class="mobile-select" onchange="updatePortionCalculatorUI()">
+                          <option value="30" selected>Cada 30 días (Suscripción Mensual)</option>
+                          <option value="15">Cada 15 días (Suscripción Quincenal)</option>
+                        </select>
+                      </div>
+
+                      <div id="calc-totals-summary" style="margin-bottom: 0.75rem;">
+                        <!-- Fila Dieta Base -->
+                        <div class="portion-header" style="margin-bottom: 0.5rem; border-top: 1px solid rgba(44,26,14,0.06); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                          <span style="font-weight: 700; color: var(--secondary-brown); font-size: 0.88rem;" id="calc-diet-label-text">Comida Base (<span id="calc-delivery-label">Cada 30 días</span> - <span id="calc-monthly-weight">11.3</span> kg):</span>
+                          <span class="portion-total" id="calc-diet-price" style="font-size: 1.1rem; color: var(--text-dark); font-weight: 700;">$45.000</span>
+                        </div>
+                        
+                        <!-- Fila Snacks y Caldo -->
+                        <div class="portion-header" id="calc-snacks-row" style="margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                          <span style="font-weight: 700; color: var(--secondary-brown); font-size: 0.88rem;">Snack y Caldo:</span>
+                          <span class="portion-total" id="calc-snacks-price" style="font-size: 1.1rem; color: var(--text-dark); font-weight: 700;">$0</span>
+                        </div>
+                        
+                        <!-- Fila Total General -->
+                        <div class="portion-header" id="calc-grand-total-row" style="margin-top: 0.75rem; border-top: 1px dashed rgba(44,26,14,0.1); padding-top: 0.75rem; display: flex; justify-content: space-between; align-items: center;">
+                          <span style="font-weight: 800; color: var(--secondary-brown); font-size: 0.95rem;">Total General:</span>
+                          <span class="portion-total" id="calc-total-price" style="font-size: 1.4rem; color: var(--primary-green); font-weight: 800;">$45.000</span>
+                        </div>
+                      </div>
+                      
+                      <div style="display: flex; gap: 0.5rem;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="goBackToProfileSetup()" style="flex: 1;">
+                          <i class="fa-solid fa-arrow-left"></i> Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckoutFromCalculator()" style="flex: 2;" id="calc-confirm-btn">
+                          Ir a pagar <i class="fa-solid fa-credit-card"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.4 PANTALLA: CATÁLOGO DE SNACKS -->
+              <div id="mobile-snacks" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column">
+                      <h3 class="mobile-title">Suplementos & Snacks</h3>
+                      <p class="mobile-subtitle" style="margin-bottom: 1rem;">Acompaña la dieta mensual con deliciosos snacks deshidratados y caldo de colágeno.</p>
+                      
+                      <div class="mobile-snacks-list" id="mobile-snacks-container">
+                        <!-- Cargados dinámicamente -->
+                      </div>
+                    </div>
+
+                    <div class="pc-column">
+                      <div class="receipt-row" style="margin-top: 1.5rem; border-top: 1px solid rgba(44, 26, 14, 0.1); padding-top: 0.75rem;">
+                        <span>Dietas de Mascotas:</span>
+                        <span id="snacks-diet-subtotal">$0</span>
+                      </div>
+                      <div class="receipt-row">
+                        <span>Snacks Generales:</span>
+                        <span id="snacks-only-subtotal">$0</span>
+                      </div>
+                      <div class="receipt-row" style="font-weight: 700; color: var(--primary-green); font-size: 1.1rem; border-bottom: 1px solid rgba(44,26,14,0.06); padding-bottom: 0.75rem; margin-bottom: 1.5rem;">
+                        <span>Total Mensual Compra:</span>
+                        <span id="snacks-total">$0</span>
+                      </div>
+                      
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto; flex-wrap: wrap;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('calculator')" style="flex: 1; min-width: 90px;">
+                          <i class="fa-solid fa-arrow-left"></i> Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-secondary" onclick="initNewPetWizard()" style="flex: 1.5; min-width: 150px; border-color: var(--primary-green-light); color: var(--primary-green);">
+                          <i class="fa-solid fa-plus"></i> Ingresar otro perro
+                        </button>
+                        <button class="mobile-btn mobile-btn-primary" onclick="proceedToCheckout()" style="flex: 2; min-width: 120px;">
+                          Ir a Pagar <i class="fa-solid fa-credit-card"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.5 PANTALLA: CHECKOUT & PASARELA DE PAGO INTERACTIVA (MULTI-MASCOTA) -->
+              <div id="mobile-checkout" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title" id="checkout-title-text" style="grid-column: 1 / -1;">Suscripción Mensual</h3>
+                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1rem;">Revisa el detalle de tus mascotas y realiza el pago seguro.</p>
+                  
+                  <div class="pc-columns-wrapper" style="display: contents;">
+                    <div class="pc-column">
+                      <!-- Desglose por perro en Checkout -->
+                      <div class="checkout-pets-breakdown" id="checkout-pets-list" style="margin-bottom: 1rem;">
+                        <!-- Llenado dinámico per pet -->
+                      </div>
+
+                      <!-- Tarjeta de Crédito 3D Interactiva -->
+                      <div class="credit-card-wrapper" id="checkout-credit-card" style="margin-bottom: 1.5rem;">
+                        <div class="credit-card-inner">
+                          <!-- Lado Frontal -->
+                          <div class="credit-card-front">
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                              <div class="card-chip"></div>
+                              <i class="fa-brands fa-cc-visa" style="font-size: 1.8rem;"></i>
+                            </div>
+                            <div class="card-number" id="card-num-preview">•••• •••• •••• ••••</div>
+                            <div class="card-holder-group">
+                              <div>
+                                <span>Titular</span>
+                                <div class="card-holder-name" id="card-name-preview">Nombre Completo</div>
+                              </div>
+                              <div>
+                                <span>Expira</span>
+                                <div id="card-exp-preview">MM/AA</div>
+                              </div>
+                            </div>
+                          </div>
+                          <!-- Lado Posterior -->
+                          <div class="credit-card-back">
+                            <div class="card-magnetic-strip"></div>
+                            <div style="margin-top: 1rem;">
+                              <div class="card-signature-strip" id="card-cvv-preview">123</div>
+                              <div style="text-align: right; font-size: 0.6rem; opacity: 0.8; margin-top: 4px;">CVV</div>
+                            </div>
+                            <div style="text-align: left; font-size: 0.7rem; font-weight: 700; letter-spacing: 1px;">
+                              ORIGEN CANINO
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Marcador para Pago por Transferencia -->
+                      <div id="checkout-transfer-placeholder" style="display: none; margin-bottom: 1.5rem; background: var(--bg-white); border: 1px solid rgba(44, 26, 14, 0.08); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; box-shadow: var(--shadow-sm);">
+                        <i class="fa-solid fa-money-bill-transfer" style="font-size: 3rem; color: var(--primary-green); margin-bottom: 0.75rem;"></i>
+                        <h4 style="font-size: 0.95rem; font-weight: 800; color: var(--secondary-brown); margin-bottom: 0.25rem;">Pago por Transferencia</h4>
+                        <p style="font-size: 0.72rem; color: var(--text-muted); line-height: 1.4;">Transfiere el monto total a nuestra cuenta bancaria y adjunta el comprobante a la derecha para validación de tu suscripción.</p>
+                      </div>
+                    </div>
+
+                    <div class="pc-column">
+                      <!-- Selector de Método de Pago -->
+                      <div class="payment-methods-tabs" style="display: flex; gap: 0.5rem; margin-bottom: 1rem; width: 100%;">
+                        <button type="button" id="tab-pay-card" class="payment-method-btn active" onclick="selectPaymentMethod('card')" style="flex:1; padding: 0.6rem; border-radius: var(--radius-sm); border: 1.5px solid var(--primary-green); background: var(--bg-white); color: var(--primary-green); font-weight:700; cursor:pointer; font-size:0.8rem; display: none;">
+                          <i class="fa-solid fa-credit-card"></i> Tarjeta de Crédito
+                        </button>
+                        <button type="button" id="tab-pay-transfer" class="payment-method-btn" onclick="selectPaymentMethod('transfer')" style="flex:1; padding: 0.6rem; border-radius: var(--radius-sm); border: 1.5px solid rgba(44, 26, 14, 0.08); background: hsla(24, 25%, 30%, 0.03); color: var(--text-muted); font-weight:700; cursor:pointer; font-size:0.8rem;">
+                          <i class="fa-solid fa-money-bill-transfer"></i> Transferencia
+                        </button>
+                      </div>
+
+                      <!-- Formulario 1: Tarjeta de Crédito -->
+                      <div id="form-pay-card" style="width: 100%;">
+                        <div class="mobile-input-group">
+                          <label for="pay-cardholder">Nombre del Titular</label>
+                          <input type="text" id="pay-cardholder" class="mobile-input" placeholder="Ej: Patricio Silva" oninput="updateCardPreview('name', this.value)">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-cardnumber">Número de Tarjeta</label>
+                          <input type="text" id="pay-cardnumber" class="mobile-input" placeholder="4556 1234 5678 9012" maxlength="19" oninput="updateCardPreview('number', this.value)">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                          <div class="mobile-input-group">
+                            <label for="pay-expiry">Fecha Vencimiento</label>
+                            <input type="text" id="pay-expiry" class="mobile-input" placeholder="MM/AA" maxlength="5" oninput="updateCardPreview('expiry', this.value)">
+                          </div>
+                          <div class="mobile-input-group">
+                            <label for="pay-cvv">Código CVV</label>
+                            <input type="text" id="pay-cvv" class="mobile-input" placeholder="123" maxlength="4" onfocus="flipCard(true)" onblur="flipCard(false)" oninput="updateCardPreview('cvv', this.value)">
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Formulario 2: Transferencia Bancaria -->
+                      <div id="form-pay-transfer" style="display: none; width: 100%;">
+                        <div style="background: rgba(85, 114, 46, 0.05); padding: 0.75rem; border-radius: var(--radius-sm); font-size: 0.75rem; color: var(--secondary-brown); margin-bottom: 0.85rem; border: 1px solid rgba(85, 114, 46, 0.1); line-height: 1.45;">
+                          <strong>Datos para Transferencia:</strong><br>
+                          <span>• <strong>Banco:</strong> Banco de Chile</span><br>
+                          <span>• <strong>Tipo Cuenta:</strong> Cuenta Corriente</span><br>
+                          <span>• <strong>Nº Cuenta:</strong> 123-45678-90</span><br>
+                          <span>• <strong>RUT:</strong> 76.543.210-K</span><br>
+                          <span>• <strong>Nombre:</strong> Origen Canino SpA</span><br>
+                          <span>• <strong>Email:</strong> pagos@origencanino.cl</span>
+                        </div>
+                        <div class="mobile-input-group">
+                          <label>Adjuntar Comprobante de Pago</label>
+                          <div class="file-uploader-box" id="transfer-file-box" onclick="triggerTransferFileUpload()" style="border: 2px dashed rgba(85, 114, 46, 0.3); padding: 1.15rem; text-align: center; border-radius: var(--radius-sm); cursor: pointer; background: var(--bg-white); transition: var(--transition);">
+                            <i class="fa-solid fa-cloud-arrow-up" style="font-size: 1.5rem; color: var(--primary-green-light); margin-bottom: 0.35rem;"></i>
+                            <div style="font-size: 0.75rem; font-weight:700; color: var(--secondary-brown);" id="transfer-file-status">Haz clic para subir comprobante</div>
+                            <div style="font-size: 0.65rem; color: var(--text-muted); margin-top: 2px;">Formatos: JPG, PNG, PDF</div>
+                          </div>
+                          <input type="file" id="pay-transfer-file" accept="image/*,application/pdf" style="display: none;" onchange="handleTransferFileSelect(event)">
+                        </div>
+                        <div id="transfer-preview-container" style="display: none; margin-top: 0.65rem; text-align: center; border: 1px solid rgba(44, 26, 14, 0.08); padding: 0.4rem; border-radius: var(--radius-sm); background: var(--bg-cream);">
+                          <div style="font-size: 0.68rem; font-weight:700; color: var(--primary-green); margin-bottom: 0.2rem;">
+                            <i class="fa-solid fa-circle-check"></i> Comprobante Cargado
+                          </div>
+                          <div id="transfer-preview-name" style="font-size: 0.7rem; color: var(--text-dark); word-break: break-all; font-weight: 600;"></div>
+                        </div>
+                      </div>
+                      <h4 style="font-size: 0.85rem; font-weight: 700; color: var(--secondary-brown); margin: 1rem 0 0.5rem 0; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 1rem;">
+                        Información de Despacho
+                      </h4>
+                      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
+                        <div class="mobile-input-group">
+                          <label for="pay-recipient-name">Nombre de quien recibe</label>
+                          <input type="text" id="pay-recipient-name" class="mobile-input" placeholder="Ej: Patricio Silva">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-phone">Teléfono de Contacto</label>
+                          <input type="tel" id="pay-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
+                        </div>
+                      </div>
+                      <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <div class="mobile-input-group">
+                          <label for="pay-street">Calle y Número</label>
+                          <input type="text" id="pay-street" class="mobile-input" placeholder="Ej: Av. Principal 1234">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-commune">Comuna</label>
+                          <input type="text" id="pay-commune" class="mobile-input" placeholder="Ej: Santiago">
+                        </div>
+                        <div class="mobile-input-group">
+                          <label for="pay-region">Región</label>
+                          <input type="text" id="pay-region" class="mobile-input" placeholder="Ej: Metropolitana">
+                        </div>
+                      </div>
+                      <div class="mobile-input-group">
+                        <label for="pay-delivery-block">Horario de Entrega Preferido</label>
+                        <select id="pay-delivery-block" class="mobile-select">
+                          <option value="morning">Mañana (09:00 - 13:00)</option>
+                          <option value="midday" selected>Medio día (13:00 - 17:00)</option>
+                          <option value="afternoon">Tarde (17:00 - 21:00)</option>
+                        </select>
+                      </div>
+
+                      <div class="receipt-row" style="font-weight: 700; font-size: 1.1rem; color: var(--primary-green); margin: 0.5rem 0 1rem 0;">
+                        <span>Total a Pagar:</span>
+                        <span id="checkout-total-val">$0</span>
+                      </div>
+
+                      <div style="display: flex; gap: 0.5rem; margin-top: auto;">
+                        <button class="mobile-btn mobile-btn-secondary" onclick="goBackFromCheckout()" style="flex: 1;">
+                          Atrás
+                        </button>
+                        <button class="mobile-btn mobile-btn-accent" onclick="processSecurePayment()" style="flex: 2;" id="pay-btn">
+                          <i class="fa-solid fa-shield-halved"></i> Pagar Suscripción
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.6 PANTALLA: AUTENTICACIÓN / REGISTRO CLIENTE MÓVIL -->
+              <div id="mobile-auth" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem; max-width: 450px; margin-left: auto; margin-right: auto; padding: 2rem;">
+                  <h3 class="mobile-title" id="mobile-auth-title" style="text-align: center; font-family: var(--font-serif); color: var(--secondary-brown); font-size: 1.35rem; margin-bottom: 0.5rem;">Inicia Sesión</h3>
+                  <p class="mobile-subtitle" style="text-align: center; color: var(--text-muted); font-size: 0.82rem; margin-bottom: 1.5rem;">Identifícate para poder procesar tu pago y sincronizar tus mascotas.</p>
+                  
+                  <div style="width: 100%;">
+                    <div style="width: 100%;">
+                      <!-- Formulario Correo -->
+                      <div id="mobile-login-fields" style="width: 100%;">
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
+                          <input type="email" id="mb-auth-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                          <label for="mb-auth-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
+                          <div style="position: relative;">
+                            <input type="password" id="mb-auth-pass" class="mobile-input" placeholder="••••••••" style="padding-right: 2.5rem;">
+                            <button type="button" onclick="togglePasswordVisibility('mb-auth-pass', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 0;">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('login')">Ingresar</button>
+                        <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
+                          ¿No tienes cuenta? <a href="#" onclick="toggleMobileAuthView(true); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Regístrate aquí</a>
+                        </p>
+                      </div>
+
+                      <div id="mobile-register-fields" style="display: none; width: 100%;">
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-reg-name" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Nombre</label>
+                          <input type="text" id="mb-auth-reg-name" class="mobile-input" placeholder="Tu Nombre">
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-reg-email" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Correo Electrónico</label>
+                          <input type="email" id="mb-auth-reg-email" class="mobile-input" placeholder="ejemplo@gmail.com">
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 0.75rem;">
+                          <label for="mb-auth-reg-phone" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Teléfono</label>
+                          <input type="tel" id="mb-auth-reg-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
+                        </div>
+                        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.75rem;">
+                          <div class="mobile-input-group">
+                            <label for="mb-auth-reg-street" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Calle y Número</label>
+                            <input type="text" id="mb-auth-reg-street" class="mobile-input" placeholder="Ej: Av. Principal 1234">
+                          </div>
+                          <div class="mobile-input-group">
+                            <label for="mb-auth-reg-commune" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Comuna</label>
+                            <input type="text" id="mb-auth-reg-commune" class="mobile-input" placeholder="Ej: Santiago">
+                          </div>
+                          <div class="mobile-input-group">
+                            <label for="mb-auth-reg-region" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Región</label>
+                            <input type="text" id="mb-auth-reg-region" class="mobile-input" placeholder="Ej: Metropolitana">
+                          </div>
+                        </div>
+                        <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                          <label for="mb-auth-reg-pass" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Contraseña</label>
+                          <div style="position: relative;">
+                            <input type="password" id="mb-auth-reg-pass" class="mobile-input" placeholder="••••••••" style="padding-right: 2.5rem;">
+                            <button type="button" onclick="togglePasswordVisibility('mb-auth-reg-pass', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 0;">
+                              <i class="fa-solid fa-eye"></i>
+                            </button>
+                          </div>
+                        </div>
+                        <button class="mobile-btn mobile-btn-primary" style="margin-top: 0.5rem; width: 100%;" onclick="submitCustomerAuthMobile('register')">Registrarse</button>
+                        <p style="font-size: 0.75rem; text-align: center; margin-top: 0.75rem; color: var(--text-muted);">
+                          ¿Ya tienes cuenta? <a href="#" onclick="toggleMobileAuthView(false); return false;" style="color: var(--primary-green); font-weight: 600; text-decoration: none;">Inicia sesión</a>
+                        </p>
+                      </div>
+                      
+                      <button class="mobile-btn mobile-btn-secondary" style="margin-top: 1rem; width: 100%;" onclick="authGoBackMobile()">Atrás</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.7 PANTALLA: COMPLETAR DATOS DESPACHO (REGISTRO SOCIAL / INCOMPLETO) -->
+              <div id="mobile-social-profile-setup" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <h3 class="mobile-title" style="grid-column: 1 / -1;">Datos de Despacho</h3>
+                  <p class="mobile-subtitle" style="grid-column: 1 / -1; margin-bottom: 1.5rem;">Por favor, completa tus datos de contacto y entrega para continuar.</p>
+                  
+                  <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                    <label for="mb-social-name" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Nombre Completo</label>
+                    <input type="text" id="mb-social-name" class="mobile-input" placeholder="Ej: Patricio Silva">
+                  </div>
+
+                  <div class="mobile-input-group" style="margin-bottom: 1rem;">
+                    <label for="mb-social-phone" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Teléfono de Contacto</label>
+                    <input type="tel" id="mb-social-phone" class="mobile-input" placeholder="Ej: +56 9 1234 5678">
+                  </div>
+                  
+                  <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem;">
+                    <div class="mobile-input-group">
+                      <label for="mb-social-street" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Calle y Número</label>
+                      <input type="text" id="mb-social-street" class="mobile-input" placeholder="Ej: Av. Principal 1234">
+                    </div>
+                    <div class="mobile-input-group">
+                      <label for="mb-social-commune" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Comuna</label>
+                      <input type="text" id="mb-social-commune" class="mobile-input" placeholder="Ej: Santiago">
+                    </div>
+                    <div class="mobile-input-group">
+                      <label for="mb-social-region" style="font-size: 0.8rem; font-weight: 700; color: var(--secondary-brown);">Región</label>
+                      <input type="text" id="mb-social-region" class="mobile-input" placeholder="Ej: Metropolitana">
+                    </div>
+                  </div>
+                  
+                  <button class="mobile-btn mobile-btn-primary" style="width: 100%;" onclick="submitSocialProfileCompletion()">Continuar</button>
+                  <button id="mb-social-back-btn" class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; width: 100%; display: none;" onclick="cancelSocialProfileEdit()">Cancelar</button>
+                </div>
+              </div>
+
+              <!-- 2.6 PANTALLA: RECIBO DE CONFIRMACIÓN (MULTI-MASCOTA) -->
+              <div id="mobile-receipt" class="mobile-view">
+                <div class="mobile-card" style="margin-top: 1rem;">
+                  <div class="order-success-box">
+                    <div class="success-icon-badge">
+                      <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: var(--secondary-brown);">¡Suscripción Activada!</h3>
+                    <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 1.25rem;">
+                      Hemos procesado tu pago de manera segura. Tu comida ya se está formulando.
+                    </p>
+                    
+                    <div class="order-receipt-ticket" id="receipt-details-container">
+                      <!-- Resumen de recibo dinámico per pet -->
+                    </div>
+
+                    <div class="qr-code-placeholder">
+                      <i class="fa-solid fa-qrcode" style="font-size: 2.2rem; display: block; margin-bottom: 4px; color: var(--secondary-brown);"></i>
+                      <span>Ticket de Suscripción</span>
+                    </div>
+
+                    <button class="mobile-btn mobile-btn-primary" style="margin-top: 1.5rem;" onclick="loadPetDashboardView()">
+                      Ir a Mi Mascota <i class="fa-solid fa-house-user"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2.7 PANTALLA: DASHBOARD DE MASCOTAS (CON SLIDER DE SELECCIÓN) -->
+              <div id="mobile-pet-dashboard" class="mobile-view">
+                
+                <!-- Slider Horizontal de Avatares de Perros -->
+                <div class="pet-selector-bar" id="dash-pet-selector" style="grid-column: 1 / -1;">
+                  <!-- Avatares circulares cargados con JS, más botón de agregar -->
+                </div>
+
+                <div class="pc-columns-wrapper" style="display: contents;">
+                  <div class="pc-column">
+                    <div class="mobile-card">
+                      <div class="pet-profile-summary">
+                        <img id="dash-pet-avatar" src="assets/logo.jpg" alt="Mascota" class="pet-avatar-big">
+                        <div class="pet-meta-text">
+                          <h3 id="dash-pet-name">Toby</h3>
+                          <p id="dash-pet-details">Border Collie • 15 kg</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Cuenta regresiva de entrega -->
+                    <div class="delivery-countdown" style="margin-bottom: 0.5rem;">
+                      <h4 id="dash-delivery-title">Siguiente Despacho en</h4>
+                      <div class="days" id="dash-delivery-days">08 Días</div>
+                      <p style="font-size: 0.7rem; opacity: 0.9;" id="dash-delivery-estimate">Entrega estimada: 15 de Junio</p>
+                    </div>
+
+                    <button class="mobile-btn mobile-btn-primary" onclick="repeatLastOrder()" style="margin-top: 1rem; width: 100%;" title="Repite de forma rápida tu último pedido pagado con las mismas recetas, kilos y snacks, llevándote directo a pagar sin reconfigurar.">
+                      <i class="fa-solid fa-rotate-right"></i> Repetir último pedido
+                    </button>
+                    <button class="mobile-btn mobile-btn-secondary" onclick="changeMobileView('welcome')" style="margin-top: 0.5rem; width: 100%;" title="Registra un nuevo perro en tu cuenta y configura su alimentación personalizada o por kilos.">
+                      <i class="fa-solid fa-plus"></i> Agregar otra mascota
+                    </button>
+                    <button class="mobile-btn mobile-btn-secondary" onclick="openUserProfileEdit()" style="margin-top: 0.5rem; width: 100%;">
+                      <i class="fa-solid fa-user-gear"></i> Editar Datos de Cuenta
+                    </button>
+                    <button class="mobile-btn mobile-btn-secondary" style="margin-top: 0.5rem; color: var(--accent-red); border-color: rgba(177, 59, 57, 0.2); width: 100%;" onclick="logoutApp()">
+                      <i class="fa-solid fa-power-off"></i> Cerrar Sesión
+                    </button>
+                  </div>
+
+                  <div class="pc-column">
+                    <!-- Info de Plan -->
+                    <div class="mobile-card" style="padding: 1.5rem !important; min-height: 250px; display: flex; flex-direction: column; justify-content: space-between;">
+                      <div>
+                        <h3 style="font-size: 1.25rem; font-weight: 800; color: var(--secondary-brown); margin-bottom: 1.25rem; border-bottom: 2px solid var(--primary-green-light); padding-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; width: 100%; flex-wrap: wrap;">
+                          <span style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-circle-check" style="color: var(--primary-green); font-size: 1.2rem;"></i> Suscripción
+                          </span>
+                          <span id="dash-plan-badge" style="font-size: 0.75rem; font-weight: 800; padding: 0.25rem 0.6rem; border-radius: 30px; display: inline-flex; align-items: center; gap: 0.25rem; white-space: nowrap;"></span>
+                        </h3>
+                        <div class="receipt-row" style="font-size: 1.05rem; margin-bottom: 0.75rem; display: flex; justify-content: space-between;">
+                          <span style="color: var(--text-muted);">Fórmula Base:</span>
+                          <strong id="dash-diet-recipe" style="color: var(--secondary-brown); font-size: 1.05rem;">BARF Res</strong>
+                        </div>
+                        <div id="dash-customization-details" style="display: none; margin-top: 0.75rem; border-top: 1px dashed rgba(44, 26, 14, 0.08); padding-top: 0.75rem;">
+                        </div>
+                      </div>
+                      <div class="receipt-row" style="color: var(--primary-green); font-weight: 800; border-top: 1px solid rgba(44, 26, 14, 0.08); padding-top: 1rem; margin-top: 0.75rem; font-size: 1.15rem; display: flex; justify-content: space-between; align-items: center; background: rgba(85, 114, 46, 0.06); padding: 0.85rem 1rem; border-radius: var(--radius-md);">
+                        <span>Total de Dieta:</span>
+                        <span id="dash-monthly-cost" style="font-size: 1.35rem; color: var(--primary-green); font-weight: 800;">$45.000</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Navbar Inferior de la App -->
+            <nav class="phone-navbar" id="mobile-app-nav">
+              <button class="nav-item active" onclick="changeMobileView('welcome')">
+                <i class="fa-solid fa-house"></i>Inicio
+              </button>
+              <button class="nav-item" onclick="navigateMobileNav('profile')">
+                <i class="fa-solid fa-calculator"></i>Porción
+              </button>
+              <button class="nav-item" onclick="navigateMobileNav('snacks')">
+                <i class="fa-solid fa-cookie-bite"></i>Snacks
+              </button>
+              <button class="nav-item" onclick="navigateMobileNav('dashboard')">
+                <i class="fa-solid fa-paw"></i>Mascotas
+              </button>
+            </nav>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+
+      <!-- Botón Flotante de WhatsApp (Ventas y Dudas) -->
+      <a href="https://wa.me/56927401342?text=¡Hola!%20Quisiera%20hacer%20algunas%20consultas%20sobre%20las%20dietas%20naturales%20de%20Origen%20Canino.%20¿Me%20podrían%20asesorar%20por%20favor?" 
+         class="whatsapp-float-btn" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         title="Contactar por WhatsApp">
+        <i class="fa-brands fa-whatsapp"></i>
+        <span class="whatsapp-float-tooltip">¿Dudas? Escríbenos a WhatsApp</span>
+      </a>
+  <!-- Modal de Testimonios Públicos -->
+  <div id="public-testimonial-modal" class="ppv-modal">
+    <div class="ppv-modal-content testimonial-modal-content">
+      <button class="ppv-modal-close" onclick="closePublicTestimonialModal()">&times;</button>
+      
+      <div id="testimonial-form-wrapper">
+        <div class="ppv-modal-header" style="margin-bottom: 1.5rem;">
+          <h3>Dejar un Testimonio</h3>
+          <p class="ppv-subtitle">Comparte tu experiencia con nosotros</p>
+        </div>
+        
+        <form id="public-testimonial-form" onsubmit="submitPublicTestimonial(event)">
+          <div class="ppv-form-group" style="margin-bottom: 1rem;">
+            <label for="testimonial-author" style="font-weight:600; display:block; margin-bottom:0.35rem;">Tu Nombre</label>
+            <input type="text" id="testimonial-author" required class="form-input" placeholder="Ej: Patricio Silva">
+          </div>
+          <div class="ppv-form-group" style="margin-bottom: 1rem;">
+            <label for="testimonial-dog" style="font-weight:600; display:block; margin-bottom:0.35rem;">Nombre de tu Mascota</label>
+            <input type="text" id="testimonial-dog" required class="form-input" placeholder="Ej: Rocky">
+          </div>
+          <div class="ppv-form-group" style="margin-bottom: 1rem;">
+            <label for="testimonial-location" style="font-weight:600; display:block; margin-bottom:0.35rem;">Ciudad / Comuna</label>
+            <input type="text" id="testimonial-location" required class="form-input" placeholder="Ej: Las Condes">
+          </div>
+          <div class="ppv-form-group" style="margin-bottom: 1rem;">
+            <label for="testimonial-quote" style="font-weight:600; display:block; margin-bottom:0.35rem;">Tu Testimonio</label>
+            <textarea id="testimonial-quote" required class="form-input" placeholder="Cuéntanos cómo Origen Canino ha mejorado la vida de tu perro..." style="height: 100px; resize: none;"></textarea>
+          </div>
+          <div class="ppv-form-group" style="margin-bottom: 1.5rem;">
+            <label for="testimonial-photo-input" style="font-weight:600; display:block; margin-bottom:0.35rem;">Foto de tu Mascota (Opcional)</label>
+            <input type="file" id="testimonial-photo-input" accept="image/*" onchange="previewTestimonialPhoto(event)" style="display: none;">
+            <button type="button" class="btn btn-secondary" onclick="document.getElementById('testimonial-photo-input').click()" style="width: 100%; text-align: center; justify-content: center;">
+              <i class="fa-solid fa-camera"></i> Subir Foto
+            </button>
+            <div id="testimonial-photo-preview" style="text-align: center; margin-top: 0.5rem;"></div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; text-align: center; justify-content: center;">Enviar Testimonio</button>
+        </form>
+      </div>
+
+      <div id="testimonial-form-success" class="ppv-success-msg" style="display: none; text-align: center; padding: 1rem 0;">
+        <div class="ppv-success-icon-container" style="color: var(--primary-green); margin-bottom: 1rem; text-align: center;">
+          <i class="fa-solid fa-circle-check" style="font-size: 3.5rem;"></i>
+        </div>
+        <h4 style="font-family: var(--font-serif); color: var(--secondary-brown); font-size: 1.5rem; margin-bottom: 0.5rem;">¡Muchas Gracias!</h4>
+        <p style="color: var(--text-dark); margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.4;">Tu testimonio ha sido enviado correctamente. Pasará por una moderación y estará visible muy pronto.</p>
+        <button class="btn btn-secondary" onclick="closePublicTestimonialModal()" style="margin: 0 auto;">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal de Contacto PPV Soluciones Informáticas -->
+  <div id="ppv-contact-modal" class="ppv-modal">
+    <div class="ppv-modal-content">
+      <!-- Background glowing dust particles -->
+      <div class="ppv-dust-purple"></div>
+      <div class="ppv-dust-cyan"></div>
+      
+      <!-- Spaceship orbiting / targetting -->
+      <div id="ppv-spaceship" class="ppv-spaceship animate-spaceship-orbit">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L8 9.5C8 9.5 2 12.5 2 15.5C2 18.5 7.5 18 7.5 18L9 21.5L12 19L15 21.5L16.5 18C16.5 18 22 18.5 22 15.5C22 12.5 16 9.5 16 9.5L12 2Z" fill="currentColor" stroke="currentColor" stroke-width="0.5"/>
+          <circle cx="12" cy="11" r="1.5" fill="#070312" />
+          <path d="M10.5 19L12 23L13.5 19H10.5Z" fill="#ef4444" style="animation: pulse 1s infinite;" />
+        </svg>
+      </div>
+
+      <!-- Fired Missile -->
+      <div id="ppv-missile" class="ppv-missile" style="display: none;">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M12 2L9 7V16H15V7L12 2Z" fill="currentColor" />
+          <path d="M7 12L9 14V16H7V12Z" fill="#F97316" />
+          <path d="M17 12L15 14V16H17V12Z" fill="#F97316" />
+          <path d="M10 16L12 22L14 16H10Z" fill="#ef4444" style="animation: pulse 1s infinite;" />
+        </svg>
+      </div>
+
+      <!-- Explosion -->
+      <div id="ppv-explosion" class="ppv-explosion" style="display: none;">
+        <div class="ppv-explode-ring"></div>
+        <div class="ppv-explode-particles"></div>
+        <div class="ppv-explode-ring-delayed"></div>
+      </div>
+
+      <button class="ppv-modal-close" onclick="closePpvModal()">&times;</button>
+      
+      <div id="ppv-form-wrapper">
+        <div class="ppv-modal-header">
+          <div class="ppv-terminal-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.25 6.75 22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3-4.5 16.5" />
+            </svg>
+          </div>
+          <h3>PPV Soluciones</h3>
+          <p class="ppv-subtitle">Sistemas & Software Espacial</p>
+          <p class="ppv-intro">¿Quieres llevar tu negocio a otra dimensión? Cuéntanos sobre tu idea y la haremos realidad con tecnología de vanguardia.</p>
+        </div>
+        
+        <form id="ppv-contact-form" onsubmit="submitPpvForm(event)">
+          <div class="ppv-form-group">
+            <label for="ppv-name">Nombre Completo</label>
+            <input type="text" id="ppv-name" required placeholder="Ej: Juan Pérez">
+          </div>
+          <div class="ppv-form-group">
+            <label for="ppv-email">Correo Electrónico</label>
+            <input type="email" id="ppv-email" required placeholder="Ej: juan@empresa.cl">
+          </div>
+          <div class="ppv-form-group">
+            <label for="ppv-phone">Teléfono de Contacto</label>
+            <input type="tel" id="ppv-phone" required placeholder="Ej: +56 9 1234 5678">
+          </div>
+          <div class="ppv-form-group">
+            <label for="ppv-message">Cuéntanos sobre tu idea o proyecto</label>
+            <textarea id="ppv-message" required placeholder="Describe brevemente qué tipo de sitio web, aplicación o sistema necesitas..."></textarea>
+          </div>
+          <button type="submit" class="ppv-btn-submit">Lanzar Solicitud</button>
+        </form>
+      </div>
+
+      <div id="ppv-form-success" class="ppv-success-msg" style="display: none;">
+        <div class="ppv-success-icon-container">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+            <path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.748-5.25Z" clip-rule="evenodd" />
+          </svg>
+        </div>
+        <h4>¡Contacto Establecido!</h4>
+        <p>Tu mensaje ha viajado con éxito a través del espacio digital. Nuestro equipo responderá a tu llamado interconectado a la brevedad.</p>
+        <button class="ppv-btn-close-cabin" onclick="closePpvModal()">Cerrar Cabina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fin de Contenido Principal -->
+</main>
+
+  <!-- Lógica JavaScript Principal -->
+  <script src="app.js?v=5.7"></script>
+</body>
+</html>

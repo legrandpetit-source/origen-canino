@@ -218,7 +218,7 @@ body {
    1. ESTILOS DEL SITIO WEB (DESKTOP)
    ========================================================================== */
 .web-hero {
-  padding: 5rem 2rem;
+  padding: 4rem 2rem 1.5rem 2rem;
   background: radial-gradient(circle at 80% 20%, hsla(85, 34%, 28%, 0.08) 0%, transparent 60%),
               radial-gradient(circle at 10% 80%, hsla(1, 51%, 46%, 0.05) 0%, transparent 50%);
   display: grid;
@@ -388,14 +388,14 @@ body {
 
 /* Filosofía y Dietas */
 .web-diets {
-  padding: 6rem 2rem;
+  padding: 3.5rem 2rem;
   background: var(--bg-white);
 }
 
 .section-title {
   text-align: center;
   max-width: 600px;
-  margin: 0 auto 4rem;
+  margin: 0 auto 2rem;
 }
 
 .section-title span {
@@ -495,7 +495,7 @@ body {
 
 /* Catálogo Web */
 .web-catalog {
-  padding: 6rem 2rem;
+  padding: 3.5rem 2rem;
   max-width: 1200px;
   margin: 0 auto;
 }
@@ -622,7 +622,7 @@ body {
    ESTILOS DE TESTIMONIOS (INSPIRADO EN LEGRAND PETIT)
    ========================================== */
 .web-testimonials {
-  padding: 6rem 2rem;
+  padding: 3.5rem 2rem;
   background: var(--bg-white);
   border-bottom: 1px solid rgba(44, 26, 14, 0.08);
 }
@@ -724,7 +724,7 @@ body {
    ESTILOS DE PREGUNTAS FRECUENTES (FAQS)
    ========================================== */
 .web-faqs {
-  padding: 6rem 2rem;
+  padding: 3.5rem 2rem;
   background: var(--bg-cream);
   border-bottom: 1px solid rgba(44, 26, 14, 0.08);
 }
@@ -806,7 +806,7 @@ body {
 .web-calculator-section {
   background: var(--secondary-brown);
   color: var(--bg-cream);
-  padding: 6rem 2rem;
+  padding: 3.5rem 2rem;
 }
 
 .web-calc-container {
@@ -1494,14 +1494,14 @@ body {
 .weight-progress-text {
   display: flex;
   justify-content: space-between;
-  font-size: 0.75rem;
-  font-weight: 700;
+  font-size: 0.95rem;
+  font-weight: 800;
   color: var(--secondary-brown);
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.45rem;
 }
 
 .weight-progress-bar-bg {
-  height: 6px;
+  height: 8px;
   background: rgba(44, 26, 14, 0.06);
   border-radius: 50px;
   overflow: hidden;
@@ -1714,7 +1714,15 @@ body {
 .label-row {
   display: flex;
   justify-content: space-between;
+  gap: 0.5rem;
   margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.label-row span:last-child,
+.label-row strong {
+  text-align: right;
+  word-break: break-word;
 }
 
 /* Catálogo de Snacks en Móvil */
@@ -3188,9 +3196,9 @@ body:not(.mobile-native-mode) .pc-column {
 
 /* Specific grids for elements inside columns */
 body:not(.mobile-native-mode) .mobile-snacks-list {
-  display: grid !important;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 0.5rem !important;
 }
 
 
@@ -3202,8 +3210,10 @@ body:not(.mobile-native-mode) .order-success-box {
   margin: 0 auto;
 }
 
-/* PC simulator container responsive height adjustments */
+/* PC simulator container responsive width/height adjustments */
 body:not(.mobile-native-mode) .phone-mockup {
+  width: 1150px !important;
+  max-width: 96vw !important;
   height: auto !important;
   max-height: 94vh !important;
 }
@@ -3220,12 +3230,14 @@ body:not(.mobile-native-mode) .phone-content {
 }
 
 body:not(.mobile-native-mode) .mobile-simulator-container {
-  padding: 1rem 2rem !important;
+  padding: 0.5rem 2rem !important;
+  align-items: flex-start !important;
+  min-height: auto !important;
 }
 
 /* Desktop compact layouts to avoid scrolling on PC/notebook */
 body:not(.mobile-native-mode) #mobile-calculator .pc-columns-wrapper {
-  grid-template-columns: 1fr 1fr 1fr !important;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr) !important;
   gap: 1rem !important;
 }
 
@@ -3249,8 +3261,93 @@ body:not(.mobile-native-mode) .package-label-mockup {
   margin-top: 0.5rem !important;
 }
 
+body:not(.mobile-native-mode) .recipe-select-card {
+  padding: 0.5rem !important;
+}
+
+body:not(.mobile-native-mode) .recipe-qty-selector {
+  gap: 0.25rem !important;
+  padding-top: 0.35rem !important;
+  margin-top: 0.35rem !important;
+}
+
+body:not(.mobile-native-mode) .recipe-qty-btn {
+  width: 20px !important;
+  height: 20px !important;
+  font-size: 0.75rem !important;
+}
+
+body:not(.mobile-native-mode) .recipe-qty-val {
+  min-width: 20px !important;
+  font-size: 0.75rem !important;
+}
+
+body:not(.mobile-native-mode) #calc-checkout-card .portion-header {
+  flex-wrap: wrap !important;
+  gap: 0.5rem !important;
+}
+
+body:not(.mobile-native-mode) #calc-checkout-card .portion-header span:first-child {
+  font-size: 0.85rem !important;
+  flex: 1 !important;
+  min-width: 150px !important;
+}
+
+body:not(.mobile-native-mode) #calc-checkout-card .portion-header .portion-total {
+  font-size: 1.25rem !important;
+}
+
 /* Ocultar botones de cambio de vista de entorno y navbar móvil en desktop */
 .view-tabs button.tab-btn,
 body:not(.mobile-native-mode) .phone-navbar {
   display: none !important;
 }
+
+/* Badge Warning */
+.badge-warning {
+  background: hsla(35, 100%, 50%, 0.1);
+  color: #d97706; /* Amber color */
+}
+
+/* Modal de Testimonio Público */
+.testimonial-modal-content {
+  background: var(--bg-cream) !important;
+  color: var(--text-dark) !important;
+  border: 1px solid rgba(44, 26, 14, 0.15) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+.testimonial-modal-content h3 {
+  font-family: var(--font-serif) !important;
+  color: var(--secondary-brown) !important;
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  margin-top: 0 !important;
+  margin-bottom: 0.25rem !important;
+}
+.testimonial-modal-content .ppv-subtitle {
+  color: #7c5e47 !important;
+  margin-bottom: 1.5rem !important;
+}
+.testimonial-modal-content label {
+  color: var(--secondary-brown) !important;
+}
+.testimonial-modal-content .form-input {
+  background: #ffffff !important;
+  border: 1px solid rgba(44, 26, 14, 0.15) !important;
+  color: var(--text-dark) !important;
+}
+.testimonial-modal-content .form-input:focus {
+  border-color: var(--primary-green) !important;
+}
+.testimonial-modal-content .ppv-modal-close {
+  color: var(--secondary-brown) !important;
+}
+.testimonial-modal-content .ppv-success-msg h4 {
+  background: none !important;
+  -webkit-background-clip: initial !important;
+  -webkit-text-fill-color: initial !important;
+  color: var(--secondary-brown) !important;
+  font-family: var(--font-serif) !important;
+}
+

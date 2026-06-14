@@ -3,6 +3,58 @@
 // ----------------------------------------------------
 
 // URL del backend: producción en Render, desarrollo local en localhost
+(function() {
+  window.addEventListener('load', () => {
+    const debugPanel = document.createElement('div');
+    debugPanel.id = 'debug-panel';
+    debugPanel.style.cssText = 'position: fixed; bottom: 0; left: 0; right: 0; height: 160px; background: rgba(0,0,0,0.9); color: #00ff00; font-family: monospace; font-size: 11px; overflow-y: auto; z-index: 10000; padding: 10px; border-top: 3px solid #ff007f;';
+    
+    debugPanel.innerHTML = `
+      <div style="font-weight: bold; border-bottom: 1px solid #00ff00; margin-bottom: 5px; display: flex; justify-content: space-between; align-items: center;">
+        <span>🔍 Consola de Depuración (Origen Canino)</span>
+        <button onclick="document.getElementById('debug-panel').remove()" style="background: #ff007f; color: white; border: none; padding: 2px 6px; cursor: pointer; border-radius: 3px; font-weight: bold;">Cerrar</button>
+      </div>
+      <div id="debug-log-content"></div>
+    `;
+    document.body.appendChild(debugPanel);
+
+    const logContent = document.getElementById('debug-log-content');
+    const appendLog = (type, msg) => {
+      if (!logContent) return;
+      const div = document.createElement('div');
+      div.style.marginBottom = '3px';
+      div.style.color = type === 'error' ? '#ff4d4d' : (type === 'warn' ? '#ffcc00' : '#00ff00');
+      div.textContent = `[${new Date().toLocaleTimeString()}] [${type.toUpperCase()}] ${msg}`;
+      logContent.appendChild(div);
+      debugPanel.scrollTop = debugPanel.scrollHeight;
+    };
+
+    const originalLog = console.log;
+    const originalError = console.error;
+    const originalWarn = console.warn;
+
+    console.log = function(...args) {
+      originalLog.apply(console, args);
+      appendLog('log', args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+    };
+    console.error = function(...args) {
+      originalError.apply(console, args);
+      appendLog('error', args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+    };
+    console.warn = function(...args) {
+      originalWarn.apply(console, args);
+      appendLog('warn', args.map(a => typeof a === 'object' ? JSON.stringify(a) : a).join(' '));
+    };
+
+    window.onerror = function(message, source, lineno, colno, error) {
+      appendLog('error', `${message} at ${source}:${lineno}:${colno}`);
+      return false;
+    };
+
+    console.log("Sistema de telemetría de depuración iniciado correctamente.");
+  });
+})();
+
 const PROD_BACKEND_URL = "https://origen-canino-api.onrender.com"; // ← Actualizar con tu URL de Render
 const API_BASE_URL = window.location.hostname.includes("github.io") || window.location.hostname.includes("origencanino")
   ? PROD_BACKEND_URL
@@ -22,7 +74,8 @@ function mapPetFromAPI(p) {
     addedVegetablesFruits: p.added_vegetables_fruits || [],
     customInstructions: p.custom_instructions || "",
     deliveryPeriod: p.delivery_period || p.deliveryPeriod || 30,
-    orderDate: p.order_date || p.orderDate || ""
+    orderDate: p.order_date || p.orderDate || "",
+    kilosNeeded: p.kilos_needed || null
   };
 }
 
@@ -756,20 +809,24 @@ function renderMobileWelcomeScreen() {
   }
 }
 
-window.initNewPetWizard = function() {
+window.initNewPetWizard = function(flowType = 'personalizar') {
   if (!appState.customerToken) {
     appState.pendingWizardInit = true;
+    appState.pendingWizardFlowType = flowType;
     changeMobileView('auth');
     return;
   }
   
   if (!appState.customerPhone || !appState.customerAddress) {
     appState.pendingWizardInit = true;
+    appState.pendingWizardFlowType = flowType;
     changeMobileView('social-profile-setup');
     return;
   }
 
+  appState.orderFlowType = flowType;
   appState.currentPetId = 'pet_' + Date.now();
+  appState.snacksCart = {}; // Limpiar carrito de snacks para el nuevo registro
   
   document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
   document.getElementById('pet-name').value = '';
@@ -777,7 +834,40 @@ window.initNewPetWizard = function() {
   document.getElementById('pet-weight').value = '';
   document.getElementById('pet-age').value = 'adult';
   document.getElementById('pet-activity').value = 'normal';
-  document.getElementById('pet-notes').value = '';
+  
+  const weightGroup = document.getElementById('pet-weight-group');
+  const ageGroup = document.getElementById('pet-age-group');
+  const activityGroup = document.getElementById('pet-activity-group');
+  const notesGroup = document.getElementById('pet-notes-group');
+  const kilosGroup = document.getElementById('pet-kilos-needed-group');
+  const submitBtnText = document.getElementById('profile-submit-btn-text');
+
+  if (flowType === 'kilos') {
+    if (weightGroup) weightGroup.style.display = 'none';
+    if (ageGroup) ageGroup.style.display = 'none';
+    if (activityGroup) activityGroup.style.display = 'none';
+    if (notesGroup) notesGroup.style.display = 'none';
+    if (kilosGroup) kilosGroup.style.display = 'block';
+    if (document.getElementById('pet-kilos-needed')) {
+      document.getElementById('pet-kilos-needed').value = '';
+    }
+    if (submitBtnText) {
+      submitBtnText.innerHTML = 'Seleccionar comida <i class="fa-solid fa-arrow-right"></i>';
+    }
+  } else {
+    if (weightGroup) weightGroup.style.display = 'block';
+    if (ageGroup) ageGroup.style.display = 'block';
+    if (activityGroup) activityGroup.style.display = 'block';
+    if (notesGroup) notesGroup.style.display = 'block';
+    if (kilosGroup) kilosGroup.style.display = 'none';
+    if (document.getElementById('pet-notes')) {
+      document.getElementById('pet-notes').value = '';
+    }
+    if (submitBtnText) {
+      submitBtnText.innerHTML = 'Calcular Ración <i class="fa-solid fa-arrow-right"></i>';
+    }
+  }
+  
   petPhotoBase64 = null;
   document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
   
@@ -799,14 +889,29 @@ window.cancelPetWizard = function() {
 window.savePetProfileAndGoToCalculator = async function() {
   const name = document.getElementById('pet-name').value.trim();
   const breed = document.getElementById('pet-breed').value.trim();
-  const weight = parseFloat(document.getElementById('pet-weight').value);
-  const age = document.getElementById('pet-age').value;
-  const activity = document.getElementById('pet-activity').value;
-  const notes = document.getElementById('pet-notes').value.trim();
+  
+  let weight = 10.0;
+  let age = 'adult';
+  let activity = 'normal';
+  let notes = "";
+  let kilosNeeded = null;
 
-  if (!name || !breed || isNaN(weight) || weight <= 0) {
-    alert('Por favor, completa Nombre, Raza y Peso de tu mascota.');
-    return;
+  if (appState.orderFlowType === 'kilos') {
+    const kilosNeededInput = document.getElementById('pet-kilos-needed');
+    kilosNeeded = kilosNeededInput ? parseFloat(kilosNeededInput.value) : NaN;
+    if (!name || !breed || isNaN(kilosNeeded) || kilosNeeded < 7) {
+      alert('Por favor, completa Nombre, Raza y los kilos que necesita (mínimo 7 kg).');
+      return;
+    }
+  } else {
+    weight = parseFloat(document.getElementById('pet-weight').value);
+    age = document.getElementById('pet-age').value;
+    activity = document.getElementById('pet-activity').value;
+    notes = document.getElementById('pet-notes').value.trim();
+    if (!name || !breed || isNaN(weight) || weight <= 0) {
+      alert('Por favor, completa Nombre, Raza y Peso de tu mascota.');
+      return;
+    }
   }
 
   // Validar que no exista otra mascota con el mismo nombre para el usuario
@@ -830,13 +935,14 @@ window.savePetProfileAndGoToCalculator = async function() {
     age,
     activity,
     notes,
+    kilos_needed: kilosNeeded,
     photo,
     subscription_paid: petIndex !== -1 ? (appState.pets[petIndex].subscriptionPaid || false) : false,
     selected_recipe_id: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipeId || null) : null,
     selected_recipes: petIndex !== -1 ? (appState.pets[petIndex].selectedRecipes || {}) : {},
     excluded_ingredients: petIndex !== -1 ? (appState.pets[petIndex].excludedIngredients || []) : [],
-    added_superfoods: petIndex !== -1 ? (appState.pets[petIndex].addedSuperfoods || []) : [],
-    added_vegetables_fruits: petIndex !== -1 ? (appState.pets[petIndex].addedVegetablesFruits || []) : [],
+    added_superfoods: petIndex !== -1 ? (appState.orderFlowType === 'kilos' ? [] : (appState.pets[petIndex].addedSuperfoods || [])) : [],
+    added_vegetables_fruits: petIndex !== -1 ? (appState.orderFlowType === 'kilos' ? [] : (appState.pets[petIndex].addedVegetablesFruits || [])) : [],
     custom_instructions: petIndex !== -1 ? (appState.pets[petIndex].customInstructions || '') : '',
     delivery_period: petIndex !== -1 ? (appState.pets[petIndex].deliveryPeriod || 30) : 30,
     order_date: petIndex !== -1 ? (appState.pets[petIndex].orderDate || '') : ''
@@ -868,6 +974,7 @@ window.savePetProfileAndGoToCalculator = async function() {
       age: petData.age,
       activity: petData.activity,
       notes: petData.notes,
+      kilosNeeded: petData.kilos_needed,
       photo: petData.photo,
       subscriptionPaid: petData.subscription_paid,
       selectedRecipeId: petData.selected_recipe_id,
@@ -922,11 +1029,11 @@ function renderMobileRecipeSelector() {
   pet.selectedRecipes = pet.selectedRecipes || {};
   let totalSelected = 0;
   for (const rid in pet.selectedRecipes) {
-    totalSelected += pet.selectedRecipes[rid] || 0;
+    totalSelected += parseFloat(pet.selectedRecipes[rid]) || 0;
   }
 
   const results = pet.portionResults || { monthlyKg: 0 };
-  const totalRequired = results.monthlyKg;
+  const totalRequired = parseFloat(results.monthlyKg) || 0;
 
   const progressPercent = totalRequired > 0 ? Math.min(100, (totalSelected / totalRequired) * 100) : 0;
   const progressFill = document.getElementById('weight-progress-bar');
@@ -967,9 +1074,10 @@ function renderMobileRecipeSelector() {
   }
 
   appState.recipes.forEach(r => {
-    const qty = pet.selectedRecipes[r.id] || 0;
+    const qty = parseFloat(pet.selectedRecipes[r.id]) || 0;
     const card = document.createElement('div');
     card.className = `recipe-select-card ${qty > 0 ? 'selected' : ''}`;
+    card.setAttribute('onclick', `selectRecipeCard('${r.id}')`);
     
     card.innerHTML = `
       <div style="font-size: 1.4rem; margin-bottom: 2px;">${r.icon}</div>
@@ -985,36 +1093,32 @@ function renderMobileRecipeSelector() {
   });
 }
 
-window.updateRecipeQty = function(recipeId, change) {
+function updateRecipeQty(recipeId, change) {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (!pet) return;
 
   pet.selectedRecipes = pet.selectedRecipes || {};
-  const currentQty = pet.selectedRecipes[recipeId] || 0;
+  const currentQty = parseFloat(pet.selectedRecipes[recipeId]) || 0;
   let newQty = currentQty + change;
   if (newQty < 0) newQty = 0;
 
   let totalSelected = 0;
   for (const rid in pet.selectedRecipes) {
     if (rid !== recipeId) {
-      totalSelected += pet.selectedRecipes[rid] || 0;
+      totalSelected += parseFloat(pet.selectedRecipes[rid]) || 0;
     }
   }
   
   const results = pet.portionResults || { monthlyKg: 0 };
-  const totalRequired = results.monthlyKg;
+  const totalRequired = parseFloat(results.monthlyKg) || 0;
 
   if (change > 0 && totalSelected + newQty > totalRequired) {
     newQty = totalRequired - totalSelected;
   }
 
-  if (newQty === 0) {
-    delete pet.selectedRecipes[recipeId];
-  } else {
-    pet.selectedRecipes[recipeId] = newQty;
-  }
+  pet.selectedRecipes[recipeId] = newQty;
 
-  const activeRecipes = Object.keys(pet.selectedRecipes).filter(rid => pet.selectedRecipes[rid] > 0);
+  const activeRecipes = Object.keys(pet.selectedRecipes).filter(rid => (parseFloat(pet.selectedRecipes[rid]) || 0) > 0);
   if (activeRecipes.length > 0) {
     pet.selectedRecipeId = activeRecipes[0];
   } else {
@@ -1023,7 +1127,52 @@ window.updateRecipeQty = function(recipeId, change) {
 
   saveStateToStorage();
   updatePortionCalculatorUI();
-};
+}
+window.updateRecipeQty = updateRecipeQty;
+
+function selectRecipeCard(recipeId) {
+  const pet = appState.pets.find(p => p.id === appState.currentPetId);
+  if (!pet) return;
+
+  pet.selectedRecipes = pet.selectedRecipes || {};
+  const results = pet.portionResults || { monthlyKg: 0 };
+  const totalRequired = parseFloat(results.monthlyKg) || 0;
+
+  let totalSelected = 0;
+  for (const rid in pet.selectedRecipes) {
+    totalSelected += parseFloat(pet.selectedRecipes[rid]) || 0;
+  }
+
+  // If already fully assigned to this recipe, do nothing
+  if (parseFloat(pet.selectedRecipes[recipeId]) === totalRequired) {
+    return;
+  }
+
+  if (totalSelected >= totalRequired) {
+    // If all kilos are already distributed, transfer them all to the clicked recipe
+    for (const rid in pet.selectedRecipes) {
+      pet.selectedRecipes[rid] = 0;
+    }
+    pet.selectedRecipes[recipeId] = totalRequired;
+  } else {
+    // If there is a residue, assign the remaining unassigned kilos to this recipe
+    const remaining = totalRequired - totalSelected;
+    const currentQty = parseFloat(pet.selectedRecipes[recipeId]) || 0;
+    pet.selectedRecipes[recipeId] = currentQty + remaining;
+  }
+
+  // Update selectedRecipeId to the first active recipe
+  const activeRecipes = Object.keys(pet.selectedRecipes).filter(rid => (parseFloat(pet.selectedRecipes[rid]) || 0) > 0);
+  if (activeRecipes.length > 0) {
+    pet.selectedRecipeId = activeRecipes[0];
+  } else {
+    pet.selectedRecipeId = null;
+  }
+
+  saveStateToStorage();
+  updatePortionCalculatorUI();
+}
+window.selectRecipeCard = selectRecipeCard;
 
 function updatePortionCalculatorUI() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
@@ -1032,7 +1181,11 @@ function updatePortionCalculatorUI() {
   pet.selectedRecipes = pet.selectedRecipes || {};
 
   const selectPeriod = document.getElementById('calc-delivery-period');
-  const deliveryPeriodVal = selectPeriod ? (parseInt(selectPeriod.value) || 30) : 30;
+  let deliveryPeriodVal = selectPeriod ? (parseInt(selectPeriod.value) || 30) : 30;
+  if (pet.kilosNeeded) {
+    deliveryPeriodVal = 30;
+    if (selectPeriod) selectPeriod.value = "30";
+  }
   const periodChanged = pet.deliveryPeriod && pet.deliveryPeriod !== deliveryPeriodVal;
   pet.deliveryPeriod = deliveryPeriodVal;
 
@@ -1052,21 +1205,55 @@ function updatePortionCalculatorUI() {
   document.getElementById('custom-instructions').value = pet.customInstructions || '';
 
   const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType, deliveryPeriodVal);
+  if (pet.kilosNeeded) {
+    results.monthlyKg = pet.kilosNeeded;
+    results.dailyGrams = Math.round((pet.kilosNeeded * 1000) / deliveryPeriodVal);
+  }
   pet.portionResults = results;
 
-  document.getElementById('calc-daily-total').textContent = `${results.dailyGrams}g`;
-  document.getElementById('calc-monthly-weight').textContent = results.monthlyKg;
-  document.getElementById('calc-delivery-label').textContent = deliveryPeriodVal === 15 ? 'Cada 15 días' : 'Cada 30 días';
+  const dailyTotalEl = document.getElementById('calc-daily-total');
+  if (dailyTotalEl) {
+    dailyTotalEl.textContent = `${results.dailyGrams}g`;
+  }
+  const monthlyWeightEl = document.getElementById('calc-monthly-weight');
+  if (monthlyWeightEl) {
+    monthlyWeightEl.textContent = results.monthlyKg;
+  }
+  const deliveryLabelEl = document.getElementById('calc-delivery-label');
+  if (deliveryLabelEl) {
+    deliveryLabelEl.textContent = deliveryPeriodVal === 15 ? 'Cada 15 días' : 'Cada 30 días';
+  }
 
   let totalSelected = 0;
   for (const rid in pet.selectedRecipes) {
-    totalSelected += pet.selectedRecipes[rid] || 0;
+    totalSelected += parseFloat(pet.selectedRecipes[rid]) || 0;
   }
-  if (totalSelected === 0 || periodChanged) {
+  const hasKeys = Object.keys(pet.selectedRecipes || {}).length > 0;
+  if (!hasKeys || periodChanged) {
     pet.selectedRecipes = {};
     const firstRecipeId = selectedRecipe ? selectedRecipe.id : (appState.recipes[0]?.id || 'b-pollo');
     pet.selectedRecipes[firstRecipeId] = results.monthlyKg;
     pet.selectedRecipeId = firstRecipeId;
+  }
+
+  // Toggle portion breakdown card and period picker visibility based on flow
+  const portionCard = document.getElementById('calc-portion-card');
+  if (portionCard) {
+    portionCard.style.display = pet.kilosNeeded ? 'none' : 'block';
+  }
+  const deliveryPeriodGroup = document.getElementById('calc-delivery-period-group');
+  if (deliveryPeriodGroup) {
+    deliveryPeriodGroup.style.display = pet.kilosNeeded ? 'none' : 'block';
+  }
+
+  // Update text for Comida Base subtotal row
+  const dietLabelText = document.getElementById('calc-diet-label-text');
+  if (dietLabelText) {
+    const periodLabel = deliveryPeriodVal === 15 ? 'Cada 15 días' : 'Cada 30 días';
+    const displayStyle = pet.kilosNeeded ? 'display: none;' : '';
+    const separatorStyle = pet.kilosNeeded ? 'display: none;' : '';
+    
+    dietLabelText.innerHTML = `Comida Base (<span id="calc-delivery-label" style="${displayStyle}">${periodLabel}</span><span style="${separatorStyle}"> - </span><span id="calc-monthly-weight">${results.monthlyKg}</span> kg):`;
   }
 
   const labelEl = document.getElementById('calc-superfoods-label');
@@ -1123,11 +1310,64 @@ function updatePortionCalculatorUI() {
     `;
   }
 
+  // Toggle Column 2 and button behavior based on flow type
+  const flowType = pet.kilosNeeded ? 'kilos' : 'personalizar';
+  const headingEl = document.getElementById('calc-column-2-heading');
+  const descEl = document.getElementById('calc-column-2-desc');
+  const personalizationSection = document.getElementById('calc-personalization-section');
+  const snacksSection = document.getElementById('calc-snacks-section');
+  const confirmBtn = document.getElementById('calc-confirm-btn');
+
+  const vfContainer = document.getElementById('calc-vegfruits-container');
+  const vfLabel = document.getElementById('calc-vegfruits-label');
+  const supContainer = document.getElementById('calc-superfoods-container');
+  const supLabel = document.getElementById('calc-superfoods-label');
+
+  if (flowType === 'kilos') {
+    if (headingEl) headingEl.textContent = "2. Snack y Caldo";
+    if (descEl) descEl.textContent = "Añade deliciosos snacks deshidratados o caldo al carro de compras.";
+    if (personalizationSection) personalizationSection.style.display = 'none';
+    if (snacksSection) snacksSection.style.display = 'block';
+    
+    if (vfContainer) vfContainer.style.display = 'none';
+    if (vfLabel) vfLabel.style.display = 'none';
+    if (supContainer) supContainer.style.display = 'none';
+    if (supLabel) supLabel.style.display = 'none';
+
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `Ir a pagar <i class="fa-solid fa-credit-card"></i>`;
+      confirmBtn.onclick = function() {
+        proceedToCheckoutFromCalculator();
+      };
+    }
+    renderCalculatorSnacks();
+  } else {
+    if (headingEl) headingEl.textContent = "2. Personaliza la Comida";
+    if (descEl) descEl.textContent = "Desmarca ingredientes para excluirlos de su porción mensual (se tacharán en la etiqueta).";
+    if (personalizationSection) personalizationSection.style.display = 'block';
+    if (snacksSection) snacksSection.style.display = 'none';
+    
+    if (vfContainer) vfContainer.style.display = 'flex';
+    if (vfLabel) vfLabel.style.display = 'block';
+    if (supContainer) supContainer.style.display = 'flex';
+    if (supLabel) supLabel.style.display = 'block';
+
+    if (confirmBtn) {
+      confirmBtn.innerHTML = `Confirmar Dieta <i class="fa-solid fa-arrow-right"></i>`;
+      confirmBtn.onclick = function() {
+        proceedToSnacks();
+      };
+    }
+  }
+
   renderInteractiveIngredients(pet, selectedRecipe || DEFAULT_RECIPES[0]);
   renderMobileRecipeSelector();
 }
 
 function renderInteractiveIngredients(pet, recipe) {
+  pet.excludedIngredients = pet.excludedIngredients || [];
+  pet.addedVegetablesFruits = pet.addedVegetablesFruits || [];
+  pet.addedSuperfoods = pet.addedSuperfoods || [];
   const ingContainer = document.getElementById('calc-ingredients-container');
   const vfContainer = document.getElementById('calc-vegfruits-container');
   const supContainer = document.getElementById('calc-superfoods-container');
@@ -1138,7 +1378,7 @@ function renderInteractiveIngredients(pet, recipe) {
   supContainer.innerHTML = '';
 
   const activeRecipeIds = Object.keys(pet.selectedRecipes || {}).filter(rid => pet.selectedRecipes[rid] > 0);
-  
+
   if (activeRecipeIds.length > 0) {
     activeRecipeIds.forEach((rid, groupIndex) => {
       const r = appState.recipes.find(rec => rec.id === rid);
@@ -1149,23 +1389,22 @@ function renderInteractiveIngredients(pet, recipe) {
         } else {
           rIngs = rIngs.map(i => i.trim().replace(/\.$/, '')).filter(Boolean);
         }
-        
+
         if (rIngs.length > 0) {
           const groupDiv = document.createElement('div');
           groupDiv.className = `ingredient-recipe-group recipe-color-${rid}`;
-          
+
           const titleEl = document.createElement('div');
           titleEl.className = 'ingredient-recipe-title';
           titleEl.innerHTML = `<span class="recipe-title-icon">${r.icon}</span> ${r.name}`;
           groupDiv.appendChild(titleEl);
-          
+
           const pillsWrapper = document.createElement('div');
           pillsWrapper.className = 'pills-container';
-          
           rIngs.forEach((ing, i) => {
             const isExcluded = pet.excludedIngredients.includes(ing);
             const checkboxId = `ing-${rid}-${i}`;
-            
+
             const wrapper = document.createElement('div');
             wrapper.innerHTML = `
               <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleIngredient('${ing}', this.checked)">
@@ -1179,7 +1418,7 @@ function renderInteractiveIngredients(pet, recipe) {
             pillsWrapper.appendChild(wrapper.firstElementChild);
             pillsWrapper.appendChild(wrapper.lastElementChild);
           });
-          
+
           groupDiv.appendChild(pillsWrapper);
           ingContainer.appendChild(groupDiv);
         }
@@ -1194,11 +1433,11 @@ function renderInteractiveIngredients(pet, recipe) {
 
     const pillsWrapper = document.createElement('div');
     pillsWrapper.className = 'pills-container';
-    
+
     ingredients.forEach((ing, i) => {
       const isExcluded = pet.excludedIngredients.includes(ing);
       const checkboxId = `ing-fallback-${i}`;
-      
+
       const wrapper = document.createElement('div');
       wrapper.innerHTML = `
         <input type="checkbox" id="${checkboxId}" class="pill-checkbox" ${!isExcluded ? 'checked' : ''} onchange="toggleIngredient('${ing}', this.checked)">
@@ -1320,7 +1559,7 @@ function calculateSingleDietPrice(pet, recipe) {
   let activeRecipesCount = 0;
   
   for (const rid in activeRecipes) {
-    const kgs = activeRecipes[rid];
+    const kgs = parseFloat(activeRecipes[rid]) || 0;
     if (kgs > 0) {
       hasActiveSelection = true;
       activeRecipesCount++;
@@ -1355,7 +1594,43 @@ function calculateSingleDietPrice(pet, recipe) {
 
   pet.totalPrice = dietSubtotal + superfoodExtra + vegFruitExtra;
 
-  document.getElementById('calc-diet-price').textContent = `$${pet.totalPrice.toLocaleString('es-CL')}`;
+  const dietPriceEl = document.getElementById('calc-diet-price');
+  if (dietPriceEl) {
+    dietPriceEl.textContent = `$${pet.totalPrice.toLocaleString('es-CL')}`;
+  }
+
+  // Calcular total de snacks
+  let snacksTotal = 0;
+  const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
+  for (const snackId in appState.snacksCart) {
+    const snack = snacksList.find(s => s.id === snackId);
+    if (snack) {
+      snacksTotal += snack.price * (parseInt(appState.snacksCart[snackId], 10) || 0);
+    }
+  }
+
+  const snacksRow = document.getElementById('calc-snacks-row');
+  const grandTotalRow = document.getElementById('calc-grand-total-row');
+  const snacksPriceEl = document.getElementById('calc-snacks-price');
+  if (snacksPriceEl) {
+    snacksPriceEl.textContent = `$${snacksTotal.toLocaleString('es-CL')}`;
+  }
+
+  // Ocultar filas de snacks y total general en el flujo de Personalizar (se seleccionan en la siguiente pantalla)
+  const flowType = pet.kilosNeeded ? 'kilos' : 'personalizar';
+  if (flowType === 'personalizar') {
+    if (snacksRow) snacksRow.style.display = 'none';
+    if (grandTotalRow) grandTotalRow.style.display = 'none';
+  } else {
+    if (snacksRow) snacksRow.style.display = 'flex';
+    if (grandTotalRow) grandTotalRow.style.display = 'flex';
+  }
+
+  const grandTotal = pet.totalPrice + snacksTotal;
+  const totalPriceEl = document.getElementById('calc-total-price');
+  if (totalPriceEl) {
+    totalPriceEl.textContent = `$${grandTotal.toLocaleString('es-CL')}`;
+  }
 }
 
 function renderPackageLabelPreview(pet, recipe) {
@@ -1392,18 +1667,27 @@ function renderPackageLabelPreview(pet, recipe) {
     recipeLabel = activeRecipeParts.join(', ');
   }
 
+  const flowType = pet.kilosNeeded ? 'kilos' : 'personalizar';
+  const exclusionsHtml = (flowType === 'personalizar' && exList) 
+    ? `<div style="border-top:1px dashed rgba(44,26,14,0.15); margin: 0.5rem 0; padding-top: 0.5rem;">
+        <strong>EXCLUSIONES DE ALERGIAS:</strong><br>
+        ${exList}
+       </div>`
+    : '';
+
+  const dailyDoseHtml = flowType === 'personalizar'
+    ? `<div class="label-row"><span>DOSIS DIARIA:</span><strong>${pet.portionResults.dailyGrams} G</strong></div>`
+    : '';
+
   container.innerHTML = `
     <div class="label-title">FORMULACIÓN PERSONALIZADA</div>
     <div class="label-row"><span>PACIENTE:</span><strong>${pet.name.toUpperCase()}</strong></div>
     <div class="label-row"><span>RAZA:</span><span>${pet.breed.toUpperCase()}</span></div>
     <div class="label-row"><span>PESO:</span><span>${pet.weight} KG</span></div>
     <div class="label-row"><span>TIPO DE DIETA:</span><span>${recipeLabel}</span></div>
-    <div class="label-row"><span>DOSIS DIARIA:</span><strong>${pet.portionResults.dailyGrams} G</strong></div>
+    ${dailyDoseHtml}
     <div class="label-row"><span>FORMATO ENVÍO:</span><strong>PORCIONES DE 1 KG</strong></div>
-    <div style="border-top:1px dashed rgba(44,26,14,0.15); margin: 0.5rem 0; padding-top: 0.5rem;">
-      <strong>EXCLUSIONES DE ALERGIAS:</strong><br>
-      ${exList || '<span style="opacity:0.6;">NINGUNA</span>'}
-    </div>
+    ${exclusionsHtml}
     <div style="border-top:1px dashed rgba(44,26,14,0.15); margin: 0.5rem 0; padding-top: 0.5rem;">
       <strong>SUPLEMENTOS / ADICIONALES:</strong><br>
       ${mergedSupplements || '<span style="opacity:0.6;">NINGUNO</span>'}
@@ -1414,7 +1698,62 @@ function renderPackageLabelPreview(pet, recipe) {
   `;
 }
 
-window.proceedToSnacks = async function() {
+function renderCalculatorSnacks() {
+  const container = document.getElementById('calc-snacks-container');
+  if (!container) return;
+
+  container.innerHTML = '';
+  
+  const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
+
+  snacksList.forEach(s => {
+    const qty = parseInt(appState.snacksCart[s.id], 10) || 0;
+    
+    const item = document.createElement('div');
+    item.className = 'mobile-snack-item';
+    item.style.padding = '0.4rem 0.6rem';
+    item.style.fontSize = '0.75rem';
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.justifyContent = 'space-between';
+    item.style.gap = '0.5rem';
+    
+    item.innerHTML = `
+      <div style="font-size: 1.2rem; width: 28px; height: 28px; background: var(--bg-cream); border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">${s.icon}</div>
+      <div style="flex: 1; min-width: 0;">
+        <h4 style="font-family: var(--font-header); font-weight: 600; font-size: 0.75rem; color: var(--secondary-brown); margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.name}</h4>
+        <p style="font-size: 0.65rem; color: var(--text-muted); margin: 0;">$${s.price.toLocaleString('es-CL')} / ${s.unit}</p>
+      </div>
+      <div style="display: flex; align-items: center; gap: 0.4rem; flex-shrink: 0;">
+        <button type="button" class="qty-btn" onclick="updateCalculatorSnackQty('${s.id}', -1)" style="width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid rgba(44,26,14,0.1); border-radius: 50%; background: var(--bg-white); cursor: pointer;">-</button>
+        <span style="font-weight:700; width: 14px; text-align: center; font-size: 0.75rem;">${qty}</span>
+        <button type="button" class="qty-btn" onclick="updateCalculatorSnackQty('${s.id}', 1)" style="width: 20px; height: 20px; font-size: 0.8rem; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid rgba(44,26,14,0.1); border-radius: 50%; background: var(--bg-white); cursor: pointer;">+</button>
+      </div>
+    `;
+    container.appendChild(item);
+  });
+}
+window.renderCalculatorSnacks = renderCalculatorSnacks;
+
+function updateCalculatorSnackQty(snackId, change) {
+  const currentQty = parseInt(appState.snacksCart[snackId], 10) || 0;
+  let newQty = currentQty + change;
+  if (newQty < 0) newQty = 0;
+  
+  if (newQty === 0) {
+    delete appState.snacksCart[snackId];
+  } else {
+    appState.snacksCart[snackId] = newQty;
+  }
+  
+  saveStateToStorage();
+  renderCalculatorSnacks();
+  calculateSubscriptionTotals();
+  updatePortionCalculatorUI();
+}
+window.updateCalculatorSnackQty = updateCalculatorSnackQty;
+
+window.proceedToCheckoutFromCalculator = async function() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (pet) {
     pet.customInstructions = document.getElementById('custom-instructions').value.trim();
@@ -1426,7 +1765,8 @@ window.proceedToSnacks = async function() {
       weight: pet.weight,
       age: pet.age,
       activity: pet.activity,
-      notes: pet.notes,
+      notes: pet.notes || '',
+      kilos_needed: pet.kilosNeeded,
       photo: pet.photo,
       subscription_paid: pet.subscriptionPaid,
       selected_recipe_id: pet.selectedRecipeId,
@@ -1452,6 +1792,65 @@ window.proceedToSnacks = async function() {
     }
     saveStateToStorage();
   }
+  
+  if (!appState.customerToken) {
+    changeMobileView('auth');
+  } else {
+    changeMobileView('checkout');
+  }
+};
+
+window.goBackFromCheckout = function() {
+  const pet = appState.pets.find(p => p.id === appState.currentPetId);
+  const flowType = (pet && pet.kilosNeeded) ? 'kilos' : (appState.orderFlowType || 'personalizar');
+  if (flowType === 'kilos') {
+    changeMobileView('calculator');
+  } else {
+    changeMobileView('snacks');
+  }
+};
+
+window.proceedToSnacks = async function() {
+  const pet = appState.pets.find(p => p.id === appState.currentPetId);
+  if (pet) {
+    pet.customInstructions = document.getElementById('custom-instructions').value.trim();
+    
+    const petData = {
+      id: pet.id,
+      name: pet.name,
+      breed: pet.breed,
+      weight: pet.weight,
+      age: pet.age,
+      activity: pet.activity,
+      notes: pet.notes || '',
+      kilos_needed: pet.kilosNeeded,
+      photo: pet.photo,
+      subscription_paid: pet.subscriptionPaid,
+      selected_recipe_id: pet.selectedRecipeId,
+      selected_recipes: pet.selectedRecipes || {},
+      excluded_ingredients: pet.excludedIngredients,
+      added_superfoods: pet.addedSuperfoods,
+      added_vegetables_fruits: pet.addedVegetablesFruits || [],
+      custom_instructions: pet.customInstructions,
+      address: pet.address,
+      delivery_period: pet.deliveryPeriod || 30,
+      order_date: pet.orderDate || ''
+    };
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/pets`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(petData)
+      });
+      if (!res.ok) throw new Error("Error al sincronizar mascota en el servidor");
+    } catch (err) {
+      console.warn("Error al guardar cambios de receta en el servidor:", err);
+    }
+    saveStateToStorage();
+  }
+  
+  renderMobileSnacksList();
   changeMobileView('snacks');
 };
 
@@ -1465,7 +1864,9 @@ function renderMobileSnacksList() {
 
   container.innerHTML = '';
 
-  appState.snacks.forEach(s => {
+  const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
+
+  snacksList.forEach(s => {
     const qty = appState.snacksCart[s.id] || 0;
     
     const item = document.createElement('div');
@@ -1517,8 +1918,9 @@ function calculateSubscriptionTotals() {
   });
 
   globalSnacksSubtotal = 0;
+  const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
   for (const snackId in appState.snacksCart) {
-    const snack = appState.snacks.find(s => s.id === snackId);
+    const snack = snacksList.find(s => s.id === snackId);
     if (snack) {
       globalSnacksSubtotal += snack.price * appState.snacksCart[snackId];
     }
@@ -1579,7 +1981,7 @@ function setupCheckoutUI() {
     }
   }
 
-  currentPaymentMethod = 'card';
+  currentPaymentMethod = 'transfer';
   transferFileBase64 = null;
   transferFileName = '';
   const prevContainer = document.getElementById('transfer-preview-container');
@@ -1590,7 +1992,7 @@ function setupCheckoutUI() {
   if (box) box.style.borderColor = 'rgba(85, 114, 46, 0.3)';
   
   if (typeof selectPaymentMethod === 'function') {
-    selectPaymentMethod('card');
+    selectPaymentMethod('transfer');
   }
   
   const listContainer = document.getElementById('checkout-pets-list');
@@ -1639,8 +2041,9 @@ function setupCheckoutUI() {
     `;
     listContainer.appendChild(shippingRow);
 
+    const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
     for (const snackId in appState.snacksCart) {
-      const snack = appState.snacks.find(s => s.id === snackId);
+      const snack = snacksList.find(s => s.id === snackId);
       const qty = appState.snacksCart[snackId];
       if (snack) {
         const row = document.createElement('div');
@@ -1794,8 +2197,9 @@ window.processSecurePayment = async function() {
   }).join('; ');
 
   const snacksArr = [];
+  const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
   for (const snackId in appState.snacksCart) {
-    const snack = appState.snacks.find(s => s.id === snackId);
+    const snack = snacksList.find(s => s.id === snackId);
     if (snack) {
       snacksArr.push(`${snack.name} (x${appState.snacksCart[snackId]})`);
     }
@@ -1822,9 +2226,13 @@ window.processSecurePayment = async function() {
   };
 
   try {
+    const headers = { "Content-Type": "application/json" };
+    if (appState.customerToken) {
+      headers["Authorization"] = `Bearer ${appState.customerToken}`;
+    }
     const res = await fetch(`${API_BASE_URL}/api/orders`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: headers,
       body: JSON.stringify(orderData)
     });
 
@@ -1978,12 +2386,13 @@ function renderPetDashboard() {
     const addBtn = document.createElement('button');
     addBtn.className = 'pet-selector-add';
     addBtn.innerHTML = '<i class="fa-solid fa-plus"></i>';
-    addBtn.onclick = () => initNewPetWizard();
+    addBtn.onclick = () => changeMobileView('welcome');
     selector.appendChild(addBtn);
   }
 
   const activePet = paidPets.find(p => p.id === appState.activePetIdDashboard) || paidPets[0];
   appState.activePetIdDashboard = activePet.id;
+  const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
 
   document.getElementById('dash-pet-avatar').src = activePet.photo;
   document.getElementById('dash-pet-name').textContent = activePet.name;
@@ -2004,98 +2413,236 @@ function renderPetDashboard() {
   if (activeParts.length > 0) {
     recipeDisplay = activeParts.join(', ');
   } else {
-    const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
     recipeDisplay = rec.name;
   }
   document.getElementById('dash-diet-recipe').textContent = recipeDisplay;
-  document.getElementById('dash-daily-portion').textContent = `${activePet.portionResults.dailyGrams} g / día`;
+
+  // Plan badges and customization details rendering
+  const planBadgeEl = document.getElementById('dash-plan-badge');
+  const customDetailsEl = document.getElementById('dash-customization-details');
+  if (planBadgeEl && customDetailsEl) {
+    const isKilosPlan = activePet.kilosNeeded ? true : false;
+    if (isKilosPlan) {
+      // Badge: Por Kilo
+      planBadgeEl.innerHTML = '<i class="fa-solid fa-scale-balanced"></i> Por Kilo';
+      planBadgeEl.style.backgroundColor = 'rgba(217, 119, 6, 0.1)';
+      planBadgeEl.style.color = 'rgb(217, 119, 6)';
+      planBadgeEl.style.border = '1px solid rgba(217, 119, 6, 0.2)';
+      
+      customDetailsEl.innerHTML = '';
+      customDetailsEl.style.display = 'none';
+    } else {
+      // Badge: Personalizada
+      planBadgeEl.innerHTML = '<i class="fa-solid fa-wand-magic-sparkles"></i> Personalizada';
+      planBadgeEl.style.backgroundColor = 'rgba(85, 114, 46, 0.12)';
+      planBadgeEl.style.color = 'var(--primary-green)';
+      planBadgeEl.style.border = '1px solid rgba(85, 114, 46, 0.25)';
+
+      // Render customization details
+      let detailsHtml = '';
+
+      // 1. Excluded ingredients
+      const excluded = activePet.excludedIngredients || [];
+      if (excluded.length > 0) {
+        detailsHtml += `
+          <div style="margin-bottom: 0.75rem; display: flex; flex-direction: column; gap: 0.25rem;">
+            <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Ingredientes Excluidos:</span>
+            <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+              ${excluded.map(ing => `
+                <span style="font-size: 0.75rem; background: rgba(177, 59, 57, 0.08); color: var(--accent-red); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem; text-decoration: line-through;">
+                  ❌ ${ing}
+                </span>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Added additions (Superfoods & VegFruits)
+      const addedSups = activePet.addedSuperfoods || [];
+      const addedVfs = activePet.addedVegetablesFruits || [];
+      if (addedSups.length > 0 || addedVfs.length > 0) {
+        const supList = addedSups.map(id => (appState.superfoods || SUPERALIMENTOS).find(s => s.id === id)).filter(Boolean);
+        const vfList = addedVfs.map(id => (appState.vegetablesFruits || VERDURAS_FRUTAS).find(vf => vf.id === id)).filter(Boolean);
+        const allAdditions = [...supList, ...vfList];
+
+        if (allAdditions.length > 0) {
+          detailsHtml += `
+            <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+              <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px;">Adicionales Incluidos:</span>
+              <div style="display: flex; flex-wrap: wrap; gap: 0.35rem;">
+                ${allAdditions.map(item => `
+                  <span style="font-size: 0.75rem; background: rgba(85, 114, 46, 0.08); color: var(--primary-green); padding: 0.15rem 0.5rem; border-radius: 4px; font-weight: 600; display: inline-flex; align-items: center; gap: 0.25rem;">
+                    ${item.icon || '➕'} ${item.name}
+                  </span>
+                `).join('')}
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      if (!detailsHtml) {
+        detailsHtml = `
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-style: italic; display: flex; align-items: center; gap: 0.35rem;">
+            <i class="fa-solid fa-info-circle"></i> Receta estándar completa.
+          </div>
+        `;
+      }
+
+      customDetailsEl.innerHTML = detailsHtml;
+      customDetailsEl.style.display = 'block';
+    }
+  }
+
+  const dailyPortionEl = document.getElementById('dash-daily-portion');
+  if (dailyPortionEl) {
+    dailyPortionEl.textContent = `${activePet.portionResults.dailyGrams} g / día`;
+  }
   
-  const periodText = activePet.deliveryPeriod === 15 ? 'Cada 15 días' : 'Cada 30 días';
-  document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')} (${periodText})`;
+  if (activePet.kilosNeeded) {
+    document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')}`;
+  } else {
+    const periodText = activePet.deliveryPeriod === 15 ? 'Cada 15 días' : 'Cada 30 días';
+    document.getElementById('dash-monthly-cost').textContent = `$${activePet.totalPrice.toLocaleString('es-CL')} (${periodText})`;
+  }
 
   const deliveryDays = document.getElementById('dash-delivery-days');
   const deliveryEstimate = document.getElementById('dash-delivery-estimate');
+  const deliveryTitle = document.getElementById('dash-delivery-title');
   if (deliveryDays && deliveryEstimate) {
-    function parseChileanDate(dateStr) {
-      if (!dateStr) return new Date();
-      const parts = dateStr.split(/[-/]/);
-      if (parts.length === 3) {
-        const day = parseInt(parts[0], 10);
-        const month = parseInt(parts[1], 10) - 1; // 0-indexed month
-        const year = parseInt(parts[2], 10);
-        return new Date(year, month, day);
+    if (activePet.kilosNeeded) {
+      if (deliveryTitle) {
+        deliveryTitle.textContent = 'Siguiente Despacho';
       }
-      return new Date(dateStr);
+      deliveryDays.textContent = '¡Cuando quieras!';
+      deliveryDays.style.fontSize = '1.35rem';
+      deliveryEstimate.textContent = '¡Siempre tenemos lo mejor para tu perro! 🐾';
+      deliveryEstimate.style.fontSize = '0.75rem';
+    } else {
+      if (deliveryTitle) {
+        deliveryTitle.textContent = 'Siguiente Despacho en';
+      }
+      deliveryDays.style.fontSize = '2rem';
+      deliveryEstimate.style.fontSize = '0.7rem';
+
+      function parseChileanDate(dateStr) {
+        if (!dateStr) return new Date();
+        const parts = dateStr.split(/[-/]/);
+        if (parts.length === 3) {
+          const day = parseInt(parts[0], 10);
+          const month = parseInt(parts[1], 10) - 1; // 0-indexed month
+          const year = parseInt(parts[2], 10);
+          return new Date(year, month, day);
+        }
+        return new Date(dateStr);
+      }
+
+      const orderDate = activePet.orderDate ? parseChileanDate(activePet.orderDate) : new Date();
+      const periodDays = activePet.deliveryPeriod || 30;
+      
+      const nextDeliveryDate = new Date(orderDate);
+      nextDeliveryDate.setDate(orderDate.getDate() + periodDays);
+
+      const today = new Date();
+      today.setHours(0,0,0,0);
+      const nextDeliveryClear = new Date(nextDeliveryDate);
+      nextDeliveryClear.setHours(0,0,0,0);
+
+      const diffTime = nextDeliveryClear.getTime() - today.getTime();
+      let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      if (diffDays < 0) {
+        diffDays = 0;
+      }
+
+      const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      
+      const formattedDays = diffDays.toString().padStart(2, '0');
+      deliveryDays.textContent = `${formattedDays} Días`;
+      deliveryEstimate.textContent = `Entrega estimada: ${nextDeliveryDate.getDate()} de ${months[nextDeliveryDate.getMonth()]}`;
     }
-
-    const orderDate = activePet.orderDate ? parseChileanDate(activePet.orderDate) : new Date();
-    const periodDays = activePet.deliveryPeriod || 30;
-    
-    const nextDeliveryDate = new Date(orderDate);
-    nextDeliveryDate.setDate(orderDate.getDate() + periodDays);
-
-    const today = new Date();
-    today.setHours(0,0,0,0);
-    const nextDeliveryClear = new Date(nextDeliveryDate);
-    nextDeliveryClear.setHours(0,0,0,0);
-
-    const diffTime = nextDeliveryClear.getTime() - today.getTime();
-    let diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    if (diffDays < 0) {
-      diffDays = 0;
-    }
-
-    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    
-    const formattedDays = diffDays.toString().padStart(2, '0');
-    deliveryDays.textContent = `${formattedDays} Días`;
-    deliveryEstimate.textContent = `Entrega estimada: ${nextDeliveryDate.getDate()} de ${months[nextDeliveryDate.getMonth()]}`;
   }
 
   const guideWrapper = document.getElementById('dash-feeding-guide');
-  const results = activePet.portionResults;
-  
-  if (rec.category === 'barf') {
-    const gBones = Math.round(results.dailyGrams * 0.5);
-    const gMeat = Math.round(results.dailyGrams * 0.3);
-    const gOrgans = Math.round(results.dailyGrams * 0.1);
-    const gVeg = Math.round(results.dailyGrams * 0.1);
+  if (guideWrapper) {
+    const results = activePet.portionResults;
+    if (rec.category === 'barf') {
+      const gBones = Math.round(results.dailyGrams * 0.5);
+      const gMeat = Math.round(results.dailyGrams * 0.3);
+      const gOrgans = Math.round(results.dailyGrams * 0.1);
+      const gVeg = Math.round(results.dailyGrams * 0.1);
 
-    guideWrapper.innerHTML = `
-      <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:0.35rem;">
-        <div style="display:flex; justify-content:space-between;"><span>Hueso Carnudo (Pollo/Pavo):</span><strong>${gBones}g</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Carne Magra picada:</span><strong>${gMeat}g</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Vísceras y Órganos:</span><strong>${gOrgans}g</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Vegetales y Frutas:</span><strong>${gVeg}g</strong></div>
-      </div>
-    `;
-  } else {
-    const gProtein = Math.round(results.dailyGrams * 0.5);
-    const gVeg = Math.round(results.dailyGrams * 0.3);
-    const gCarbs = Math.round(results.dailyGrams * 0.1);
-    const gOrgans = Math.round(results.dailyGrams * 0.1);
+      guideWrapper.innerHTML = `
+        <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:0.35rem;">
+          <div style="display:flex; justify-content:space-between;"><span>Hueso Carnudo (Pollo/Pavo):</span><strong>${gBones}g</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Carne Magra picada:</span><strong>${gMeat}g</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Vísceras y Órganos:</span><strong>${gOrgans}g</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Vegetales y Frutas:</span><strong>${gVeg}g</strong></div>
+        </div>
+      `;
+    } else {
+      const gProtein = Math.round(results.dailyGrams * 0.5);
+      const gVeg = Math.round(results.dailyGrams * 0.3);
+      const gCarbs = Math.round(results.dailyGrams * 0.1);
+      const gOrgans = Math.round(results.dailyGrams * 0.1);
 
-    guideWrapper.innerHTML = `
-      <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:0.35rem;">
-        <div style="display:flex; justify-content:space-between;"><span>Proteínas al vapor:</span><strong>${gProtein}g</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Verduras picadas:</span><strong>${gVeg}g</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Carbohidratos saludables:</span><strong>${gCarbs}g</strong></div>
-        <div style="display:flex; justify-content:space-between;"><span>Vísceras cocidas:</span><strong>${gOrgans}g</strong></div>
-      </div>
-    `;
+      guideWrapper.innerHTML = `
+        <div style="font-size:0.8rem; display:flex; flex-direction:column; gap:0.35rem;">
+          <div style="display:flex; justify-content:space-between;"><span>Proteínas al vapor:</span><strong>${gProtein}g</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Verduras picadas:</span><strong>${gVeg}g</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Carbohidratos saludables:</span><strong>${gCarbs}g</strong></div>
+          <div style="display:flex; justify-content:space-between;"><span>Vísceras cocidas:</span><strong>${gOrgans}g</strong></div>
+        </div>
+      `;
+    }
   }
 }
 
 window.goBackToProfileSetup = function() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (pet) {
+    appState.orderFlowType = pet.kilosNeeded ? 'kilos' : 'personalizar';
+    
     document.getElementById('profile-wizard-title').textContent = pet.subscriptionPaid ? 'Modificar Perfil de ' + pet.name : 'Perfil de tu Mascota';
     document.getElementById('pet-name').value = pet.name || '';
     document.getElementById('pet-breed').value = pet.breed || '';
     document.getElementById('pet-weight').value = pet.weight || '';
     document.getElementById('pet-age').value = pet.age || 'adult';
     document.getElementById('pet-activity').value = pet.activity || 'normal';
-    document.getElementById('pet-notes').value = pet.notes || '';
+    
+    const weightGroup = document.getElementById('pet-weight-group');
+    const ageGroup = document.getElementById('pet-age-group');
+    const activityGroup = document.getElementById('pet-activity-group');
+    const notesGroup = document.getElementById('pet-notes-group');
+    const kilosGroup = document.getElementById('pet-kilos-needed-group');
+    const submitBtnText = document.getElementById('profile-submit-btn-text');
+
+    if (appState.orderFlowType === 'kilos') {
+      if (weightGroup) weightGroup.style.display = 'none';
+      if (ageGroup) ageGroup.style.display = 'none';
+      if (activityGroup) activityGroup.style.display = 'none';
+      if (notesGroup) notesGroup.style.display = 'none';
+      if (kilosGroup) kilosGroup.style.display = 'block';
+      if (document.getElementById('pet-kilos-needed')) {
+        document.getElementById('pet-kilos-needed').value = pet.kilosNeeded || '';
+      }
+      if (submitBtnText) {
+        submitBtnText.innerHTML = 'Seleccionar comida <i class="fa-solid fa-arrow-right"></i>';
+      }
+    } else {
+      if (weightGroup) weightGroup.style.display = 'block';
+      if (ageGroup) ageGroup.style.display = 'block';
+      if (activityGroup) activityGroup.style.display = 'block';
+      if (notesGroup) notesGroup.style.display = 'block';
+      if (kilosGroup) kilosGroup.style.display = 'none';
+      if (document.getElementById('pet-notes')) {
+        document.getElementById('pet-notes').value = pet.notes || '';
+      }
+      if (submitBtnText) {
+        submitBtnText.innerHTML = 'Calcular Ración <i class="fa-solid fa-arrow-right"></i>';
+      }
+    }
+    
     petPhotoBase64 = pet.photo || 'assets/logo.jpg';
     if (petPhotoBase64 && petPhotoBase64 !== 'assets/logo.jpg') {
       document.getElementById('pet-photo-preview').innerHTML = `<img src="${petPhotoBase64}" alt="Vista previa" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">`;
@@ -2112,11 +2659,18 @@ window.editCurrentPlanFromDashboard = function() {
 };
 
 window.logoutApp = function() {
-  if (confirm('¿Deseas cerrar sesión? Se borrarán las mascotas del dispositivo local.')) {
+  if (confirm('¿Deseas cerrar sesión?')) {
     appState.customerToken = null;
+    appState.customerName = null;
+    appState.customerEmail = null;
+    appState.customerPhone = null;
+    appState.customerAddress = null;
+    
     localStorage.removeItem('oc_customer_token');
     localStorage.removeItem('oc_customer_name');
     localStorage.removeItem('oc_customer_email');
+    localStorage.removeItem('oc_customer_phone');
+    localStorage.removeItem('oc_customer_address');
     
     const badge = document.getElementById('customer-header-badge');
     if (badge) badge.style.display = 'none';
@@ -2126,7 +2680,8 @@ window.logoutApp = function() {
     appState.activePetIdDashboard = null;
     appState.snacksCart = {};
     saveStateToStorage();
-    changeMobileView('welcome');
+    
+    switchView('web');
   }
 };
 
@@ -2135,9 +2690,10 @@ window.logoutApp = function() {
 // ==========================================================================
 
 // Routing principal de compra (Redirecciona al flujo unificado de la app móvil)
-window.startOrderFlow = function() {
+window.startOrderFlow = function(flowType = 'personalizar') {
+  appState.orderFlowType = flowType;
   switchView('mobile');
-  changeMobileView('welcome');
+  initNewPetWizard(flowType);
 };
 
 window.logoutCustomer = function() {
@@ -2163,7 +2719,7 @@ window.logoutCustomer = function() {
     appState.snacksCart = {};
     saveStateToStorage();
     
-    loadInitialDataFromAPI();
+    switchView('web');
   }
 };
 
@@ -2405,20 +2961,9 @@ async function handlePostAuthRedirect() {
   }
   
   if (appState.pendingWizardInit) {
+    const flowType = appState.pendingWizardFlowType || 'personalizar';
     appState.pendingWizardInit = false;
-    
-    appState.currentPetId = 'pet_' + Date.now();
-    document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
-    document.getElementById('pet-name').value = '';
-    document.getElementById('pet-breed').value = '';
-    document.getElementById('pet-weight').value = '';
-    document.getElementById('pet-age').value = 'adult';
-    document.getElementById('pet-activity').value = 'normal';
-    document.getElementById('pet-notes').value = '';
-    petPhotoBase64 = null;
-    document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
-    
-    changeMobileView('profile-setup');
+    initNewPetWizard(flowType);
   } else {
     changeMobileView('checkout');
   }
@@ -2469,20 +3014,9 @@ window.submitSocialProfileCompletion = async function() {
     
     // Continue
     if (appState.pendingWizardInit) {
+      const flowType = appState.pendingWizardFlowType || 'personalizar';
       appState.pendingWizardInit = false;
-      
-      appState.currentPetId = 'pet_' + Date.now();
-      document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
-      document.getElementById('pet-name').value = '';
-      document.getElementById('pet-breed').value = '';
-      document.getElementById('pet-weight').value = '';
-      document.getElementById('pet-age').value = 'adult';
-      document.getElementById('pet-activity').value = 'normal';
-      document.getElementById('pet-notes').value = '';
-      petPhotoBase64 = null;
-      document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
-      
-      changeMobileView('profile-setup');
+      initNewPetWizard(flowType);
     } else {
       changeMobileView('checkout');
     }
@@ -2504,20 +3038,9 @@ window.submitSocialProfileCompletion = async function() {
     }
     
     if (appState.pendingWizardInit) {
+      const flowType = appState.pendingWizardFlowType || 'personalizar';
       appState.pendingWizardInit = false;
-      
-      appState.currentPetId = 'pet_' + Date.now();
-      document.getElementById('profile-wizard-title').textContent = 'Perfil de tu Mascota';
-      document.getElementById('pet-name').value = '';
-      document.getElementById('pet-breed').value = '';
-      document.getElementById('pet-weight').value = '';
-      document.getElementById('pet-age').value = 'adult';
-      document.getElementById('pet-activity').value = 'normal';
-      document.getElementById('pet-notes').value = '';
-      petPhotoBase64 = null;
-      document.getElementById('pet-photo-preview').innerHTML = `<i class="fa-solid fa-camera"></i><span>Subir Foto</span>`;
-      
-      changeMobileView('profile-setup');
+      initNewPetWizard(flowType);
     } else {
       changeMobileView('checkout');
     }
@@ -2539,6 +3062,12 @@ window.authGoBackMobile = function() {
   if (appState.pendingWizardInit) {
     appState.pendingWizardInit = false;
     changeMobileView('welcome');
+    return;
+  }
+  const pet = appState.pets.find(p => p.id === appState.currentPetId);
+  const flowType = (pet && pet.kilosNeeded) ? 'kilos' : (appState.orderFlowType || 'personalizar');
+  if (flowType === 'kilos') {
+    changeMobileView('calculator');
   } else {
     changeMobileView('snacks');
   }
@@ -3003,5 +3532,164 @@ window.moveIngredientTooltip = function(event) {
 
     tooltipEl.style.left = `${left}px`;
     tooltipEl.style.top = `${top}px`;
+  }
+};
+
+window.repeatLastOrder = async function() {
+  if (!appState.customerToken) {
+    alert("Inicia sesión para poder repetir tu último pedido.");
+    changeMobileView('auth');
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/customer/orders`, {
+      headers: { "Authorization": `Bearer ${appState.customerToken}` }
+    });
+    if (!res.ok) throw new Error("No se pudieron obtener los pedidos.");
+    const orders = await res.json();
+    if (!orders || orders.length === 0) {
+      alert("No tienes pedidos anteriores registrados para repetir.");
+      return;
+    }
+
+    // Ordenar descendente para obtener el último
+    orders.sort((a, b) => b.id - a.id);
+    const lastOrder = orders[0];
+
+    const orderedPetNames = lastOrder.pet_name.split(', ').map(n => n.trim().toLowerCase());
+
+    let matchedAnyPet = false;
+    appState.pets.forEach(p => {
+      if (orderedPetNames.includes(p.name.trim().toLowerCase())) {
+        p.subscriptionPaid = false;
+        matchedAnyPet = true;
+      }
+    });
+
+    if (!matchedAnyPet && appState.pets.length > 0) {
+      appState.pets.forEach(p => {
+        p.subscriptionPaid = false;
+      });
+    }
+
+    // Configurar snacksCart
+    appState.snacksCart = {};
+    const snacksList = (appState.snacks && appState.snacks.length > 0) ? appState.snacks : DEFAULT_SNACKS;
+    if (lastOrder.snacks && lastOrder.snacks !== 'Ninguno') {
+      const parts = lastOrder.snacks.split(', ');
+      for (const part of parts) {
+        const match = part.match(/(.+)\s+\(x(\d+)\)/);
+        if (match) {
+          const snackName = match[1].trim().toLowerCase();
+          const qty = parseInt(match[2], 10);
+          const snack = snacksList.find(s => s.name.toLowerCase() === snackName);
+          if (snack) {
+            appState.snacksCart[snack.id] = qty;
+          }
+        }
+      }
+    }
+
+    saveStateToStorage();
+    setupCheckoutUI();
+    changeMobileView('checkout');
+
+  } catch (err) {
+    console.error("Error al repetir el último pedido:", err);
+    alert("Hubo un error al intentar repetir el último pedido. Por favor intenta de nuevo.");
+  }
+};
+
+window.startNewOrderFlow = function(flowType = 'personalizar') {
+  initNewPetWizard(flowType);
+};
+
+// ----------------------------------------------------
+// PUBLIC TESTIMONIAL MODAL CONTROLLER
+// ----------------------------------------------------
+let testimonialPhotoBase64 = null;
+window.previewTestimonialPhoto = function(event) {
+  const file = event.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      testimonialPhotoBase64 = e.target.result;
+      document.getElementById('testimonial-photo-preview').innerHTML = `<img src="${testimonialPhotoBase64}" alt="Vista previa" style="max-height: 100px; border-radius: 8px; margin-top: 8px; max-width: 100%; border: 1px solid var(--primary-green);">`;
+    };
+    reader.readAsDataURL(file);
+  }
+};
+
+window.openPublicTestimonialModal = function() {
+  const modal = document.getElementById('public-testimonial-modal');
+  if (modal) {
+    modal.classList.add('active');
+    
+    // Reset form elements
+    const form = document.getElementById('public-testimonial-form');
+    const formWrapper = document.getElementById('testimonial-form-wrapper');
+    const successMsg = document.getElementById('testimonial-form-success');
+    const previewDiv = document.getElementById('testimonial-photo-preview');
+    
+    testimonialPhotoBase64 = null;
+    if (form) form.reset();
+    if (previewDiv) previewDiv.innerHTML = '';
+    if (formWrapper) formWrapper.style.display = 'block';
+    if (successMsg) successMsg.style.display = 'none';
+  }
+};
+
+window.closePublicTestimonialModal = function() {
+  const modal = document.getElementById('public-testimonial-modal');
+  if (modal) {
+    modal.classList.remove('active');
+  }
+};
+
+window.submitPublicTestimonial = async function(event) {
+  if (event) event.preventDefault();
+  
+  const author = document.getElementById('testimonial-author')?.value.trim() || '';
+  const dog_name = document.getElementById('testimonial-dog')?.value.trim() || '';
+  const location = document.getElementById('testimonial-location')?.value.trim() || '';
+  const quote = document.getElementById('testimonial-quote')?.value.trim() || '';
+  const photo_url = testimonialPhotoBase64 || null;
+
+  if (!author || !dog_name || !location || !quote) {
+    alert("Por favor completa todos los campos requeridos.");
+    return;
+  }
+
+  const payload = {
+    author,
+    dog_name,
+    location,
+    quote,
+    photo_url,
+    active: false
+  };
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/testimonials/public`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) {
+      throw new Error("Error en la respuesta del servidor");
+    }
+
+    // Show success view
+    const formWrapper = document.getElementById('testimonial-form-wrapper');
+    const successMsg = document.getElementById('testimonial-form-success');
+    if (formWrapper) formWrapper.style.display = 'none';
+    if (successMsg) successMsg.style.display = 'block';
+  } catch (err) {
+    console.error("Error al enviar el testimonio:", err);
+    alert("Hubo un error al enviar tu testimonio. Por favor intenta nuevamente.");
   }
 };

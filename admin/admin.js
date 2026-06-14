@@ -176,11 +176,13 @@ window.switchAdminTab = async function(tabName) {
 
   // Acciones de actualización según pestaña
   if (tabName === 'recipes') {
+    await fetchAdminProducts();
     renderAdminProductsTable();
   } else if (tabName === 'orders') {
     await fetchAdminOrders();
     renderAdminOrdersTable();
   } else if (tabName === 'testimonials') {
+    await fetchAdminTestimonials();
     renderAdminTestimonialsTable();
   } else if (tabName === 'faqs') {
     renderAdminFaqsTable();
@@ -253,9 +255,28 @@ window.saveAdminParameters = async function() {
   }
 };
 
-// ----------------------------------------------------
-// 4. CRUD DE PRODUCTOS / RECETAS
-// ----------------------------------------------------
+async function fetchAdminProducts() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/products`, {
+      headers: {
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudieron cargar los productos");
+    }
+    const data = await res.json();
+    appState.recipes = data.recipes.map(mapRecipeFromAPI);
+    appState.snacks = data.snacks;
+  } catch (err) {
+    console.error("Error al cargar productos en administración:", err);
+  }
+}
 
 function renderAdminProductsTable() {
   const tbody = document.getElementById('admin-products-tbody');
@@ -265,7 +286,7 @@ function renderAdminProductsTable() {
   const all = [...appState.recipes, ...appState.snacks];
 
   if (all.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay productos en el catálogo.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay productos en el catálogo.</td></tr>`;
     return;
   }
 
@@ -274,6 +295,7 @@ function renderAdminProductsTable() {
     const catLabel = p.category === 'barf' ? 'BARF' : (p.category === 'cooked' ? 'Cocinada' : 'Snack');
     const badgeClass = p.category === 'barf' ? 'badge-success' : (p.category === 'cooked' ? 'badge-danger' : 'badge-info');
     const priceLabel = isRecipe ? `$${p.price.toLocaleString('es-CL')}/kg` : `$${p.price.toLocaleString('es-CL')} por ${p.unit}`;
+    const visibleBadge = p.visible !== false ? '<span class="badge badge-success">Sí</span>' : '<span class="badge badge-info">No</span>';
 
     const tr = document.createElement('tr');
     tr.innerHTML = `
@@ -282,6 +304,7 @@ function renderAdminProductsTable() {
       <td><span class="badge ${badgeClass}">${catLabel}</span></td>
       <td style="max-width: 350px; font-size: 0.8rem; color: var(--text-muted);">${p.ingredients}</td>
       <td style="font-weight: 700; color: var(--primary-green);">${priceLabel}</td>
+      <td>${visibleBadge}</td>
       <td class="admin-actions-cell">
         <button class="btn-icon btn-edit" onclick="editProductInAdmin('${p.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
         <button class="btn-icon btn-delete" onclick="deleteProductInAdmin('${p.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -300,6 +323,7 @@ window.showAddProductForm = function() {
   document.getElementById('form-product-price').value = '';
   document.getElementById('form-product-icon').value = '';
   document.getElementById('form-product-ingredients').value = '';
+  document.getElementById('form-product-visible').checked = true;
 };
 
 window.hideProductForm = function() {
@@ -319,6 +343,7 @@ window.editProductInAdmin = function(prodId) {
   document.getElementById('form-product-price').value = prod.price;
   document.getElementById('form-product-icon').value = prod.icon;
   document.getElementById('form-product-ingredients').value = prod.ingredients;
+  document.getElementById('form-product-visible').checked = prod.visible !== false;
 };
 
 window.submitProductForm = async function() {
@@ -328,6 +353,8 @@ window.submitProductForm = async function() {
   const price = parseFloat(document.getElementById('form-product-price').value);
   const icon = document.getElementById('form-product-icon').value.trim() || '🍖';
   const ingredients = document.getElementById('form-product-ingredients').value.trim();
+
+  const visible = document.getElementById('form-product-visible').checked;
 
   if (!name || isNaN(price) || price <= 0 || !ingredients) {
     alert('Ingresa todos los datos requeridos.');
@@ -348,7 +375,8 @@ window.submitProductForm = async function() {
     price,
     icon,
     ingredients: cleanedIngredientsStr,
-    ingredients_array
+    ingredients_array,
+    visible
   };
 
   try {
@@ -581,6 +609,30 @@ function renderAdminOrdersTable() {
 // 6. CRUD DE TESTIMONIOS
 // ----------------------------------------------------
 
+async function fetchAdminTestimonials() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/admin/testimonials`, {
+      headers: { 
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudo cargar la lista de testimonios");
+    }
+
+    const data = await res.json();
+    appState.testimonials = data;
+  } catch (err) {
+    console.error("Error al cargar testimonios:", err);
+  }
+}
+
 function renderAdminTestimonialsTable() {
   const tbody = document.getElementById('admin-testimonials-tbody');
   if (!tbody) return;
@@ -588,12 +640,16 @@ function renderAdminTestimonialsTable() {
   tbody.innerHTML = '';
 
   if (appState.testimonials.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay testimonios registrados.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">No hay testimonios registrados.</td></tr>`;
     return;
   }
 
   appState.testimonials.forEach(t => {
     const tr = document.createElement('tr');
+    const activeBadge = t.active 
+      ? `<span class="badge badge-success">Aprobado</span>` 
+      : `<span class="badge badge-warning">Pendiente</span>`;
+
     tr.innerHTML = `
       <td style="text-align: center;">
         <img src="${t.photo_url || '../assets/logo.jpg'}" alt="${t.author}" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; border: 1px solid var(--primary-green);" onerror="this.src='../assets/logo.jpg'">
@@ -601,8 +657,11 @@ function renderAdminTestimonialsTable() {
       <td style="font-weight: 600; color: var(--secondary-brown);">${t.author}</td>
       <td>${t.location}</td>
       <td style="font-weight: 500;">${t.dog_name}</td>
-      <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+      <td style="font-size: 0.8rem; color: var(--text-muted); max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${t.quote}">
         ${t.quote}
+      </td>
+      <td>
+        ${activeBadge}
       </td>
       <td class="admin-actions-cell">
         <button class="btn-icon btn-edit" onclick="editTestimonialInAdmin('${t.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
@@ -622,6 +681,7 @@ window.showAddTestimonialForm = function() {
   document.getElementById('form-testimonial-dog').value = '';
   document.getElementById('form-testimonial-photo').value = '';
   document.getElementById('form-testimonial-quote').value = '';
+  document.getElementById('form-testimonial-active').checked = false;
 };
 
 window.hideTestimonialForm = function() {
@@ -640,6 +700,7 @@ window.editTestimonialInAdmin = function(id) {
   document.getElementById('form-testimonial-dog').value = t.dog_name;
   document.getElementById('form-testimonial-photo').value = t.photo_url || '';
   document.getElementById('form-testimonial-quote').value = t.quote;
+  document.getElementById('form-testimonial-active').checked = t.active || false;
 };
 
 window.submitTestimonialForm = async function() {
@@ -649,6 +710,7 @@ window.submitTestimonialForm = async function() {
   const dog_name = document.getElementById('form-testimonial-dog').value.trim() || 'Mascota';
   const photo_url = document.getElementById('form-testimonial-photo').value.trim() || 'assets/logo.jpg';
   const quote = document.getElementById('form-testimonial-quote').value.trim();
+  const active = document.getElementById('form-testimonial-active').checked;
 
   if (!author || !location || !quote) {
     alert('Ingresa el Nombre del Autor, la Ubicación y la Opinión.');
@@ -661,7 +723,8 @@ window.submitTestimonialForm = async function() {
     location,
     dog_name,
     photo_url,
-    quote
+    quote,
+    active
   };
 
   try {
@@ -1106,6 +1169,25 @@ window.deleteAdminLead = async function(id) {
 // 10. LOGICA DE LOGIN Y LOGOUT
 // ----------------------------------------------------
 
+window.togglePasswordVisibility = function(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const icon = btnEl.querySelector('i');
+  if (input.type === 'password') {
+    input.type = 'text';
+    if (icon) {
+      icon.classList.remove('fa-eye');
+      icon.classList.add('fa-eye-slash');
+    }
+  } else {
+    input.type = 'password';
+    if (icon) {
+      icon.classList.remove('fa-eye-slash');
+      icon.classList.add('fa-eye');
+    }
+  }
+};
+
 window.loginAdmin = async function() {
   const username = document.getElementById('admin-user-input').value.trim();
   const password = document.getElementById('admin-pass-input').value.trim();
@@ -1298,8 +1380,19 @@ window.printLabels = function() {
 
 async function fetchAdminAdditionals() {
   try {
-    const res = await fetch(`${API_BASE_URL}/api/additionals`);
-    if (!res.ok) throw new Error("No se pudieron cargar los adicionales");
+    const res = await fetch(`${API_BASE_URL}/api/admin/additionals`, {
+      headers: {
+        "Authorization": `Bearer ${appState.adminToken}`
+      }
+    });
+    if (!res.ok) {
+      if (res.status === 401) {
+        alert("Sesión expirada. Por favor inicia sesión.");
+        logoutAdmin();
+        return;
+      }
+      throw new Error("No se pudieron cargar los adicionales");
+    }
     appState.additionals = await res.json();
   } catch (err) {
     console.error("Error al cargar adicionales:", err);
@@ -1318,16 +1411,18 @@ function renderAdminAdditionalsTables() {
   const vegfruits = appState.additionals.filter(a => a.category === 'vegfruit');
 
   if (superfoods.length === 0) {
-    superfoodsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay suplementos o superalimentos registrados.</td></tr>`;
+    superfoodsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay suplementos o superalimentos registrados.</td></tr>`;
   } else {
     superfoods.forEach(a => {
       const tr = document.createElement('tr');
+      const visibleBadge = a.visible !== false ? '<span class="badge badge-success">Sí</span>' : '<span class="badge badge-info">No</span>';
       tr.innerHTML = `
         <td style="font-size: 1.3rem; text-align: center;">${a.icon}</td>
         <td style="font-weight: 700; color: var(--secondary-brown);">${a.name}</td>
         <td style="font-weight: 700; color: var(--primary-green);">$${a.price.toLocaleString('es-CL')}</td>
         <td style="font-size: 0.8rem; color: var(--text-muted);">${a.vitamins || 'N/A'}</td>
         <td style="font-size: 0.8rem; color: var(--text-muted);">${a.benefits || 'N/A'}</td>
+        <td>${visibleBadge}</td>
         <td class="admin-actions-cell">
           <button class="btn-icon btn-edit" onclick="editAdditionalInAdmin('${a.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-icon btn-delete" onclick="deleteAdditionalInAdmin('${a.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -1338,16 +1433,18 @@ function renderAdminAdditionalsTables() {
   }
 
   if (vegfruits.length === 0) {
-    vegfruitsTbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay verduras o frutas adicionales registradas.</td></tr>`;
+    vegfruitsTbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 1.5rem;">No hay verduras o frutas adicionales registradas.</td></tr>`;
   } else {
     vegfruits.forEach(a => {
       const tr = document.createElement('tr');
+      const visibleBadge = a.visible !== false ? '<span class="badge badge-success">Sí</span>' : '<span class="badge badge-info">No</span>';
       tr.innerHTML = `
         <td style="font-size: 1.3rem; text-align: center;">${a.icon}</td>
         <td style="font-weight: 700; color: var(--secondary-brown);">${a.name}</td>
         <td style="font-weight: 700; color: var(--primary-green);">$${a.price.toLocaleString('es-CL')}</td>
         <td style="font-size: 0.8rem; color: var(--text-muted);">${a.vitamins || 'N/A'}</td>
         <td style="font-size: 0.8rem; color: var(--text-muted);">${a.benefits || 'N/A'}</td>
+        <td>${visibleBadge}</td>
         <td class="admin-actions-cell">
           <button class="btn-icon btn-edit" onclick="editAdditionalInAdmin('${a.id}')" title="Editar"><i class="fa-solid fa-pen"></i></button>
           <button class="btn-icon btn-delete" onclick="deleteAdditionalInAdmin('${a.id}')" title="Eliminar"><i class="fa-solid fa-trash"></i></button>
@@ -1368,6 +1465,7 @@ window.showAddAdditionalForm = function() {
   document.getElementById('form-additional-icon').value = '';
   document.getElementById('form-additional-vitamins').value = '';
   document.getElementById('form-additional-benefits').value = '';
+  document.getElementById('form-additional-visible').checked = true;
 };
 
 window.hideAdditionalForm = function() {
@@ -1387,6 +1485,7 @@ window.editAdditionalInAdmin = function(id) {
   document.getElementById('form-additional-icon').value = a.icon;
   document.getElementById('form-additional-vitamins').value = a.vitamins || '';
   document.getElementById('form-additional-benefits').value = a.benefits || '';
+  document.getElementById('form-additional-visible').checked = a.visible !== false;
 };
 
 window.submitAdditionalForm = async function() {
@@ -1397,6 +1496,8 @@ window.submitAdditionalForm = async function() {
   const icon = document.getElementById('form-additional-icon').value.trim() || '🌱';
   const vitamins = document.getElementById('form-additional-vitamins').value.trim();
   const benefits = document.getElementById('form-additional-benefits').value.trim();
+
+  const visible = document.getElementById('form-additional-visible').checked;
 
   if (!name || isNaN(price) || price <= 0) {
     alert('Ingresa el nombre y un precio válido.');
@@ -1410,7 +1511,8 @@ window.submitAdditionalForm = async function() {
     price,
     icon,
     vitamins: vitamins || null,
-    benefits: benefits || null
+    benefits: benefits || null,
+    visible
   };
 
   try {

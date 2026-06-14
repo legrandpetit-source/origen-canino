@@ -6,7 +6,7 @@
   <title>Origen Canino - Panel de Control</title>
   
   <!-- Estilos e iconos idénticos al sitio principal -->
-  <link rel="stylesheet" href="../style.css?v=4.0">
+  <link rel="stylesheet" href="../style.css?v=4.1">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -359,7 +359,12 @@
         </div>
         <div class="form-group" style="text-align: left; margin-bottom: 1.5rem;">
           <label for="admin-pass-input" style="color: var(--text-dark); font-size: 0.8rem; font-weight: 700;">Contraseña</label>
-          <input type="password" id="admin-pass-input" class="form-input" placeholder="••••••••" style="width: 100%;" onkeydown="if(event.key==='Enter') loginAdmin()">
+          <div style="position: relative; width: 100%;">
+            <input type="password" id="admin-pass-input" class="form-input" placeholder="••••••••" style="width: 100%; padding-right: 2.5rem; box-sizing: border-box;" onkeydown="if(event.key==='Enter') loginAdmin()">
+            <button type="button" onclick="togglePasswordVisibility('admin-pass-input', this)" style="position: absolute; right: 0.75rem; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 1rem; display: flex; align-items: center; justify-content: center; padding: 0;">
+              <i class="fa-solid fa-eye"></i>
+            </button>
+          </div>
         </div>
         <button class="btn btn-primary" style="width: 100%;" onclick="loginAdmin()">
           <i class="fa-solid fa-right-to-bracket"></i> Iniciar Sesión
@@ -542,6 +547,11 @@
               <input type="text" id="form-product-ingredients" class="form-input" placeholder="Ej: 60% carne de salmón, 20% huesos triturados, 10% zapallo...">
             </div>
 
+            <div class="form-group" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="form-product-visible" style="width: auto; margin-right: 0.5rem;">
+              <label for="form-product-visible" style="color: var(--text-dark); display: inline; margin: 0; cursor: pointer;">Producto Visible en Catálogo</label>
+            </div>
+
             <div style="display: flex; gap: 0.5rem;">
               <button class="btn btn-primary" onclick="submitProductForm()">
                 Guardar Producto
@@ -562,6 +572,7 @@
                   <th>Categoría</th>
                   <th>Ingredientes / Detalle</th>
                   <th>Precio</th>
+                  <th>Visible</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -647,6 +658,11 @@
               <textarea id="form-testimonial-quote" class="form-input" style="height: 80px; resize: none;" required placeholder="Escribe aquí el testimonio de la familia..."></textarea>
             </div>
 
+            <div class="form-group" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="form-testimonial-active" style="width: auto; margin-right: 0.5rem;">
+              <label for="form-testimonial-active" style="color: var(--text-dark); display: inline; margin: 0; cursor: pointer;">Testimonio Aprobado y Visible</label>
+            </div>
+
             <div style="display: flex; gap: 0.5rem;">
               <button class="btn btn-primary" onclick="submitTestimonialForm()">
                 Guardar Testimonio
@@ -667,6 +683,7 @@
                   <th>Ubicación</th>
                   <th>Mascota</th>
                   <th>Opinión</th>
+                  <th>Estado</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -864,6 +881,11 @@
               </div>
             </div>
 
+            <div class="form-group" style="margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+              <input type="checkbox" id="form-additional-visible" style="width: auto; margin-right: 0.5rem;">
+              <label for="form-additional-visible" style="color: var(--text-dark); display: inline; margin: 0; cursor: pointer;">Suplemento Visible en Catálogo</label>
+            </div>
+
             <div style="display: flex; gap: 0.5rem;">
               <button class="btn btn-primary" onclick="submitAdditionalForm()">
                 Guardar Adicional
@@ -887,6 +909,7 @@
                   <th>Precio</th>
                   <th>Vitaminas</th>
                   <th>Beneficios</th>
+                  <th>Visible</th>
                   <th style="width: 150px;">Acciones</th>
                 </tr>
               </thead>
@@ -908,6 +931,7 @@
                   <th>Precio</th>
                   <th>Vitaminas</th>
                   <th>Beneficios</th>
+                  <th>Visible</th>
                   <th style="width: 150px;">Acciones</th>
                 </tr>
               </thead>
@@ -999,6 +1023,6 @@
     </div>
   </div>
 
-  <script src="admin.js?v=3.6"></script>
+  <script src="admin.js?v=3.9"></script>
 </body>
 </html>

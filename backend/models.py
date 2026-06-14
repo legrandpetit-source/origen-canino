@@ -11,6 +11,7 @@ class Recipe(Base):
     icon = Column(String(20))
     ingredients = Column(Text, nullable=False)
     ingredients_array = Column(JSON, nullable=True)  # List of ingredients
+    visible = Column(Boolean, default=True)
 
 class Snack(Base):
     __tablename__ = "snacks"
@@ -22,6 +23,7 @@ class Snack(Base):
     icon = Column(String(20))
     ingredients = Column(Text, nullable=False)
     unit = Column(String(50), nullable=False)  # e.g., '5 uds'
+    visible = Column(Boolean, default=True)
 
 class Parameter(Base):
     __tablename__ = "parameters"
@@ -57,6 +59,7 @@ class Pet(Base):
     age = Column(String(50), nullable=False)  # adult, puppy, puppy-mid, puppy-late
     activity = Column(String(50), nullable=False)  # sedentary, normal, active, working
     notes = Column(Text, nullable=True)
+    kilos_needed = Column(Float, nullable=True)
     photo = Column(Text, nullable=True)  # Base64 image
     subscription_paid = Column(Boolean, default=False)
     selected_recipe_id = Column(String(50), nullable=True)
@@ -102,6 +105,7 @@ class Testimonial(Base):
     dog_name = Column(String(100), nullable=False)
     photo_url = Column(Text, nullable=True)
     quote = Column(Text, nullable=False)
+    active = Column(Boolean, default=False)
 
 class Faq(Base):
     __tablename__ = "faqs"
@@ -149,6 +153,7 @@ class Additional(Base):
     price = Column(Integer, default=1500)
     vitamins = Column(String(255), nullable=True)
     benefits = Column(Text, nullable=True)
+    visible = Column(Boolean, default=True)
 
 class IngredientInfo(Base):
     __tablename__ = "ingredients_info"

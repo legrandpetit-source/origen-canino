@@ -21,6 +21,10 @@ ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://localhost:5500",
     "http://127.0.0.1:5500",
+    "http://localhost:8080",
+    "http://127.0.0.1:8080",
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
     "https://legrandpetit-source.github.io",  # GitHub Pages (production)
 ]
 # Allow any additional origin from environment variable (e.g. custom domain)
@@ -73,6 +77,7 @@ class RecipeCreate(BaseModel):
     icon: str
     ingredients: str
     ingredients_array: Optional[List[str]] = None
+    visible: Optional[bool] = True
 
 class TestimonialCreate(BaseModel):
     id: Optional[str] = None
@@ -81,6 +86,7 @@ class TestimonialCreate(BaseModel):
     dog_name: str
     photo_url: Optional[str] = None
     quote: str
+    active: Optional[bool] = False
 
 class FaqCreate(BaseModel):
     id: Optional[str] = None
@@ -95,6 +101,7 @@ class PetCreate(BaseModel):
     age: str
     activity: str
     notes: Optional[str] = None
+    kilos_needed: Optional[float] = None
     photo: Optional[str] = None
     subscription_paid: Optional[bool] = False
     selected_recipe_id: Optional[str] = None
@@ -135,6 +142,7 @@ class AdditionalCreate(BaseModel):
     price: int
     vitamins: Optional[str] = None
     benefits: Optional[str] = None
+    visible: Optional[bool] = True
 
 class IngredientInfoCreate(BaseModel):
     id: Optional[str] = None
@@ -322,12 +330,12 @@ def startup_populate():
 @app.get("/api/config")
 def get_config(db: Session = Depends(get_db)):
     """Fetch active catalog, parameters, testimonials, and FAQs for initial loading."""
-    recipes = db.query(models.Recipe).all()
-    snacks = db.query(models.Snack).all()
+    recipes = db.query(models.Recipe).filter(models.Recipe.visible == True).all()
+    snacks = db.query(models.Snack).filter(models.Snack.visible == True).all()
     params = db.query(models.Parameter).filter(models.Parameter.id == "default").first()
-    testimonials = db.query(models.Testimonial).all()
+    testimonials = db.query(models.Testimonial).filter(models.Testimonial.active == True).all()
     faqs = db.query(models.Faq).all()
-    additionals = db.query(models.Additional).all()
+    additionals = db.query(models.Additional).filter(models.Additional.visible == True).all()
     ingredients_info = db.query(models.IngredientInfo).all()
 
     # If parameters somehow don't exist, use default values
@@ -635,26 +643,59 @@ def save_parameters(params_data: ParametersUpdate, db: Session = Depends(get_db)
 def save_recipe(recipe_data: RecipeCreate, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
     """Create or update a recipe/catalog product."""
     recipe_dict = recipe_data.model_dump()
+    is_snack = recipe_data.category == "snack"
+
     if not recipe_dict.get("id"):
         # Create new
-        # Generate ID (e.g. b-1234 or s-1234)
-        prefix = "b-" if recipe_data.category == "barf" else ("c-" if recipe_data.category == "cooked" else "s-")
+        prefix = "s-" if is_snack else ("b-" if recipe_data.category == "barf" else "c-")
         import random
         recipe_dict["id"] = prefix + str(random.randint(1000, 9999))
         
-        new_recipe = models.Recipe(**recipe_dict)
-        db.add(new_recipe)
-        db.commit()
-        return {"status": "success", "recipe": new_recipe}
+        if is_snack:
+            snack_dict = {
+                "id": recipe_dict["id"],
+                "name": recipe_dict["name"],
+                "category": "snack",
+                "price": recipe_dict["price"],
+                "icon": recipe_dict["icon"],
+                "ingredients": recipe_dict["ingredients"],
+                "unit": "1 ud",
+                "visible": recipe_dict.get("visible", True)
+            }
+            new_snack = models.Snack(**snack_dict)
+            db.add(new_snack)
+            db.commit()
+            db.refresh(new_snack)
+            return {"status": "success", "recipe": new_snack}
+        else:
+            new_recipe = models.Recipe(**recipe_dict)
+            db.add(new_recipe)
+            db.commit()
+            db.refresh(new_recipe)
+            return {"status": "success", "recipe": new_recipe}
     else:
         # Update existing
-        recipe = db.query(models.Recipe).filter(models.Recipe.id == recipe_data.id).first()
-        if not recipe:
-            raise HTTPException(status_code=404, detail="Producto no encontrado")
-        for key, value in recipe_dict.items():
-            setattr(recipe, key, value)
-        db.commit()
-        return {"status": "success", "recipe": recipe}
+        if is_snack or recipe_dict["id"].startswith("s-"):
+            snack = db.query(models.Snack).filter(models.Snack.id == recipe_data.id).first()
+            if not snack:
+                raise HTTPException(status_code=404, detail="Producto no encontrado")
+            snack.name = recipe_dict["name"]
+            snack.price = recipe_dict["price"]
+            snack.icon = recipe_dict["icon"]
+            snack.ingredients = recipe_dict["ingredients"]
+            snack.visible = recipe_dict.get("visible", True)
+            db.commit()
+            db.refresh(snack)
+            return {"status": "success", "recipe": snack}
+        else:
+            recipe = db.query(models.Recipe).filter(models.Recipe.id == recipe_data.id).first()
+            if not recipe:
+                raise HTTPException(status_code=404, detail="Producto no encontrado")
+            for key, value in recipe_dict.items():
+                setattr(recipe, key, value)
+            db.commit()
+            db.refresh(recipe)
+            return {"status": "success", "recipe": recipe}
 
 @app.delete("/api/recipes/{recipe_id}")
 def delete_recipe(recipe_id: str, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
@@ -680,6 +721,7 @@ def save_testimonial(test_data: TestimonialCreate, db: Session = Depends(get_db)
         new_test = models.Testimonial(**test_dict)
         db.add(new_test)
         db.commit()
+        db.refresh(new_test)
         return {"status": "success", "testimonial": new_test}
     else:
         test = db.query(models.Testimonial).filter(models.Testimonial.id == test_data.id).first()
@@ -688,6 +730,7 @@ def save_testimonial(test_data: TestimonialCreate, db: Session = Depends(get_db)
         for key, value in test_dict.items():
             setattr(test, key, value)
         db.commit()
+        db.refresh(test)
         return {"status": "success", "testimonial": test}
 
 @app.delete("/api/testimonials/{test_id}")
@@ -699,6 +742,36 @@ def delete_testimonial(test_id: str, db: Session = Depends(get_db), admin: str =
     db.delete(test)
     db.commit()
     return {"status": "success"}
+
+@app.post("/api/testimonials/public")
+def public_create_testimonial(test_data: TestimonialCreate, db: Session = Depends(get_db)):
+    """Public endpoint for clients to submit a testimonial (saved as inactive for moderation)."""
+    test_dict = test_data.model_dump()
+    test_dict["id"] = f"t-{int(datetime.now().timestamp() * 1000)}"
+    test_dict["active"] = False  # Inactive by default, pending moderation
+    
+    new_test = models.Testimonial(**test_dict)
+    db.add(new_test)
+    db.commit()
+    db.refresh(new_test)
+    return {"status": "success", "testimonial": new_test}
+
+@app.get("/api/admin/testimonials")
+def get_admin_testimonials(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Retrieve all testimonials (active and inactive) for moderation."""
+    return db.query(models.Testimonial).all()
+
+@app.get("/api/admin/products")
+def get_admin_products(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Retrieve all recipes and snacks (visible and invisible) for management."""
+    recipes = db.query(models.Recipe).all()
+    snacks = db.query(models.Snack).all()
+    return {"recipes": recipes, "snacks": snacks}
+
+@app.get("/api/admin/additionals")
+def get_admin_additionals(db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):
+    """Retrieve all additionals (visible and invisible) for management."""
+    return db.query(models.Additional).all()
 
 @app.post("/api/faqs")
 def save_faq(faq_data: FaqCreate, db: Session = Depends(get_db), admin: str = Depends(get_current_admin)):

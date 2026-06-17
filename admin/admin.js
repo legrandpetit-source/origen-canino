@@ -3,7 +3,7 @@
 // ----------------------------------------------------
 
 // URL del backend: producción en Render, desarrollo local en localhost
-const PROD_BACKEND_URL = "https://origen-canino-api.onrender.com"; // ← Actualizar con tu URL de Render
+const PROD_BACKEND_URL = "https://api.origencanino.cl"; // ← Actualizar con tu URL de Render
 const API_BASE_URL = window.location.hostname.includes("github.io") || window.location.hostname.includes("origencanino")
   ? PROD_BACKEND_URL
   : (window.location.port ? `http://localhost:8000` : "");

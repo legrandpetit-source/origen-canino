@@ -594,6 +594,67 @@ function calculatePortion(weight, stage, activity, dietType, days = 30) {
   };
 }
 
+function ensurePetCalculated(pet) {
+  if (!pet) return;
+  
+  if (!pet.portionResults) {
+    const rec = appState.recipes.find(r => r.id === pet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+    const dietType = rec ? rec.category : 'barf';
+    const deliveryPeriodVal = pet.deliveryPeriod || 30;
+    const results = calculatePortion(pet.weight, pet.age, pet.activity, dietType, deliveryPeriodVal);
+    
+    if (pet.kilosNeeded) {
+      results.monthlyKg = pet.kilosNeeded;
+      results.dailyGrams = Math.round((pet.kilosNeeded * 1000) / deliveryPeriodVal);
+    }
+    pet.portionResults = results;
+  }
+  
+  if (pet.totalPrice === undefined || pet.totalPrice === null || pet.totalPrice === 0) {
+    const rec = appState.recipes.find(r => r.id === pet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+    
+    let dietSubtotal = 0;
+    let activeRecipesCount = 0;
+    let hasActiveSelection = false;
+    
+    for (const rid in pet.selectedRecipes) {
+      const kgs = parseFloat(pet.selectedRecipes[rid]) || 0;
+      if (kgs > 0) {
+        hasActiveSelection = true;
+        const r = appState.recipes.find(recipe => recipe.id === rid) || DEFAULT_RECIPES.find(recipe => recipe.id === rid);
+        const pricePerKg = r ? r.price : (rec ? rec.price : 4200);
+        dietSubtotal += Math.round(kgs * pricePerKg);
+        activeRecipesCount++;
+      }
+    }
+    
+    if (!hasActiveSelection) {
+      const basePrice = rec ? rec.price : 4200;
+      dietSubtotal = Math.round((pet.portionResults?.monthlyKg || 0) * basePrice);
+      activeRecipesCount = 1;
+    }
+    
+    let superfoodExtra = 0;
+    (pet.addedSuperfoods || []).forEach(id => {
+      const s = (appState.superfoods || SUPERALIMENTOS).find(item => item.id === id);
+      const itemPrice = s ? s.price : 1500;
+      const baseExtra = (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+      superfoodExtra += baseExtra * activeRecipesCount;
+    });
+    
+    let vegFruitExtra = 0;
+    (pet.addedVegetablesFruits || []).forEach(id => {
+      const vf = (appState.vegetablesFruits || VERDURAS_FRUTAS).find(item => item.id === id);
+      const itemPrice = vf ? vf.price : 1500;
+      const baseExtra = (pet.deliveryPeriod === 15 ? Math.round(itemPrice / 2) : itemPrice);
+      vegFruitExtra += baseExtra * activeRecipesCount;
+    });
+    
+    pet.totalPrice = dietSubtotal + superfoodExtra + vegFruitExtra;
+  }
+}
+window.ensurePetCalculated = ensurePetCalculated;
+
 // ----------------------------------------------------
 // 4. SITIO WEB DESKTOP: RENDER Y LOGICA
 // ----------------------------------------------------
@@ -1753,10 +1814,11 @@ function updateCalculatorSnackQty(snackId, change) {
 }
 window.updateCalculatorSnackQty = updateCalculatorSnackQty;
 
-window.proceedToCheckoutFromCalculator = async function() {
+window.proceedToCheckoutFromCalculator = function() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (pet) {
     pet.customInstructions = document.getElementById('custom-instructions').value.trim();
+    saveStateToStorage();
     
     const petData = {
       id: pet.id,
@@ -1780,17 +1842,18 @@ window.proceedToCheckoutFromCalculator = async function() {
       order_date: pet.orderDate || ''
     };
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/pets`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(petData)
-      });
-      if (!res.ok) throw new Error("Error al sincronizar mascota en el servidor");
-    } catch (err) {
-      console.warn("Error al guardar cambios de receta en el servidor:", err);
+    const headers = { "Content-Type": "application/json" };
+    if (appState.customerToken) {
+      headers["Authorization"] = `Bearer ${appState.customerToken}`;
     }
-    saveStateToStorage();
+
+    fetch(`${API_BASE_URL}/api/pets`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(petData)
+    }).catch(err => {
+      console.warn("Error al guardar cambios de receta en el servidor (en segundo plano):", err);
+    });
   }
   
   if (!appState.customerToken) {
@@ -1810,10 +1873,11 @@ window.goBackFromCheckout = function() {
   }
 };
 
-window.proceedToSnacks = async function() {
+window.proceedToSnacks = function() {
   const pet = appState.pets.find(p => p.id === appState.currentPetId);
   if (pet) {
     pet.customInstructions = document.getElementById('custom-instructions').value.trim();
+    saveStateToStorage();
     
     const petData = {
       id: pet.id,
@@ -1837,17 +1901,18 @@ window.proceedToSnacks = async function() {
       order_date: pet.orderDate || ''
     };
 
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/pets`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(petData)
-      });
-      if (!res.ok) throw new Error("Error al sincronizar mascota en el servidor");
-    } catch (err) {
-      console.warn("Error al guardar cambios de receta en el servidor:", err);
+    const headers = { "Content-Type": "application/json" };
+    if (appState.customerToken) {
+      headers["Authorization"] = `Bearer ${appState.customerToken}`;
     }
-    saveStateToStorage();
+
+    fetch(`${API_BASE_URL}/api/pets`, {
+      method: "POST",
+      headers: headers,
+      body: JSON.stringify(petData)
+    }).catch(err => {
+      console.warn("Error al guardar cambios de receta en el servidor (en segundo plano):", err);
+    });
   }
   
   renderMobileSnacksList();
@@ -1914,6 +1979,7 @@ function calculateSubscriptionTotals() {
   const unpaidPets = appState.pets.filter(p => !p.subscriptionPaid);
   
   unpaidPets.forEach(p => {
+    ensurePetCalculated(p);
     globalDietSubtotal += p.totalPrice || 0;
   });
 
@@ -2015,18 +2081,29 @@ function setupCheckoutUI() {
     }
 
     unpaidPets.forEach(p => {
-      const rec = appState.recipes.find(r => r.id === p.selectedRecipeId) || appState.recipes[0];
-      const row = document.createElement('div');
-      row.className = 'checkout-pet-row';
-      
-      row.innerHTML = `
-        <span class="pet-title">
-          <img src="${p.photo}" alt="${p.name}">
-          ${p.name} (${rec.icon} Dieta ${p.deliveryPeriod === 15 ? 'Quincenal' : 'Mensual'})
-        </span>
-        <strong>$${p.totalPrice.toLocaleString('es-CL')}</strong>
-      `;
-      listContainer.appendChild(row);
+      try {
+        ensurePetCalculated(p);
+        const rec = appState.recipes.find(r => r.id === p.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
+        const row = document.createElement('div');
+        row.className = 'checkout-pet-row';
+        
+        const price = typeof p.totalPrice === 'number' ? p.totalPrice : 0;
+        const icon = rec ? (rec.icon || '🍲') : '🍲';
+        const photo = p.photo || 'assets/logo.jpg';
+        const name = p.name || 'Mascota';
+        const periodText = p.deliveryPeriod === 15 ? 'Quincenal' : 'Mensual';
+
+        row.innerHTML = `
+          <span class="pet-title">
+            <img src="${photo}" alt="${name}">
+            ${name} (${icon} Dieta ${periodText})
+          </span>
+          <strong>$${price.toLocaleString('es-CL')}</strong>
+        `;
+        listContainer.appendChild(row);
+      } catch (err) {
+        console.error("Error al renderizar la mascota en el desglose del checkout:", err, p);
+      }
     });
 
     // Add shipping cost row to the breakdown
@@ -2272,6 +2349,7 @@ function setupReceiptUI() {
   const paidPets = appState.pets.filter(p => p.subscriptionPaid);
   
   let petRows = paidPets.map(p => {
+    ensurePetCalculated(p);
     let recipeDetailsStr = '';
     const activeRecipes = p.selectedRecipes || {};
     const activeRecipeParts = [];
@@ -2391,6 +2469,7 @@ function renderPetDashboard() {
   }
 
   const activePet = paidPets.find(p => p.id === appState.activePetIdDashboard) || paidPets[0];
+  ensurePetCalculated(activePet);
   appState.activePetIdDashboard = activePet.id;
   const rec = appState.recipes.find(r => r.id === activePet.selectedRecipeId) || appState.recipes[0] || DEFAULT_RECIPES[0];
 
@@ -2812,6 +2891,9 @@ async function syncCustomerPets() {
     
     saveStateToStorage();
     renderMobileWelcomeScreen();
+    if (appState.mobileView === 'checkout') {
+      setupCheckoutUI();
+    }
   } catch (err) {
     console.warn("Fallo al sincronizar mascotas:", err);
   }
@@ -2856,6 +2938,11 @@ window.submitCustomerAuthMobile = async function(type) {
   let url = '';
   let payload = {};
   
+  const btn = type === 'login' 
+    ? document.getElementById('mb-auth-login-btn') 
+    : document.getElementById('mb-auth-reg-btn');
+  const originalHtml = btn ? btn.innerHTML : '';
+  
   if (type === 'login') {
     const email = document.getElementById('mb-auth-email').value.trim();
     const password = document.getElementById('mb-auth-pass').value;
@@ -2880,6 +2967,11 @@ window.submitCustomerAuthMobile = async function(type) {
     const address = `${street}, ${commune}, ${region}`;
     url = `${API_BASE_URL}/api/customer/register`;
     payload = { name, email, password, provider: 'email', phone, address };
+  }
+  
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${type === 'login' ? 'Iniciando Sesión...' : 'Creando Cuenta...'}`;
   }
   
   try {
@@ -2914,6 +3006,11 @@ window.submitCustomerAuthMobile = async function(type) {
       
     setCustomerSession("mock_token_email", name, email, phone, address);
     await handlePostAuthRedirect();
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
   }
 };
 
@@ -2952,7 +3049,8 @@ window.loginCustomerSocialMobile = async function(provider) {
 };
 
 async function handlePostAuthRedirect() {
-  await syncCustomerPets();
+  // Sync in background, non-blocking
+  syncCustomerPets();
   
   // If the profile is incomplete (missing phone or address), show the setup form
   if (!appState.customerPhone || !appState.customerAddress) {
@@ -2969,7 +3067,7 @@ async function handlePostAuthRedirect() {
   }
 }
 
-window.submitSocialProfileCompletion = async function() {
+window.submitSocialProfileCompletion = function() {
   const name = document.getElementById('mb-social-name').value.trim();
   const phone = document.getElementById('mb-social-phone').value.trim();
   const street = document.getElementById('mb-social-street').value.trim();
@@ -2983,68 +3081,51 @@ window.submitSocialProfileCompletion = async function() {
   
   const address = `${street}, ${commune}, ${region}`;
   
-  try {
-    const res = await fetch(`${API_BASE_URL}/api/customer/profile`, {
-      method: "POST",
-      headers: { 
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${appState.customerToken}`
-      },
-      body: JSON.stringify({ name, phone, address })
-    });
-    
-    if (!res.ok) throw new Error("No se pudo guardar la información de perfil");
-    
-    const data = await res.json();
-    setCustomerSession(appState.customerToken, data.name, data.email, data.phone, data.address);
-    
-    // Reset inputs
-    document.getElementById('mb-social-name').value = '';
-    document.getElementById('mb-social-phone').value = '';
-    document.getElementById('mb-social-street').value = '';
-    document.getElementById('mb-social-commune').value = '';
-    document.getElementById('mb-social-region').value = '';
-    
-    if (appState.editingProfileFromDashboard) {
-      appState.editingProfileFromDashboard = false;
-      alert('¡Tus datos de cuenta se actualizaron con éxito!');
-      changeMobileView(appState.profileEditReturnView || 'pet-dashboard');
-      return;
-    }
-    
-    // Continue
-    if (appState.pendingWizardInit) {
-      const flowType = appState.pendingWizardFlowType || 'personalizar';
-      appState.pendingWizardInit = false;
-      initNewPetWizard(flowType);
-    } else {
-      changeMobileView('checkout');
-    }
-  } catch (err) {
-    console.warn("Fallo de guardado en el servidor, usando datos locales:", err);
-    setCustomerSession(appState.customerToken, name, appState.customerEmail, phone, address);
-    
-    document.getElementById('mb-social-name').value = '';
-    document.getElementById('mb-social-phone').value = '';
-    document.getElementById('mb-social-street').value = '';
-    document.getElementById('mb-social-commune').value = '';
-    document.getElementById('mb-social-region').value = '';
-    
-    if (appState.editingProfileFromDashboard) {
-      appState.editingProfileFromDashboard = false;
-      alert('¡Tus datos de cuenta se actualizaron con éxito (Modo Local)!');
-      changeMobileView(appState.profileEditReturnView || 'pet-dashboard');
-      return;
-    }
-    
-    if (appState.pendingWizardInit) {
-      const flowType = appState.pendingWizardFlowType || 'personalizar';
+  // Set session locally first for instant UI transition
+  setCustomerSession(appState.customerToken, name, appState.customerEmail, phone, address);
+  
+  // Reset inputs
+  document.getElementById('mb-social-name').value = '';
+  document.getElementById('mb-social-phone').value = '';
+  document.getElementById('mb-social-street').value = '';
+  document.getElementById('mb-social-commune').value = '';
+  document.getElementById('mb-social-region').value = '';
+
+  const isEditing = appState.editingProfileFromDashboard;
+  const returnView = appState.profileEditReturnView;
+  const pendingWizard = appState.pendingWizardInit;
+  const flowType = appState.pendingWizardFlowType || 'personalizar';
+  
+  if (isEditing) {
+    appState.editingProfileFromDashboard = false;
+    alert('¡Tus datos de cuenta se actualizaron con éxito!');
+    changeMobileView(returnView || 'pet-dashboard');
+  } else {
+    if (pendingWizard) {
       appState.pendingWizardInit = false;
       initNewPetWizard(flowType);
     } else {
       changeMobileView('checkout');
     }
   }
+
+  // Send request in the background
+  fetch(`${API_BASE_URL}/api/customer/profile`, {
+    method: "POST",
+    headers: { 
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${appState.customerToken}`
+    },
+    body: JSON.stringify({ name, phone, address })
+  }).then(async res => {
+    if (res.ok) {
+      const data = await res.json();
+      // Keep server values if updated/verified
+      setCustomerSession(appState.customerToken, data.name, data.email, data.phone, data.address);
+    }
+  }).catch(err => {
+    console.warn("Fallo de guardado en el servidor (en segundo plano):", err);
+  });
 };
 
 window.openUserProfileEdit = function() {

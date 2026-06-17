@@ -26,6 +26,8 @@ ALLOWED_ORIGINS = [
     "http://localhost:5000",
     "http://127.0.0.1:5000",
     "https://legrandpetit-source.github.io",  # GitHub Pages (production)
+    "https://origencanino.cl",                 # Custom domain production
+    "https://www.origencanino.cl",             # Custom domain www
 ]
 # Allow any additional origin from environment variable (e.g. custom domain)
 extra_origin = os.getenv("ALLOWED_ORIGIN")

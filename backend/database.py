@@ -20,7 +20,9 @@ else:
 
 engine = create_engine(
     DATABASE_URL,
-    connect_args=connect_args
+    connect_args=connect_args,
+    pool_pre_ping=True,
+    pool_recycle=300
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

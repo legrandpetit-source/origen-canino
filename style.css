@@ -3351,3 +3351,151 @@ body:not(.mobile-native-mode) .phone-navbar {
   font-family: var(--font-serif) !important;
 }
 
+/* ==========================================
+   WIDGET DE INSTAGRAM (ESTILO LEGRAND PETIT)
+   ========================================== */
+.web-instagram {
+  padding: 5rem 2rem;
+  background-color: hsla(85, 34%, 28%, 0.03); /* Fondo verde oliva súper suave */
+  border-top: 1px solid rgba(44, 26, 14, 0.08);
+  width: 100%;
+}
+
+.web-instagram .section-title {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.web-instagram .section-title span {
+  display: block;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--primary-green);
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.web-instagram .section-title h2 {
+  font-family: var(--font-header);
+  font-size: 2.2rem;
+  color: var(--secondary-brown);
+  margin-bottom: 0.75rem;
+}
+
+.web-instagram .section-title .section-subtitle {
+  font-size: 1rem;
+  color: var(--text-muted);
+}
+
+.web-instagram .instagram-link {
+  color: var(--primary-green);
+  font-weight: 700;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.web-instagram .instagram-link:hover {
+  text-decoration: underline;
+  color: var(--primary-green-dark);
+}
+
+.instagram-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.instagram-post {
+  position: relative;
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(44, 26, 14, 0.08);
+  box-shadow: var(--shadow-sm);
+  background: #000;
+}
+
+.instagram-post img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.instagram-overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(44, 26, 14, 0.65); /* Marrón oscuro translúcido */
+  opacity: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  color: #ffffff;
+  transition: opacity 0.3s ease;
+  z-index: 5;
+}
+
+.instagram-overlay .stat-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.instagram-overlay .stat-item i {
+  color: var(--primary-green-light);
+}
+
+.instagram-icon-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 0.85rem;
+  z-index: 4;
+}
+
+/* Hover effects */
+.instagram-post:hover img {
+  transform: scale(1.06);
+}
+
+.instagram-post:hover .instagram-overlay {
+  opacity: 1;
+}
+
+/* Responsive design */
+@media (max-width: 992px) {
+  .instagram-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .instagram-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+  .web-instagram {
+    padding: 3.5rem 1rem;
+  }
+  .web-instagram .section-title h2 {
+    font-size: 1.8rem;
+  }
+}
+

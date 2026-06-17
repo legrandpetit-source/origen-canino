@@ -947,7 +947,7 @@ window.cancelPetWizard = function() {
   }
 };
 
-window.savePetProfileAndGoToCalculator = async function() {
+window.savePetProfileAndGoToCalculator = function() {
   const name = document.getElementById('pet-name').value.trim();
   const breed = document.getElementById('pet-breed').value.trim();
   
@@ -1009,53 +1009,61 @@ window.savePetProfileAndGoToCalculator = async function() {
     order_date: petIndex !== -1 ? (appState.pets[petIndex].orderDate || '') : ''
   };
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/pets`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(petData)
-    });
-    if (!response.ok) throw new Error("Error al guardar mascota en el servidor");
-    
-    const data = await response.json();
-    const savedPet = mapPetFromAPI(data.pet);
-    
-    if (petIndex !== -1) {
-      appState.pets[petIndex] = savedPet;
-    } else {
-      appState.pets.push(savedPet);
-    }
-  } catch (err) {
-    console.warn("Fallo al guardar mascota en el servidor (servidor desconectado), guardando localmente:", err);
-    const fallbackPet = {
-      id: petData.id,
-      name: petData.name,
-      breed: petData.breed,
-      weight: petData.weight,
-      age: petData.age,
-      activity: petData.activity,
-      notes: petData.notes,
-      kilosNeeded: petData.kilos_needed,
-      photo: petData.photo,
-      subscriptionPaid: petData.subscription_paid,
-      selectedRecipeId: petData.selected_recipe_id,
-      selectedRecipes: petData.selected_recipes,
-      excludedIngredients: petData.excluded_ingredients,
-      addedSuperfoods: petData.added_superfoods,
-      addedVegetablesFruits: petData.added_vegetables_fruits,
-      customInstructions: petData.custom_instructions,
-      deliveryPeriod: petData.delivery_period,
-      orderDate: petData.order_date || ''
-    };
-    if (petIndex !== -1) {
-      appState.pets[petIndex] = fallbackPet;
-    } else {
-      appState.pets.push(fallbackPet);
-    }
+  // Crear o actualizar la versión local para transición instantánea
+  const fallbackPet = {
+    id: petData.id,
+    name: petData.name,
+    breed: petData.breed,
+    weight: petData.weight,
+    age: petData.age,
+    activity: petData.activity,
+    notes: petData.notes,
+    kilosNeeded: petData.kilos_needed,
+    photo: petData.photo,
+    subscriptionPaid: petData.subscription_paid,
+    selectedRecipeId: petData.selected_recipe_id,
+    selectedRecipes: petData.selected_recipes,
+    excludedIngredients: petData.excluded_ingredients,
+    addedSuperfoods: petData.added_superfoods,
+    addedVegetablesFruits: petData.added_vegetables_fruits,
+    customInstructions: petData.custom_instructions,
+    deliveryPeriod: petData.delivery_period,
+    orderDate: petData.order_date || ''
+  };
+
+  if (petIndex !== -1) {
+    appState.pets[petIndex] = fallbackPet;
+  } else {
+    appState.pets.push(fallbackPet);
   }
   
   saveStateToStorage();
   changeMobileView('calculator');
+
+  // Enviar guardado al servidor en segundo plano
+  const headers = { "Content-Type": "application/json" };
+  if (appState.customerToken) {
+    headers["Authorization"] = `Bearer ${appState.customerToken}`;
+  }
+
+  fetch(`${API_BASE_URL}/api/pets`, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify(petData)
+  }).then(async res => {
+    if (res.ok) {
+      const data = await res.json();
+      const savedPet = mapPetFromAPI(data.pet);
+      // Re-sincronizar el ID o los valores del servidor localmente por si hubo cambios
+      let pIdx = appState.pets.findIndex(p => p.id === fallbackPet.id);
+      if (pIdx !== -1) {
+        appState.pets[pIdx] = savedPet;
+        saveStateToStorage();
+      }
+    }
+  }).catch(err => {
+    console.warn("Fallo al guardar mascota en el servidor (en segundo plano):", err);
+  });
 };
 
 window.triggerPhotoUpload = function() {
